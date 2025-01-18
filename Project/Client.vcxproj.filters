@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="LabProject07-9-8.rc">
+    <ResourceCompile Include="Client.rc">
       <Filter>리소스 파일</Filter>
     </ResourceCompile>
   </ItemGroup>
@@ -23,7 +23,7 @@
     <Image Include="small.ico">
       <Filter>리소스 파일</Filter>
     </Image>
-    <Image Include="LabProject07-9-8.ico">
+    <Image Include="Client.ico">
       <Filter>리소스 파일</Filter>
     </Image>
   </ItemGroup>
