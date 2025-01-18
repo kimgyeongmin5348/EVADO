@@ -1,8 +1,5 @@
-﻿// LabProject07-9-8.cpp : 응용 프로그램에 대한 진입점을 정의합니다.
-//
-
-#include "stdafx.h"
-#include "LabProject07-9-8.h"
+﻿#include "stdafx.h"
+#include "Client.h"
 #include "GameFramework.h"
 
 #define MAX_LOADSTRING 100
