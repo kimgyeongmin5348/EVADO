@@ -283,6 +283,7 @@ void CMaterial::LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		_stprintf_s(pstrDebug, 256, _T("Texture Name: %d %c %s\n"), (pstrTextureName[0] == '@') ? nRepeatedTextures++ : nTextures++, (pstrTextureName[0] == '@') ? '@' : ' ', pwstrTextureName);
 		OutputDebugString(pstrDebug);
 #endif
+		// 새로운 텍스처인 경우 DDS 파일에서 텍스처 로드
 		if (!bDuplicated)
 		{
 			*ppTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
@@ -291,6 +292,7 @@ void CMaterial::LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 			CScene::CreateShaderResourceViews(pd3dDevice, *ppTexture, 0, nRootParameter);
 		}
+		// 중복된 텍스처인 경우 루트 오브젝트까지 거슬러 올라가 이미 로드된 텍스처를 찾아서 재사용
 		else
 		{
 			if (pParent)
@@ -1395,6 +1397,23 @@ CHeightMapTerrain::CHeightMapTerrain(ID3D12Device *pd3dDevice, ID3D12GraphicsCom
 CHeightMapTerrain::~CHeightMapTerrain(void)
 {
 	if (m_pHeightMapImage) delete m_pHeightMapImage;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 
+Map::Map(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, int nAnimationTracks)
+{
+	CLoadedModelInfo* pMapModel = pModel;
+	if (!pMapModel) pMapModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/mapobjecttest.bin", NULL);
+
+	SetChild(pMapModel->m_pModelRootObject, true);
+	//m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, nAnimationTracks, pMapModel);
+
+	//m_pSkinnedAnimationController->m_pRootMotionObject = pMapModel->m_pModelRootObject->FindFrame("EthanHips");
+}
+
+Map::~Map()
+{
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
