@@ -61,7 +61,7 @@
     <ClCompile Include="WICTextureLoader12.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="LabProject07-9-8.cpp">
+    <ClCompile Include="Client.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
@@ -102,7 +102,7 @@
     <ClInclude Include="WICTextureLoader12.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="LabProject07-9-8.h">
+    <ClInclude Include="Client.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
