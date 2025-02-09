@@ -98,14 +98,20 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	XMFLOAT4 xmf4Color(0.0f, 0.3f, 0.0f, 0.0f);
 	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Terrain/HeightMap.raw"), 257, 257, xmf3Scale, xmf4Color);
 
-	m_nHierarchicalGameObjects = 1;
+	m_nHierarchicalGameObjects = 2;
 	m_ppHierarchicalGameObjects = new CGameObject*[m_nHierarchicalGameObjects];
 
 	CLoadedModelInfo *pMapModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Map_stage_2.bin", NULL);
-	m_ppHierarchicalGameObjects[0] = new Map(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pMapModel, 1);
+	m_ppHierarchicalGameObjects[0] = new Map(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pMapModel);
 	m_ppHierarchicalGameObjects[0]->SetPosition(0, 0, 0);
 	m_ppHierarchicalGameObjects[0]->SetScale(10.0f, 10.0f, 10.0f);
 	if (pMapModel) delete pMapModel;
+
+	CLoadedModelInfo* pShovelModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Shovel.bin", NULL);
+	m_ppHierarchicalGameObjects[1] = new Shovel(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShovelModel);
+	m_ppHierarchicalGameObjects[1]->SetPosition(0, 0, 0);
+	m_ppHierarchicalGameObjects[1]->SetScale(10.0f, 10.0f, 10.0f);
+	if (pShovelModel) delete pShovelModel;
 
 	//CLoadedModelInfo *pMonsterModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Monster.bin", NULL);
 	//m_ppHierarchicalGameObjects[1] = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pMonsterModel, 1);
