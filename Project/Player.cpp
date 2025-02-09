@@ -356,12 +356,14 @@ CTerrainPlayer::CTerrainPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandLi
 	CLoadedModelInfo *pAngrybotModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/MainPlayer.bin", NULL);
 	SetChild(pAngrybotModel->m_pModelRootObject, true);
 
-	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 3, pAngrybotModel);
-	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-	m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1);
-	m_pSkinnedAnimationController->SetTrackAnimationSet(2, 2);
+	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 5, pAngrybotModel);
+	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0); // idle
+	m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1); // walk
+	m_pSkinnedAnimationController->SetTrackAnimationSet(2, 2); // run
+	m_pSkinnedAnimationController->SetTrackAnimationSet(3, 3); // jump
 	m_pSkinnedAnimationController->SetTrackEnable(1, false);
 	m_pSkinnedAnimationController->SetTrackEnable(2, false);
+	m_pSkinnedAnimationController->SetTrackEnable(3, false);
 
 	m_pSkinnedAnimationController->SetCallbackKeys(1, 2);
 #ifdef _WITH_SOUND_RESOURCE
@@ -483,33 +485,58 @@ void CTerrainPlayer::OnCameraUpdateCallback(float fTimeElapsed)
 
 void CTerrainPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 {
-	if (dwDirection == DIR_DOWN)
-	{
+	if (dwDirection & DIR_UP) {
+		isJump = true;
 		m_pSkinnedAnimationController->SetTrackEnable(0, false);
 		m_pSkinnedAnimationController->SetTrackEnable(1, false);
-		m_pSkinnedAnimationController->SetTrackEnable(2, true);
-	}
-	else {
-		m_pSkinnedAnimationController->SetTrackEnable(0, false);
-		m_pSkinnedAnimationController->SetTrackEnable(1, true);
 		m_pSkinnedAnimationController->SetTrackEnable(2, false);
+		m_pSkinnedAnimationController->SetTrackEnable(3, true); // Jump Up
+		m_pSkinnedAnimationController->SetTrackEnable(4, false);
 	}
-
+	else if (dwDirection & (DIR_FORWARD | DIR_BACKWARD | DIR_LEFT | DIR_RIGHT)) {
+		if (dwDirection & DIR_DOWN) {
+			m_pSkinnedAnimationController->SetTrackEnable(0, false);
+			m_pSkinnedAnimationController->SetTrackEnable(1, false);
+			m_pSkinnedAnimationController->SetTrackEnable(2, true); // Running
+			m_pSkinnedAnimationController->SetTrackEnable(3, false);
+			m_pSkinnedAnimationController->SetTrackEnable(4, false);
+		}
+		else {
+			m_pSkinnedAnimationController->SetTrackEnable(0, false);
+			m_pSkinnedAnimationController->SetTrackEnable(1, true); // Walking
+			m_pSkinnedAnimationController->SetTrackEnable(2, false);
+			m_pSkinnedAnimationController->SetTrackEnable(3, false);
+			m_pSkinnedAnimationController->SetTrackEnable(4, false);
+		}
+	}		
 	CPlayer::Move(dwDirection, fDistance, bUpdateVelocity);
 }
 
 void CTerrainPlayer::Update(float fTimeElapsed)
 {
 	CPlayer::Update(fTimeElapsed);
-
-	if (m_pSkinnedAnimationController)
-	{
+	if (m_pSkinnedAnimationController) {
 		float fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
-		if (::IsZero(fLength))
-		{
-			m_pSkinnedAnimationController->SetTrackEnable(0, true);
+		if (::IsZero(fLength)) {
+			m_pSkinnedAnimationController->SetTrackEnable(0, true); // Idle
 			m_pSkinnedAnimationController->SetTrackEnable(1, false);
-			m_pSkinnedAnimationController->SetTrackPosition(1, 0.0f);
+			m_pSkinnedAnimationController->SetTrackEnable(2, false);
+			m_pSkinnedAnimationController->SetTrackEnable(3, false);
+			m_pSkinnedAnimationController->SetTrackEnable(4, false);
+		}
+		if (isJump) {
+			float jumpTrackPosition = m_pSkinnedAnimationController->m_pAnimationTracks[3].m_fPosition; // 현재 점프 트랙의 위치
+			if (jumpTrackPosition >= 12.0)
+			{
+				isJump = false; // 점프 상태 종료
+			}
+		}
+		else {
+			m_pSkinnedAnimationController->SetTrackEnable(0, false);
+			m_pSkinnedAnimationController->SetTrackEnable(1, false);
+			m_pSkinnedAnimationController->SetTrackEnable(2, false);
+			m_pSkinnedAnimationController->SetTrackEnable(3, false);
+			m_pSkinnedAnimationController->SetTrackEnable(4, true); // Jump Down
 		}
 	}
 }
