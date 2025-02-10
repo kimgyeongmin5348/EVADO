@@ -486,7 +486,7 @@ void CTerrainPlayer::OnCameraUpdateCallback(float fTimeElapsed)
 void CTerrainPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 {
 	if (dwDirection & DIR_UP) {
-		isJump = true;
+		m_xmf3Velocity.y = 100.f;
 		m_pSkinnedAnimationController->SetTrackEnable(0, false);
 		m_pSkinnedAnimationController->SetTrackEnable(1, false);
 		m_pSkinnedAnimationController->SetTrackEnable(2, false);
@@ -524,19 +524,12 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 			m_pSkinnedAnimationController->SetTrackEnable(3, false);
 			m_pSkinnedAnimationController->SetTrackEnable(4, false);
 		}
-		if (isJump) {
-			float jumpTrackPosition = m_pSkinnedAnimationController->m_pAnimationTracks[3].m_fPosition; // 현재 점프 트랙의 위치
-			if (jumpTrackPosition >= 12.0)
-			{
-				isJump = false; // 점프 상태 종료
-			}
-		}
-		else {
-			m_pSkinnedAnimationController->SetTrackEnable(0, false);
-			m_pSkinnedAnimationController->SetTrackEnable(1, false);
-			m_pSkinnedAnimationController->SetTrackEnable(2, false);
-			m_pSkinnedAnimationController->SetTrackEnable(3, false);
-			m_pSkinnedAnimationController->SetTrackEnable(4, true); // Jump Down
-		}
+		//if (m_xmf3Velocity.y <= -250.f) {
+		//	m_pSkinnedAnimationController->SetTrackEnable(0, false);
+		//	m_pSkinnedAnimationController->SetTrackEnable(1, false);
+		//	m_pSkinnedAnimationController->SetTrackEnable(2, false);
+		//	m_pSkinnedAnimationController->SetTrackEnable(3, false);
+		//	m_pSkinnedAnimationController->SetTrackEnable(4, true); // Jump Down
+		//}
 	}
 }
