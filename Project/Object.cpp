@@ -1416,6 +1416,7 @@ Map::Map(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, I
 Map::~Map()
 {
 }
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 
 Shovel::Shovel(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel)
@@ -1427,6 +1428,21 @@ Shovel::Shovel(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandL
 }
 
 Shovel::~Shovel()
+{
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+Spider::Spider(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, int nAnimationTracks)
+{
+	CLoadedModelInfo* pSpiderModel = pModel;
+	if (!pSpiderModel) pSpiderModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Monster_spider.bin", NULL);
+
+	SetChild(pSpiderModel->m_pModelRootObject, true);
+	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, nAnimationTracks, pSpiderModel);
+}
+
+Spider::~Spider()
 {
 }
 

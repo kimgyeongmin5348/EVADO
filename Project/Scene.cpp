@@ -113,11 +113,11 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_ppHierarchicalGameObjects[1]->SetScale(10.0f, 10.0f, 10.0f);
 	if (pShovelModel) delete pShovelModel;
 
-	//CLoadedModelInfo *pMonsterModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Monster.bin", NULL);
-	//m_ppHierarchicalGameObjects[1] = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pMonsterModel, 1);
-	//m_ppHierarchicalGameObjects[1]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-	//m_ppHierarchicalGameObjects[1]->SetPosition(430.0f, m_pTerrain->GetHeight(430.0f, 700.0f), 700.0f);
-	//m_ppHierarchicalGameObjects[1]->SetScale(3.0f, 3.0f, 3.0f);
+	//CLoadedModelInfo *pMonsterModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Monster_spider.bin", NULL);
+	//m_ppHierarchicalGameObjects[2] = new Spider(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pMonsterModel, 1);
+	//m_ppHierarchicalGameObjects[2]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 1);
+	//m_ppHierarchicalGameObjects[2]->SetPosition(0, 0, 0);
+	//m_ppHierarchicalGameObjects[2]->SetScale(3.0f, 3.0f, 3.0f);
 
 	//m_ppHierarchicalGameObjects[2] = new CMonsterObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pMonsterModel, 1);
 	//m_ppHierarchicalGameObjects[2]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 1);

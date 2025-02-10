@@ -353,10 +353,10 @@ CTerrainPlayer::CTerrainPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandLi
 {
 	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
 
-	CLoadedModelInfo *pAngrybotModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/MainPlayer.bin", NULL);
-	SetChild(pAngrybotModel->m_pModelRootObject, true);
+	CLoadedModelInfo *pPlayerModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/MainPlayer.bin", NULL);
+	SetChild(pPlayerModel->m_pModelRootObject, true);
 
-	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 2, pAngrybotModel);
+	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 2, pPlayerModel);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1);
 	m_pSkinnedAnimationController->SetTrackEnable(1, false);
@@ -383,7 +383,7 @@ CTerrainPlayer::CTerrainPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandLi
 	SetPosition(XMFLOAT3(0, 0, 0));
 	SetScale(XMFLOAT3(10.0f, 10.0f, 10.0f));
 
-	if (pAngrybotModel) delete pAngrybotModel;
+	if (pPlayerModel) delete pPlayerModel;
 }
 
 CTerrainPlayer::~CTerrainPlayer()
