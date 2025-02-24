@@ -93,25 +93,60 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
-	
+	m_pMap = new Map(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+
 	XMFLOAT3 xmf3Scale(0.0f, 0.0f, 0.0f);
 	XMFLOAT4 xmf4Color(0.0f, 0.3f, 0.0f, 0.0f);
 	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Terrain/HeightMap.raw"), 257, 257, xmf3Scale, xmf4Color);
 
-	m_nHierarchicalGameObjects = 2;
-	m_ppHierarchicalGameObjects = new CGameObject*[m_nHierarchicalGameObjects];
 
-	CLoadedModelInfo *pMapModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Map_stage_2.bin", NULL);
-	m_ppHierarchicalGameObjects[0] = new Map(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pMapModel);
-	m_ppHierarchicalGameObjects[0]->SetPosition(0, 0, 0);
-	m_ppHierarchicalGameObjects[0]->SetScale(10.0f, 10.0f, 10.0f);
-	if (pMapModel) delete pMapModel;
+	m_nHierarchicalGameObjects = 0;
+	//m_ppHierarchicalGameObjects = new CGameObject*[m_nHierarchicalGameObjects];
 
-	CLoadedModelInfo* pShovelModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Shovel.bin", NULL);
-	m_ppHierarchicalGameObjects[1] = new Shovel(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShovelModel);
-	m_ppHierarchicalGameObjects[1]->SetPosition(0, 0, 0);
-	m_ppHierarchicalGameObjects[1]->SetScale(10.0f, 10.0f, 10.0f);
-	if (pShovelModel) delete pShovelModel;
+	//CLoadedModelInfo *pMapModelBase = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Map_stage2_base.bin", NULL);
+	//m_ppHierarchicalGameObjects[0] = new Map(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pMapModelBase);
+	//m_ppHierarchicalGameObjects[0]->SetPosition(0, 0, 0);
+	//m_ppHierarchicalGameObjects[0]->SetScale(10.0f, 10.0f, 10.0f);
+	//if (pMapModelBase) delete pMapModelBase;
+
+	//CLoadedModelInfo* pMapModelCorridor4way = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Map_corridor_4Way.bin", NULL);
+	//m_ppHierarchicalGameObjects[1] = new Map(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pMapModelCorridor4way);
+	//m_ppHierarchicalGameObjects[1]->SetPosition(0, 0, 0);
+	//m_ppHierarchicalGameObjects[1]->SetScale(10.0f, 10.0f, 10.0f);
+	//if (pMapModelCorridor4way) delete pMapModelCorridor4way;
+
+	//CLoadedModelInfo* pMapModelCorridorCorner = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Map_corridor_corner.bin", NULL);
+	//m_ppHierarchicalGameObjects[2] = new Map(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pMapModelCorridorCorner);
+	//m_ppHierarchicalGameObjects[2]->SetPosition(0, 0, 0);
+	//m_ppHierarchicalGameObjects[2]->SetScale(10.0f, 10.0f, 10.0f);
+	//if (pMapModelCorridorCorner) delete pMapModelCorridorCorner;
+
+	//CLoadedModelInfo* pMapModelCorridorEntrance = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Map_corridor_entrance.bin", NULL);
+	//m_ppHierarchicalGameObjects[3] = new Map(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pMapModelCorridorEntrance);
+	//m_ppHierarchicalGameObjects[3]->SetPosition(0, 0, 0);
+	//m_ppHierarchicalGameObjects[3]->SetScale(10.0f, 10.0f, 10.0f);
+	//if (pMapModelCorridorEntrance) delete pMapModelCorridorEntrance;
+
+	//CLoadedModelInfo* pMapModelCorridorPassthrough = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Map_corridor_passthrough.bin", NULL);
+	//m_ppHierarchicalGameObjects[4] = new Map(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pMapModelCorridorPassthrough);
+	//m_ppHierarchicalGameObjects[4]->SetPosition(0, 0, 0);
+	//m_ppHierarchicalGameObjects[4]->SetScale(10.0f, 10.0f, 10.0f);
+	//if (pMapModelCorridorPassthrough) delete pMapModelCorridorPassthrough;
+
+	//CLoadedModelInfo* pMapModelCorridorTee = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Map_corridor_tee.bin", NULL);
+	//m_ppHierarchicalGameObjects[5] = new Map(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pMapModelCorridorTee);
+	//m_ppHierarchicalGameObjects[5]->SetPosition(0, 0, 0);
+	//m_ppHierarchicalGameObjects[5]->SetScale(10.0f, 10.0f, 10.0f);
+	//if (pMapModelCorridorTee) delete pMapModelCorridorTee;
+
+	//CLoadedModelInfo* pMapModelCorridorDoorraised = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Map_wall_door_raised.bin", NULL);
+	//m_ppHierarchicalGameObjects[6] = new Map(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pMapModelCorridorDoorraised);
+	//m_ppHierarchicalGameObjects[6]->SetPosition(0, 0, 0);
+	//m_ppHierarchicalGameObjects[6]->SetScale(10.0f, 10.0f, 10.0f);
+	//if (pMapModelCorridorDoorraised) delete pMapModelCorridorDoorraised;
+
+
+
 
 	//CLoadedModelInfo *pMonsterModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Monster_spider.bin", NULL);
 	//m_ppHierarchicalGameObjects[2] = new Spider(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pMonsterModel, 1);
@@ -639,6 +674,7 @@ void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera
 
 	if (m_pSkyBox) m_pSkyBox->Render(pd3dCommandList, pCamera);
 	if (m_pTerrain) m_pTerrain->Render(pd3dCommandList, pCamera);
+	if (m_pMap) m_pMap->Render(pd3dCommandList, pCamera);
 
 	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Render(pd3dCommandList, pCamera);
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
