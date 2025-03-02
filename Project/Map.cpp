@@ -59,7 +59,6 @@ void Map::LoadGeometryFromFile()
 
     int childCount;
     inFile.read(reinterpret_cast<char*>(&childCount), sizeof(int));
-
     // 자식 오브젝트 읽기 (Level 1)
     for (int i = 0; i < childCount; i++)
     {
@@ -71,12 +70,10 @@ void Map::LoadGeometryFromFile()
         }
 
         std::string objectName = ReadString(inFile);
-
         std::string childTransformTag = ReadString(inFile);
+
         DirectX::XMFLOAT3 position, rotation, scale;
         DirectX::XMFLOAT4 quaternion;
-        float matrix[16];
-
         inFile.read(reinterpret_cast<char*>(&position), sizeof(DirectX::XMFLOAT3));
         inFile.read(reinterpret_cast<char*>(&rotation), sizeof(DirectX::XMFLOAT3));
         inFile.read(reinterpret_cast<char*>(&scale), sizeof(DirectX::XMFLOAT3));
@@ -84,6 +81,7 @@ void Map::LoadGeometryFromFile()
 
         std::string childMatrixTag = ReadString(inFile);
 
+        float matrix[16];
         inFile.read(reinterpret_cast<char*>(matrix), sizeof(float) * 16);
 
         std::string endFrameTag = ReadString(inFile);
@@ -93,7 +91,17 @@ void Map::LoadGeometryFromFile()
             return;
         }
 
-        m_vObjectInstances.emplace_back(objectName, position, rotation, scale, quaternion, matrix);
+        int index = -1;
+        for (int i = 0; i < m_vLoadedModelInfo.size(); i++)
+        {
+            if (strcmp(m_vLoadedModelInfo[i]->GetFrameName(), objectName.c_str()))
+            {
+                index = static_cast<int>(i);
+                break;
+            }
+        }
+
+        m_vObjectInstances.emplace_back(index, objectName, position, rotation, scale, quaternion, matrix);
     }
 
     inFile.close();
@@ -118,6 +126,10 @@ void Map::LoadMapObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 			}
 		}
 	}
+
+    for (auto& temp : m_vLoadedModelInfo) {
+        cout << temp->GetPosition().x  << " " << temp->GetPosition().y  << " " << temp->GetPosition().z << endl;
+    }
 }
 
 void Map::SetMapObjects()
@@ -127,13 +139,21 @@ void Map::SetMapObjects()
 
 void Map::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
-	//CGameObject::Render(pd3dCommandList, pCamera);
+    for (const auto& instance : m_vObjectInstances)
+    {
+        // modelIndex를 통해 m_vLoadedModelInfo에서 참조할 모델 가져오기
+        if (instance.modelIndex < 0 || instance.modelIndex >= m_vLoadedModelInfo.size())
+        {
+            std::cerr << "Warning: Invalid modelIndex (" << instance.modelIndex << ") for object " << instance.objectName << std::endl;
+            continue;
+        }
 
-	//for (auto& pObject : m_vHierarchicalMapObjects)
-	//{
-	//	if (pObject)
-	//	{
-	//		pObject->Render(pd3dCommandList, pCamera);
-	//	}
-	//}
+        CGameObject* pModel = m_vLoadedModelInfo[instance.modelIndex];
+        pModel->SetPosition(instance.position);
+        pModel->SetScale(instance.scale);
+        pModel->Rotate(instance.rotation);
+        if (!pModel) continue;
+
+        pModel->Render(pd3dCommandList, pCamera);
+    }
 }

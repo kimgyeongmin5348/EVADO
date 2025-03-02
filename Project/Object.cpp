@@ -894,19 +894,24 @@ void CGameObject::SetPosition(XMFLOAT3 xmf3Position)
 	SetPosition(xmf3Position.x, xmf3Position.y, xmf3Position.z);
 }
 
+void CGameObject::SetScale(float x, float y, float z)
+{
+	XMMATRIX mtxScale = XMMatrixScaling(x, y, z);
+	m_xmf4x4ToParent = Matrix4x4::Multiply(mtxScale, m_xmf4x4ToParent);
+
+	UpdateTransform(NULL);
+}
+
+void CGameObject::SetScale(XMFLOAT3 xmf3Scale)
+{
+	SetScale(xmf3Scale.x, xmf3Scale.y, xmf3Scale.z);
+}
+
 void CGameObject::Move(XMFLOAT3 xmf3Offset)
 {
 	m_xmf4x4ToParent._41 += xmf3Offset.x;
 	m_xmf4x4ToParent._42 += xmf3Offset.y;
 	m_xmf4x4ToParent._43 += xmf3Offset.z;
-
-	UpdateTransform(NULL);
-}
-
-void CGameObject::SetScale(float x, float y, float z)
-{
-	XMMATRIX mtxScale = XMMatrixScaling(x, y, z);
-	m_xmf4x4ToParent = Matrix4x4::Multiply(mtxScale, m_xmf4x4ToParent);
 
 	UpdateTransform(NULL);
 }
@@ -966,6 +971,11 @@ void CGameObject::Rotate(float fPitch, float fYaw, float fRoll)
 	m_xmf4x4ToParent = Matrix4x4::Multiply(mtxRotate, m_xmf4x4ToParent);
 
 	UpdateTransform(NULL);
+}
+
+void CGameObject::Rotate(XMFLOAT3 xmf3Rotate)
+{
+	Rotate(xmf3Rotate.x, xmf3Rotate.y, xmf3Rotate.z);
 }
 
 void CGameObject::Rotate(XMFLOAT3 *pxmf3Axis, float fAngle)

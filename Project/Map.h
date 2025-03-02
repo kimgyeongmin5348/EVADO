@@ -4,6 +4,7 @@
 
 struct MapObjectInstance
 {
+    int modelIndex;           // m_vLoadedModelInfo에서 참조할 모델의 인덱스
     std::string objectName;
     DirectX::XMFLOAT3 position;
     DirectX::XMFLOAT3 rotation;
@@ -11,8 +12,8 @@ struct MapObjectInstance
     DirectX::XMFLOAT4 quaternion;
     float transformMatrix[16];
 
-    MapObjectInstance(std::string name, DirectX::XMFLOAT3 pos, DirectX::XMFLOAT3 rot, DirectX::XMFLOAT3 scl, DirectX::XMFLOAT4 quat, float matrix[16])
-        : objectName(name), position(pos), rotation(rot), scale(scl), quaternion(quat)
+    MapObjectInstance(int idx, std::string name, DirectX::XMFLOAT3 pos, DirectX::XMFLOAT3 rot, DirectX::XMFLOAT3 scl, DirectX::XMFLOAT4 quat, float matrix[16])
+        : modelIndex(idx), objectName(name), position(pos), rotation(rot), scale(scl), quaternion(quat)
     {
         std::copy(matrix, matrix + 16, transformMatrix);
     }
@@ -24,8 +25,7 @@ public:
 	Map(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
 	virtual ~Map();
 
-	void AddMapSection(int modelIndex, const XMFLOAT3& position, const XMFLOAT3& rotation, const XMFLOAT3& scale);
-	void LoadMapObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
+	void LoadMapObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
 	void LoadGeometryFromFile();
 	void SetMapObjects();
 
