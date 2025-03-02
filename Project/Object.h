@@ -281,7 +281,7 @@ public:
 public:
 	void PrepareSkinning();
 };
-
+ 
 class CAnimationController 
 {
 public:
@@ -349,7 +349,7 @@ public:
 
 public:
 	char							m_pstrFrameName[64];
-
+		
 	CMesh							*m_pMesh = NULL;
 
 	int								m_nMaterials = 0;
@@ -391,6 +391,8 @@ public:
 
 	virtual void ReleaseUploadBuffers();
 
+	char* GetFrameName() { return m_pstrFrameName; }
+
 	XMFLOAT3 GetPosition();
 	XMFLOAT3 GetLook();
 	XMFLOAT3 GetUp();
@@ -402,12 +404,14 @@ public:
 	virtual void SetPosition(float x, float y, float z);
 	virtual void SetPosition(XMFLOAT3 xmf3Position);
 	void SetScale(float x, float y, float z);
+	void SetScale(XMFLOAT3 xmf3Scale);
 
 	void MoveStrafe(float fDistance = 1.0f);
 	void MoveUp(float fDistance = 1.0f);
 	void MoveForward(float fDistance = 1.0f);
 
 	void Rotate(float fPitch = 10.0f, float fYaw = 10.0f, float fRoll = 10.0f);
+	void Rotate(XMFLOAT3 xmf3Rotate);
 	void Rotate(XMFLOAT3 *pxmf3Axis, float fAngle);
 	void Rotate(XMFLOAT4 *pxmf4Quaternion);
 
@@ -435,6 +439,7 @@ public:
 
 	// 모델의 기하학적 데이터(메시)와 애니메이션 데이터를 동시에 로드
 	static CLoadedModelInfo *LoadGeometryAndAnimationFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, char *pstrFileName, CShader *pShader);
+	static CLoadedModelInfo *LoadGeometryAndAnimationFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, std::filesystem::path pstrFileName, CShader* pShader);
 
 	// 각 프레임(게임 오브젝트)의 메모리 주소와 부모 객체의 메모리 주소가 출력
 	static void PrintFrameInfo(CGameObject *pGameObject, CGameObject *pParent);
@@ -466,24 +471,6 @@ public:
 	XMFLOAT3 GetScale() { return(m_xmf3Scale); }
 	float GetWidth() { return(m_nWidth * m_xmf3Scale.x); }
 	float GetLength() { return(m_nLength * m_xmf3Scale.z); }
-};
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-class Map : public CGameObject
-{
-public:
-	Map(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
-	virtual ~Map();
-
-	void AddMapSection(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
-		ID3D12RootSignature* pd3dGraphicsRootSignature, char* modelPath,
-		const XMFLOAT3& position, const XMFLOAT3& rotate, const XMFLOAT3& scale);
-
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
-
-public:
-	std::vector<CGameObject*> m_vHierarchicalGameObjects;
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -9,7 +9,7 @@
 // Windows 헤더 파일:
 #include <windows.h>
 
-#define DEBUG_MODE
+#define COUT_FILE_LOADING_LIST
 
 // C의 런타임 헤더 파일입니다.
 #include <stdlib.h>
@@ -25,6 +25,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <filesystem>
 
 using namespace std;
 

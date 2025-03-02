@@ -894,19 +894,24 @@ void CGameObject::SetPosition(XMFLOAT3 xmf3Position)
 	SetPosition(xmf3Position.x, xmf3Position.y, xmf3Position.z);
 }
 
+void CGameObject::SetScale(float x, float y, float z)
+{
+	XMMATRIX mtxScale = XMMatrixScaling(x, y, z);
+	m_xmf4x4ToParent = Matrix4x4::Multiply(mtxScale, m_xmf4x4ToParent);
+
+	UpdateTransform(NULL);
+}
+
+void CGameObject::SetScale(XMFLOAT3 xmf3Scale)
+{
+	SetScale(xmf3Scale.x, xmf3Scale.y, xmf3Scale.z);
+}
+
 void CGameObject::Move(XMFLOAT3 xmf3Offset)
 {
 	m_xmf4x4ToParent._41 += xmf3Offset.x;
 	m_xmf4x4ToParent._42 += xmf3Offset.y;
 	m_xmf4x4ToParent._43 += xmf3Offset.z;
-
-	UpdateTransform(NULL);
-}
-
-void CGameObject::SetScale(float x, float y, float z)
-{
-	XMMATRIX mtxScale = XMMatrixScaling(x, y, z);
-	m_xmf4x4ToParent = Matrix4x4::Multiply(mtxScale, m_xmf4x4ToParent);
 
 	UpdateTransform(NULL);
 }
@@ -966,6 +971,11 @@ void CGameObject::Rotate(float fPitch, float fYaw, float fRoll)
 	m_xmf4x4ToParent = Matrix4x4::Multiply(mtxRotate, m_xmf4x4ToParent);
 
 	UpdateTransform(NULL);
+}
+
+void CGameObject::Rotate(XMFLOAT3 xmf3Rotate)
+{
+	Rotate(xmf3Rotate.x, xmf3Rotate.y, xmf3Rotate.z);
 }
 
 void CGameObject::Rotate(XMFLOAT3 *pxmf3Axis, float fAngle)
@@ -1313,7 +1323,7 @@ void CGameObject::LoadAnimationFromFile(FILE *pInFile, CLoadedModelInfo *pLoaded
 
 CLoadedModelInfo *CGameObject::LoadGeometryAndAnimationFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, char *pstrFileName, CShader *pShader)
 {
-#ifdef DEBUG_MODE
+#ifdef COUT_FILE_LOADING_LIST
 	cout << "[Loading] " << pstrFileName << endl;
 #endif
 
@@ -1326,6 +1336,56 @@ CLoadedModelInfo *CGameObject::LoadGeometryAndAnimationFromFile(ID3D12Device *pd
 	char pstrToken[64] = { '\0' };
 
 	for ( ; ; )
+	{
+		if (::ReadStringFromFile(pInFile, pstrToken))
+		{
+			if (!strcmp(pstrToken, "<Hierarchy>:"))
+			{
+				pLoadedModel->m_pModelRootObject = CGameObject::LoadFrameHierarchyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, NULL, pInFile, pShader, &pLoadedModel->m_nSkinnedMeshes);
+				::ReadStringFromFile(pInFile, pstrToken); //"</Hierarchy>"
+			}
+			else if (!strcmp(pstrToken, "<Animation>:"))
+			{
+				CGameObject::LoadAnimationFromFile(pInFile, pLoadedModel);
+				pLoadedModel->PrepareSkinning();
+			}
+			else if (!strcmp(pstrToken, "</Animation>:"))
+			{
+				break;
+			}
+		}
+		else
+		{
+			break;
+		}
+	}
+
+#ifdef _WITH_DEBUG_FRAME_HIERARCHY
+	TCHAR pstrDebug[256] = { 0 };
+	_stprintf_s(pstrDebug, 256, "Frame Hierarchy\n"));
+	OutputDebugString(pstrDebug);
+
+	CGameObject::PrintFrameInfo(pGameObject, NULL);
+#endif
+
+	return(pLoadedModel);
+}
+
+CLoadedModelInfo* CGameObject::LoadGeometryAndAnimationFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, std::filesystem::path pstrFileName, CShader* pShader)
+{
+#ifdef COUT_FILE_LOADING_LIST
+	cout << "[Loading] " << pstrFileName << endl;
+#endif
+
+	FILE* pInFile = NULL;
+	::fopen_s(&pInFile, pstrFileName.string().c_str(), "rb");
+	::rewind(pInFile);
+
+	CLoadedModelInfo* pLoadedModel = new CLoadedModelInfo();
+
+	char pstrToken[64] = { '\0' };
+
+	for (; ; )
 	{
 		if (::ReadStringFromFile(pInFile, pstrToken))
 		{
@@ -1401,165 +1461,6 @@ CHeightMapTerrain::CHeightMapTerrain(ID3D12Device *pd3dDevice, ID3D12GraphicsCom
 CHeightMapTerrain::~CHeightMapTerrain(void)
 {
 	if (m_pHeightMapImage) delete m_pHeightMapImage;
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// 
-Map::Map(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
-{
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_stage2_base.bin", XMFLOAT3(0, 0, 0), XMFLOAT3(0,0,0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_corridor_4way.bin", XMFLOAT3(0, 0, 0), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_corridor_4way.bin", XMFLOAT3(-18, 0, -42), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_corridor_corner.bin", XMFLOAT3(0, 0, -24), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_corridor_corner.bin", XMFLOAT3(-12, 0, -30), XMFLOAT3(0, 180, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_corridor_passthrough.bin", XMFLOAT3(0, 0, 6), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_corridor_passthrough.bin", XMFLOAT3(12, 0, 0), XMFLOAT3(0, 90, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_corridor_passthrough.bin", XMFLOAT3(-12, 0, 0), XMFLOAT3(0, 90, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_corridor_passthrough.bin", XMFLOAT3(0, 0, -18), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_corridor_passthrough.bin", XMFLOAT3(-30, 0, -42), XMFLOAT3(0, 90, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_corridor_passthrough.bin", XMFLOAT3(-18, 0, -60), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_corridor_passthrough.bin", XMFLOAT3(-18, 0, -66), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_corridor_passthrough.bin", XMFLOAT3(-18, 0, -72), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_corridor_tee.bin", XMFLOAT3(-18, 0, -84), XMFLOAT3(0, -90, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_wall_corridor.bin", XMFLOAT3(18, 0, -6), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_wall_corridor.bin", XMFLOAT3(0, 0, 12), XMFLOAT3(0, 90, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_wall_corridor.bin", XMFLOAT3(-12, 0, 0), XMFLOAT3(0, 180, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_wall_corridor.bin", XMFLOAT3(-6, 0, -42), XMFLOAT3(0, 180, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_wall_corridor.bin", XMFLOAT3(-30, 0, -42), XMFLOAT3(0, 180, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_wall_corridor.bin", XMFLOAT3(-24, 0, -84), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_wall_corridor.bin", XMFLOAT3(-24, 0, -132), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_wall_door.bin", XMFLOAT3(66, 0, -42), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_wall_door.bin", XMFLOAT3(0, 0, -60), XMFLOAT3(0, 90, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_wall_door.bin", XMFLOAT3(0, 0, -66), XMFLOAT3(0, 90, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_wall_door.bin", XMFLOAT3(-66, 0, -132), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_wall_door.bin", XMFLOAT3(18, 0, -132), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_wall_door.bin", XMFLOAT3(12, 0, -90), XMFLOAT3(0, 90, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_wall_door.bin", XMFLOAT3(-60, 0, -36), XMFLOAT3(0, 90, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_barrel.bin", XMFLOAT3(11.1, 0, 35), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_barrel.bin", XMFLOAT3(10.39, 0, 35.45), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_cart.bin", XMFLOAT3(10, 0, 14.3), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_catwalk_long_rails.bin", XMFLOAT3(46, -6.47, -47), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_catwalk_long_rails.bin", XMFLOAT3(58, -6.47, -47), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_catwalk_pillar_01.bin", XMFLOAT3(-20, 0, -3), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_catwalk_pillar_01.bin", XMFLOAT3(-32, 0, -3), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_catwalk_rails_short.bin", XMFLOAT3(58, -6.5, -47), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_crate_short.bin", XMFLOAT3(11, 0, 33.8), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_duct_elbow_01.bin", XMFLOAT3(-25, 0.6, -9), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_duct_vent.bin", XMFLOAT3(-25, 0.6, -9), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_duct_vent.bin", XMFLOAT3(-25, 0.6, -7), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_duct_vent.bin", XMFLOAT3(-25, 0.6, -5), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_duct_vent.bin", XMFLOAT3(-25, 0.6, -3), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_exit_sign.bin", XMFLOAT3(3, 5, 36), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_fire_extinguisher.bin", XMFLOAT3(-20, 2, -3), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_fire_extinguisher.bin", XMFLOAT3(-32, 2, -3), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_fusebox_01.bin", XMFLOAT3(-1, 2.73, 12), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_fusebox_02.bin", XMFLOAT3(6.6, 3.25, 12.06), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_garbage_bin.bin", XMFLOAT3(-5, 0, 35), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_pallet_variation_02.bin", XMFLOAT3(-5.8, 0, 17.3), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_pallet_variation_03.bin", XMFLOAT3(-16, 0, -8), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_pallet_variation_03.bin", XMFLOAT3(-6, 0, 15.5), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_pallet_variation_06.bin", XMFLOAT3(32.51, 0, -23.51), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_pallet_variation_08.bin", XMFLOAT3(-32, 0, -11), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_pipes_06.bin", XMFLOAT3(-6, 8, 13.9), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_shelf_variation_01.bin", XMFLOAT3(-36, 0, -86), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_shelf_variation_01.bin", XMFLOAT3(-60, 0, -107), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_shelf_variation_01.bin", XMFLOAT3(-41, 0, -11), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_shelf_variation_01.bin", XMFLOAT3(-41, 0, -1), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_shelf_variation_02.bin", XMFLOAT3(-36, 0, -107), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_shelf_variation_02.bin", XMFLOAT3(-60, 0, -128), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_shelf_variation_03.bin", XMFLOAT3(-36, 0, -128), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_shelf_variation_04.bin", XMFLOAT3(-48, 0, -86), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_shelf_variation_05.bin", XMFLOAT3(-48, 0, -107), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_shelf_variation_06.bin", XMFLOAT3(-48, 0, -128), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_shelves_empty.bin", XMFLOAT3(-60, 0, -86), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_short_stairs.bin", XMFLOAT3(34, 0, -39), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_sprinkler_01.bin", XMFLOAT3(6, 9.5, 18), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_sprinkler_01.bin", XMFLOAT3(6, 9.5, 12), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_sprinkler_01.bin", XMFLOAT3(0, 9.5, 18), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_sprinkler_01.bin", XMFLOAT3(0, 9.5, 12), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_sprinkler_04.bin", XMFLOAT3(6, 9.5, 24), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_sprinkler_04.bin", XMFLOAT3(0, 9.5, 24), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_wall_light.bin", XMFLOAT3(-6, 5, 30), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_wall_light.bin", XMFLOAT3(-6, 5, 24), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_wall_light.bin", XMFLOAT3(-6, 5, 18), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_wall_light.bin", XMFLOAT3(12, 5, 30), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_wall_light.bin", XMFLOAT3(12, 5, 24), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-	AddMapSection(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map_wall_light.bin", XMFLOAT3(12, 5, 18), XMFLOAT3(0, 0, 0), XMFLOAT3(10.0f, 10.0f, 10.0f));
-}
-
-Map::~Map()
-{
-}
-
-void Map::AddMapSection(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, 
-	char* modelPath, const XMFLOAT3& position, const XMFLOAT3& rotate, const XMFLOAT3& scale)
-{
-	CLoadedModelInfo* pMapModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, modelPath, NULL);
-
-	if (pMapModel && pMapModel->m_pModelRootObject)
-	{
-		// 계층 구조에 추가
-		SetChild(pMapModel->m_pModelRootObject, true);
-
-		// 벡터에 추가
-		m_vHierarchicalGameObjects.push_back(pMapModel->m_pModelRootObject);
-
-		// 위치 및 스케일 설정
-		pMapModel->m_pModelRootObject->SetPosition(position.x * 10, position.y * 10, position.z * 10);
-		pMapModel->m_pModelRootObject->Rotate(rotate.x, rotate.y, rotate.z);
-		pMapModel->m_pModelRootObject->SetScale(scale.x, scale.y, scale.z);
-	}
-
-	// 메모리 해제
-	if (pMapModel) delete pMapModel;
-}
-
-void Map::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
-{
-	//CGameObject::Render(pd3dCommandList, pCamera);
-
-	for (auto& pObject : m_vHierarchicalGameObjects)
-	{
-		if (pObject)
-		{
-			pObject->Render(pd3dCommandList, pCamera);
-		}
-	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
