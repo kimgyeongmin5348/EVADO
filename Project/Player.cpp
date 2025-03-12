@@ -381,7 +381,7 @@ CTerrainPlayer::CTerrainPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandLi
 
 	CHeightMapTerrain *pTerrain = (CHeightMapTerrain *)pContext;
 	SetPosition(XMFLOAT3(0, 0, 0));
-	SetScale(XMFLOAT3(10.0f, 10.0f, 10.0f));
+	//SetScale(XMFLOAT3(10.0f, 10.0f, 10.0f));
 
 	if (pPlayerModel) delete pPlayerModel;
 }
