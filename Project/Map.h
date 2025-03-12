@@ -36,4 +36,5 @@ public:
 public:
 	std::vector<MapObjectInstance> m_vObjectInstances;
 	std::vector<CGameObject*> m_vLoadedModelInfo;
+    std::vector<CGameObject*> m_vMapObjects;
 };
