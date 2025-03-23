@@ -1420,6 +1420,27 @@ CLoadedModelInfo* CGameObject::LoadGeometryAndAnimationFromFile(ID3D12Device* pd
 	return(pLoadedModel);
 }
 
+CGameObject* CGameObject::Clone()
+{
+	CGameObject* pNewObject = new CGameObject(*this);
+
+	// 자식 객체 복사
+	if (m_pChild)
+	{
+		pNewObject->m_pChild = m_pChild->Clone();
+		pNewObject->m_pChild->m_pParent = pNewObject;
+	}
+
+	// 형제 객체 복사
+	if (m_pSibling)
+	{
+		pNewObject->m_pSibling = m_pSibling->Clone();
+		pNewObject->m_pSibling->m_pParent = pNewObject->m_pParent;
+	}
+
+	return pNewObject;
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 CHeightMapTerrain::CHeightMapTerrain(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, LPCTSTR pFileName, int nWidth, int nLength, XMFLOAT3 xmf3Scale, XMFLOAT4 xmf4Color) : CGameObject(1)
