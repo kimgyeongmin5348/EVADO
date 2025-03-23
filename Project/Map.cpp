@@ -166,8 +166,7 @@ void Map::SetMapObjects()
 		CGameObject* pModel = m_vLoadedModelInfo[instance.modelIndex];
 		if (!pModel) continue;
 
-		CGameObject* pNewObject = new CGameObject(*pModel);
-		//CGameObject* pNewObject = pModel->Clone();
+		CGameObject* pNewObject = pModel->Clone();
 
 		pNewObject->SetPosition(instance.position);
 		pNewObject->SetScale(instance.scale);

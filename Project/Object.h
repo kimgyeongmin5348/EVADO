@@ -451,19 +451,8 @@ public:
 	// 각 프레임(게임 오브젝트)의 메모리 주소와 부모 객체의 메모리 주소가 출력
 	static void PrintFrameInfo(CGameObject *pGameObject, CGameObject *pParent);
 
-	CGameObject* Clone()
-	{
-		CGameObject* pNewObject = new CGameObject(*this);  // 기본 데이터 복사
-
-		if (m_pMesh)
-		{
-			CStandardMesh* pClonedMesh = new CStandardMesh(*static_cast<CStandardMesh*>(m_pMesh));
-			pNewObject->SetMesh(pClonedMesh);
-		}
-
-		return pNewObject;
-	}
-
+	// 오브젝트의 계층 구조 전체를 복사
+	CGameObject* Clone();
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
