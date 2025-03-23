@@ -15,10 +15,10 @@ Map::Map(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, I
 	//for (auto& a : m_vObjectInstances) {
 	//    cout << "[" << a.modelIndex << "] " << a.objectName << "(" << a.position.x << ", " << a.position.z << ")" << endl;
 	//}
-	cout << "[ m_vpMapObjects ]" << endl;
-	for (const auto& a : m_vMapObjects) {
-		cout << a->GetFrameName() << " | " << a->GetPosition().x << ", " << a->GetPosition().z << " | " << endl;
-	}
+	//cout << "[ m_vpMapObjects ]" << endl;
+	//for (const auto& a : m_vMapObjects) {
+	//	cout << a->GetFrameName() << " | " << a->GetPosition().x << ", " << a->GetPosition().z << " | " << endl;
+	//}
 }
 
 Map::~Map()
@@ -115,13 +115,13 @@ void Map::LoadGeometryFromFile()
 			}
 		}
 
-		cout << std::left
-			<< std::setw(30) << objectName << " [ "
-			<< std::setw(4) << index << "] ( "
-			<< std::setw(10) << position.x << ", "
-			<< std::setw(10) << position.y << ", "
-			<< std::setw(10) << position.z << " )  |"
-			<< std::setw(3) << scale.x << " | " << endl;
+		//cout << std::left
+		//	<< std::setw(30) << objectName << " [ "
+		//	<< std::setw(4) << index << "] ( "
+		//	<< std::setw(10) << position.x << ", "
+		//	<< std::setw(10) << position.y << ", "
+		//	<< std::setw(10) << position.z << " )  |"
+		//	<< std::setw(3) << scale.x << " | " << endl;
 
 		m_vObjectInstances.emplace_back(index, objectName, position, rotation, scale, quaternion, matrix);
 	}
@@ -172,9 +172,9 @@ void Map::SetMapObjects()
 		pNewObject->SetScale(instance.scale);
 		pNewObject->Rotate(instance.rotation);
 
-		std::cout << "Object: " << instance.objectName
-			<< " | Model Index: " << instance.modelIndex
-			<< " | Mesh Pointer: " << pNewObject->m_pMesh << std::endl;
+		//std::cout << "Object: " << instance.objectName
+		//	<< " | Model Index: " << instance.modelIndex
+		//	<< " | Mesh Pointer: " << pNewObject->m_pMesh << std::endl;
 
 		m_vMapObjects.push_back(pNewObject);
 	}
