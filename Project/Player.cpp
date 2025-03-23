@@ -90,8 +90,8 @@ void CPlayer::Rotate(float x, float y, float z)
 		if (x != 0.0f)
 		{
 			m_fPitch += x;
-			if (m_fPitch > +89.0f) { x -= (m_fPitch - 89.0f); m_fPitch = +89.0f; }
-			if (m_fPitch < -89.0f) { x -= (m_fPitch + 89.0f); m_fPitch = -89.0f; }
+			if (m_fPitch > -42.0f) { x -= (m_fPitch + 42.0f); m_fPitch = -42.0f; }
+			if (m_fPitch < -200.0f) { x -= (m_fPitch + 200.0f); m_fPitch = -200.0f; }
 		}
 		if (y != 0.0f)
 		{
@@ -144,6 +144,7 @@ void CPlayer::Rotate(float x, float y, float z)
 void CPlayer::Update(float fTimeElapsed)
 {
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, m_xmf3Gravity);
+
 	float fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
 	float fMaxVelocityXZ = m_fMaxVelocityXZ;
 	if (fLength > m_fMaxVelocityXZ)
@@ -151,6 +152,7 @@ void CPlayer::Update(float fTimeElapsed)
 		m_xmf3Velocity.x *= (fMaxVelocityXZ / fLength);
 		m_xmf3Velocity.z *= (fMaxVelocityXZ / fLength);
 	}
+
 	float fMaxVelocityY = m_fMaxVelocityY;
 	fLength = sqrtf(m_xmf3Velocity.y * m_xmf3Velocity.y);
 	if (fLength > m_fMaxVelocityY) m_xmf3Velocity.y *= (fMaxVelocityY / fLength);
@@ -234,104 +236,6 @@ void CPlayer::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamer
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 
-CAirplanePlayer::CAirplanePlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, void *pContext)
-{
-	m_pCamera = ChangeCamera(/*SPACESHIP_CAMERA*/THIRD_PERSON_CAMERA, 0.0f);
-
-	CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Mi24.bin", NULL);
-	SetChild(pModel->m_pModelRootObject, true);
-
-	OnPrepareAnimate();
-
-	CreateShaderVariables(pd3dDevice, pd3dCommandList);
-
-	if (pModel) delete pModel;
-}
-
-CAirplanePlayer::~CAirplanePlayer()
-{
-}
-
-void CAirplanePlayer::OnPrepareAnimate()
-{
-	m_pMainRotorFrame = FindFrame("Top_Rotor");
-	m_pTailRotorFrame = FindFrame("Tail_Rotor");
-}
-
-void CAirplanePlayer::Animate(float fTimeElapsed)
-{
-	if (m_pMainRotorFrame)
-	{
-		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 2.0f) * fTimeElapsed);
-		m_pMainRotorFrame->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotate, m_pMainRotorFrame->m_xmf4x4ToParent);
-	}
-	if (m_pTailRotorFrame)
-	{
-		XMMATRIX xmmtxRotate = XMMatrixRotationX(XMConvertToRadians(360.0f * 4.0f) * fTimeElapsed);
-		m_pTailRotorFrame->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->m_xmf4x4ToParent);
-	}
-
-	CPlayer::Animate(fTimeElapsed);
-}
-
-void CAirplanePlayer::OnPrepareRender()
-{
-	CPlayer::OnPrepareRender();
-}
-
-CCamera *CAirplanePlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
-{
-	DWORD nCurrentCameraMode = (m_pCamera) ? m_pCamera->GetMode() : 0x00;
-	if (nCurrentCameraMode == nNewCameraMode) return(m_pCamera);
-	switch (nNewCameraMode)
-	{
-		case FIRST_PERSON_CAMERA:
-			SetFriction(2.0f);
-			SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
-			SetMaxVelocityXZ(2.5f);
-			SetMaxVelocityY(40.0f);
-			m_pCamera = OnChangeCamera(FIRST_PERSON_CAMERA, nCurrentCameraMode);
-			m_pCamera->SetTimeLag(0.0f);
-			m_pCamera->SetOffset(XMFLOAT3(0.0f, 20.0f, 0.0f));
-			m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
-			m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
-			m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
-			break;
-		case SPACESHIP_CAMERA:
-			SetFriction(100.5f);
-			SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
-			SetMaxVelocityXZ(40.0f);
-			SetMaxVelocityY(40.0f);
-			m_pCamera = OnChangeCamera(SPACESHIP_CAMERA, nCurrentCameraMode);
-			m_pCamera->SetTimeLag(0.0f);
-			m_pCamera->SetOffset(XMFLOAT3(0.0f, 0.0f, 0.0f));
-			m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
-			m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
-			m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
-			break;
-		case THIRD_PERSON_CAMERA:
-			SetFriction(20.5f);
-			SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
-			SetMaxVelocityXZ(25.5f);
-			SetMaxVelocityY(20.0f);
-			m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
-			m_pCamera->SetTimeLag(0.25f);
-			m_pCamera->SetOffset(XMFLOAT3(0.0f, 15.0f, -30.0f));
-			m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
-			m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
-			m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
-			break;
-		default:
-			break;
-	}
-	m_pCamera->SetPosition(Vector3::Add(m_xmf3Position, m_pCamera->GetOffset()));
-	Update(fTimeElapsed);
-
-	return(m_pCamera);
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// 
 #define _WITH_DEBUG_CALLBACK_DATA
 
 void CSoundCallbackHandler::HandleCallback(void *pCallbackData, float fTrackPosition)
@@ -403,7 +307,7 @@ CCamera *CTerrainPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 			SetMaxVelocityY(400.0f);
 			m_pCamera = OnChangeCamera(FIRST_PERSON_CAMERA, nCurrentCameraMode);
 			m_pCamera->SetTimeLag(0.0f);
-			m_pCamera->SetOffset(XMFLOAT3(0.0f, 20.0f, 0.0f));
+			m_pCamera->SetOffset(XMFLOAT3(0.0f, 2.0f, 0.0f));
 			m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
 			m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 			m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
@@ -427,7 +331,7 @@ CCamera *CTerrainPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 			SetMaxVelocityY(400.0f);
 			m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
 			m_pCamera->SetTimeLag(0.25f);
-			m_pCamera->SetOffset(XMFLOAT3(0.0f, 20.0f, -50.0f));
+			m_pCamera->SetOffset(XMFLOAT3(0.0f, 5.0f, -5.0f));
 			m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
 			m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 			m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
@@ -466,7 +370,7 @@ void CTerrainPlayer::OnCameraUpdateCallback(float fTimeElapsed)
 	XMFLOAT3 xmf3CameraPosition = m_pCamera->GetPosition();
 	int z = (int)(xmf3CameraPosition.z / xmf3Scale.z);
 	bool bReverseQuad = ((z % 2) != 0);
-	float fHeight = pTerrain->GetHeight(xmf3CameraPosition.x, xmf3CameraPosition.z, bReverseQuad) + 5.0f;
+	float fHeight = pTerrain->GetHeight(xmf3CameraPosition.x, xmf3CameraPosition.z, bReverseQuad);
 	if (xmf3CameraPosition.y <= fHeight)
 	{
 		xmf3CameraPosition.y = fHeight;
