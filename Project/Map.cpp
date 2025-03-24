@@ -160,6 +160,7 @@ void Map::SetMapObjects()
 		if (instance.modelIndex < 0 || instance.modelIndex >= m_vLoadedModelInfo.size())
 		{
 			std::cerr << "Warning: Invalid modelIndex (" << instance.modelIndex << ") for object " << instance.objectName << std::endl;
+			cout << instance.position.x << instance.position.z << endl;
 			continue;
 		}
 

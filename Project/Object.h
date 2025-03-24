@@ -392,7 +392,6 @@ public:
 	virtual void ReleaseUploadBuffers();
 
 	char* GetFrameName() { return m_pstrFrameName; }
-
 	XMFLOAT3 GetPosition();
 	XMFLOAT3 GetLook();
 	XMFLOAT3 GetUp();
@@ -404,8 +403,10 @@ public:
 			sqrt(m_xmf4x4ToParent._33 * m_xmf4x4ToParent._33)   // Scale Z
 		);
 	};
-
 	XMFLOAT3 GetToParentPosition();
+	CGameObject* GetParent() { return(m_pParent); }
+	CGameObject* GetChild() { return(m_pChild); }
+
 	void Move(XMFLOAT3 xmf3Offset);
 
 	virtual void SetPosition(float x, float y, float z);
@@ -422,7 +423,6 @@ public:
 	void Rotate(XMFLOAT3 *pxmf3Axis, float fAngle);
 	void Rotate(XMFLOAT4 *pxmf4Quaternion);
 
-	CGameObject *GetParent() { return(m_pParent); }
 	void UpdateTransform(XMFLOAT4X4 *pxmf4x4Parent=NULL);
 	CGameObject *FindFrame(char *pstrFrameName);
 
