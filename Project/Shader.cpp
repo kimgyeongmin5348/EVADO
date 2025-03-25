@@ -426,6 +426,34 @@ void CStandardObjectsShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
+
+float Random(float fMin, float fMax)
+{
+	float fRandomValue = (float)rand();
+	if (fRandomValue < fMin) fRandomValue = fMin;
+	if (fRandomValue > fMax) fRandomValue = fMax;
+	return(fRandomValue);
+}
+
+float Random()
+{
+	return(rand() / float(RAND_MAX));
+}
+
+XMFLOAT3 RandomPositionInSphere(XMFLOAT3 xmf3Center, float fRadius, int nColumn, int nColumnSpace)
+{
+    float fAngle = Random() * 360.0f * (2.0f * 3.14159f / 360.0f);
+
+	XMFLOAT3 xmf3Position;
+    xmf3Position.x = xmf3Center.x + fRadius * sin(fAngle);
+    xmf3Position.y = xmf3Center.y - (nColumn * float(nColumnSpace) / 2.0f) + (nColumn * nColumnSpace) + Random();
+    xmf3Position.z = xmf3Center.z + fRadius * cos(fAngle);
+
+	return(xmf3Position);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
 CSkinnedAnimationObjectsShader::CSkinnedAnimationObjectsShader()
 {
 }
@@ -469,6 +497,53 @@ void CSkinnedAnimationObjectsShader::Render(ID3D12GraphicsCommandList *pd3dComma
 			m_ppObjects[j]->Render(pd3dCommandList, pCamera);
 		}
 	}
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+CAngrybotObjectsShader::CAngrybotObjectsShader()
+{
+}
+
+CAngrybotObjectsShader::~CAngrybotObjectsShader()
+{
+}
+
+void CAngrybotObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, CLoadedModelInfo *pModel, void *pContext)
+{
+	int xObjects = 3, zObjects = 3, i = 0;
+
+	m_nObjects = (xObjects * 2 + 1) * (zObjects * 2 + 1);
+
+	m_ppObjects = new CGameObject*[m_nObjects];
+
+	float fxPitch = 7.0f * 2.5f;
+	float fzPitch = 7.0f * 2.5f;
+
+	CHeightMapTerrain *pTerrain = (CHeightMapTerrain *)pContext;
+
+	CLoadedModelInfo *pAngrybotModel = pModel;
+	if (!pAngrybotModel) pAngrybotModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Angrybot.bin", NULL);
+
+	int nObjects = 0;
+	for (int x = -xObjects; x <= xObjects; x++)
+	{
+		for (int z = -zObjects; z <= zObjects; z++)
+		{
+			m_ppObjects[nObjects] = new CSpider(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pAngrybotModel, 1);
+			m_ppObjects[nObjects]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, (nObjects % 2));
+			m_ppObjects[nObjects]->m_pSkinnedAnimationController->SetTrackSpeed(0, (nObjects % 2) ? 0.25f : 1.0f);
+			m_ppObjects[nObjects]->m_pSkinnedAnimationController->SetTrackPosition(0, (nObjects % 3) ? 0.85f : 0.0f);
+			XMFLOAT3 xmf3Position = XMFLOAT3(fxPitch*x + 390.0f, 0.0f, 730.0f + fzPitch * z);
+			xmf3Position.y = pTerrain->GetHeight(xmf3Position.x, xmf3Position.z);
+			m_ppObjects[nObjects]->SetPosition(xmf3Position);
+			m_ppObjects[nObjects++]->SetScale(2.0f, 2.0f, 2.0f);
+		}
+    }
+
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
+	if (!pModel && pAngrybotModel) delete pAngrybotModel;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
