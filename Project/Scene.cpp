@@ -103,12 +103,13 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_nHierarchicalGameObjects = 1;
 	m_ppHierarchicalGameObjects = new CGameObject * [m_nHierarchicalGameObjects];
 
-	CLoadedModelInfo* pAngrybotModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Spider.bin", NULL);
-	m_ppHierarchicalGameObjects[0] = new CAngrybotObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pAngrybotModel, 1);
+	CLoadedModelInfo* pSpiderModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Spider.bin", NULL);
+	m_ppHierarchicalGameObjects[0] = new CSpider(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pSpiderModel, 1);
 	m_ppHierarchicalGameObjects[0]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	//m_ppHierarchicalGameObjects[0]->SetScale(10, 10, 10);
-	m_ppHierarchicalGameObjects[0]->SetPosition(0, 0, 0);
-	if (pAngrybotModel) delete pAngrybotModel;
+	m_ppHierarchicalGameObjects[0]->SetPosition(3, 0, 30);
+	m_ppHierarchicalGameObjects[0]->Rotate(0, 180, 0);
+	if (pSpiderModel) delete pSpiderModel;
 
 
 /////*
