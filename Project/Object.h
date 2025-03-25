@@ -512,3 +512,44 @@ public:
 
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera = NULL);
 };
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+class CAngrybotAnimationController : public CAnimationController
+{
+public:
+	CAngrybotAnimationController(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks, CLoadedModelInfo* pModel);
+	~CAngrybotAnimationController();
+
+	virtual void OnRootMotion(CGameObject* pRootGameObject);
+};
+
+class CAngrybotObject : public CGameObject
+{
+public:
+	CAngrybotObject(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, CLoadedModelInfo *pModel, int nAnimationTracks);
+	virtual ~CAngrybotObject();
+
+	virtual void Animate(float fTimeElapsed);
+};
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+class CRootMotionCallbackHandler : public CAnimationCallbackHandler
+{
+public:
+	CRootMotionCallbackHandler() { }
+	~CRootMotionCallbackHandler() { }
+
+public:
+	virtual void HandleCallback(void* pCallbackData, float fTrackPosition);
+};
+
+class CEthanAnimationController : public CAnimationController
+{
+public:
+	CEthanAnimationController(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks, CLoadedModelInfo* pModel);
+	~CEthanAnimationController();
+
+	virtual void OnRootMotion(CGameObject* pRootGameObject);
+};
