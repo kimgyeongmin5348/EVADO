@@ -385,7 +385,7 @@ public:
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList);
 	virtual void ReleaseShaderVariables();
 
-	// CPU¿¡¼­ °è»êµÈ ¿ùµå º¯È¯ Çà·ÄÀ» GPUÀÇ ¼ÎÀÌ´õ¿¡¼­ »ç¿ëÇÒ ¼ö ÀÖµµ·Ï Àü´Ş
+	// CPUì—ì„œ ê³„ì‚°ëœ ì›”ë“œ ë³€í™˜ í–‰ë ¬ì„ GPUì˜ ì…°ì´ë”ì—ì„œ ì‚¬ìš©í•  ìˆ˜ ìˆë„ë¡ ì „ë‹¬
 	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandList, XMFLOAT4X4 *pxmf4x4World);
 	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandList, CMaterial *pMaterial);
 
@@ -426,7 +426,7 @@ public:
 	void UpdateTransform(XMFLOAT4X4 *pxmf4x4Parent=NULL);
 	CGameObject *FindFrame(char *pstrFrameName);
 
-	// °ÔÀÓ ¿ÀºêÁ§Æ®ÀÇ °èÃş ±¸Á¶ ³»¿¡¼­ Æ¯Á¤ ÀÌ¸§À» °¡Áø ÅØ½ºÃ³¸¦ Ã£´Â´Ù.
+	// ê²Œì„ ì˜¤ë¸Œì íŠ¸ì˜ ê³„ì¸µ êµ¬ì¡° ë‚´ì—ì„œ íŠ¹ì • ì´ë¦„ì„ ê°€ì§„ í…ìŠ¤ì²˜ë¥¼ ì°¾ëŠ”ë‹¤.
 	CTexture *FindReplicatedTexture(_TCHAR *pstrTextureName);
 
 	UINT GetMeshType() { return((m_pMesh) ? m_pMesh->GetType() : 0x00); }
@@ -444,14 +444,14 @@ public:
 	static void LoadAnimationFromFile(FILE *pInFile, CLoadedModelInfo *pLoadedModel);
 	static CGameObject *LoadFrameHierarchyFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, CGameObject *pParent, FILE *pInFile, CShader *pShader, int *pnSkinnedMeshes);
 
-	// ¸ğµ¨ÀÇ ±âÇÏÇĞÀû µ¥ÀÌÅÍ(¸Ş½Ã)¿Í ¾Ö´Ï¸ŞÀÌ¼Ç µ¥ÀÌÅÍ¸¦ µ¿½Ã¿¡ ·Îµå
+	// ëª¨ë¸ì˜ ê¸°í•˜í•™ì  ë°ì´í„°(ë©”ì‹œ)ì™€ ì• ë‹ˆë©”ì´ì…˜ ë°ì´í„°ë¥¼ ë™ì‹œì— ë¡œë“œ
 	static CLoadedModelInfo *LoadGeometryAndAnimationFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, char *pstrFileName, CShader *pShader);
 	static CLoadedModelInfo *LoadGeometryAndAnimationFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, std::filesystem::path pstrFileName, CShader* pShader);
 
-	// °¢ ÇÁ·¹ÀÓ(°ÔÀÓ ¿ÀºêÁ§Æ®)ÀÇ ¸Ş¸ğ¸® ÁÖ¼Ò¿Í ºÎ¸ğ °´Ã¼ÀÇ ¸Ş¸ğ¸® ÁÖ¼Ò°¡ Ãâ·Â
+	// ê° í”„ë ˆì„(ê²Œì„ ì˜¤ë¸Œì íŠ¸)ì˜ ë©”ëª¨ë¦¬ ì£¼ì†Œì™€ ë¶€ëª¨ ê°ì²´ì˜ ë©”ëª¨ë¦¬ ì£¼ì†Œê°€ ì¶œë ¥
 	static void PrintFrameInfo(CGameObject *pGameObject, CGameObject *pParent);
 
-	// ¿ÀºêÁ§Æ®ÀÇ °èÃş ±¸Á¶ ÀüÃ¼¸¦ º¹»ç
+	// ì˜¤ë¸Œì íŠ¸ì˜ ê³„ì¸µ êµ¬ì¡° ì „ì²´ë¥¼ ë³µì‚¬
 	CGameObject* Clone();
 };
 
@@ -511,4 +511,15 @@ public:
 	virtual ~CSkyBox();
 
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera = NULL);
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+class CRootMotionCallbackHandler : public CAnimationCallbackHandler
+{
+public:
+	CRootMotionCallbackHandler() { }
+	~CRootMotionCallbackHandler() { }
+
+public:
+	virtual void HandleCallback(void* pCallbackData, float fTrackPosition);
 };
