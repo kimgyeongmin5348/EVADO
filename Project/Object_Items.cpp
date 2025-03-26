@@ -39,6 +39,10 @@ FlashLight::~FlashLight()
 // 
 Whistle::Whistle(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel)
 {
+	CLoadedModelInfo* pWhistleModel = pModel;
+	if (!pWhistleModel) pWhistleModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Item/Whistle.bin", NULL);
+
+	SetChild(pWhistleModel->m_pModelRootObject, true);
 }
 
 Whistle::~Whistle()
