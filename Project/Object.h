@@ -527,8 +527,8 @@ public:
 class CRootMotionCallbackHandler : public CAnimationCallbackHandler
 {
 public:
-	CRootMotionCallbackHandler() { }
-	~CRootMotionCallbackHandler() { }
+	CRootMotionCallbackHandler() { };
+	~CRootMotionCallbackHandler() { };
 
 public:
 	virtual void HandleCallback(void* pCallbackData, float fTrackPosition);
