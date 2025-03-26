@@ -1484,20 +1484,6 @@ CHeightMapTerrain::~CHeightMapTerrain(void)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// 
-Shovel::Shovel(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel)
-{
-	CLoadedModelInfo* pShovelModel = pModel;
-	if (!pShovelModel) pShovelModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Shovel.bin", NULL);
-
-	SetChild(pShovelModel->m_pModelRootObject, true);
-}
-
-Shovel::~Shovel()
-{
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 Spider::Spider(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, int nAnimationTracks)
 {
