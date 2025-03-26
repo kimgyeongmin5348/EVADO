@@ -1323,7 +1323,7 @@ void CGameObject::LoadAnimationFromFile(FILE *pInFile, CLoadedModelInfo *pLoaded
 CLoadedModelInfo *CGameObject::LoadGeometryAndAnimationFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, char *pstrFileName, CShader *pShader)
 {
 #ifdef COUT_FILE_LOADING_LIST
-	cout << "[Loading] " << pstrFileName << endl;
+	cout << "[Loading] \"" << pstrFileName << "\"" << endl;
 #endif
 
 	FILE *pInFile = NULL;
