@@ -162,7 +162,7 @@
     <ClInclude Include="Client.h" />
     <ClInclude Include="Map.h" />
     <ClInclude Include="Mesh.h" />
-    <ClInclude Include="Object.h" />
+    <ClInclude Include="object.h" />
     <ClInclude Include="Object_Items.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Scene.h" />
