@@ -17,11 +17,11 @@ public:
 	virtual ~Shovel();
 };
 
-class HandMap : public Item
+class Handmap : public Item
 {
 public:
-	HandMap(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel);
-	virtual ~HandMap();
+	Handmap(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel);
+	virtual ~Handmap();
 
 };
 

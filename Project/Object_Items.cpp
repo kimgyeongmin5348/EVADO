@@ -17,11 +17,15 @@ Shovel::~Shovel()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 
-HandMap::HandMap(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel)
+Handmap::Handmap(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel)
 {
+	CLoadedModelInfo* pHandmapModel = pModel;
+	if (!pHandmapModel) pHandmapModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Item/Flashlight.bin", NULL);
+
+	SetChild(pHandmapModel->m_pModelRootObject, true);
 }
 
-HandMap::~HandMap()
+Handmap::~Handmap()
 {
 }
 
@@ -29,6 +33,10 @@ HandMap::~HandMap()
 // 
 FlashLight::FlashLight(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel)
 {
+	CLoadedModelInfo* pFlashlightModel = pModel;
+	if (!pFlashlightModel) pFlashlightModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Item/Flashlight.bin", NULL);
+
+	SetChild(pFlashlightModel->m_pModelRootObject, true);
 }
 
 FlashLight::~FlashLight()
