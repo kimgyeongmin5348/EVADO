@@ -37,6 +37,17 @@ cbuffer cbLights : register(b4)
 
 //#define _WITH_PCF_FILTERING
 
+#define FRAME_BUFFER_WIDTH		1920
+#define FRAME_BUFFER_HEIGHT		1080
+
+#define _DEPTH_BUFFER_WIDTH		(FRAME_BUFFER_WIDTH * 4)
+#define _DEPTH_BUFFER_HEIGHT	(FRAME_BUFFER_HEIGHT * 4)
+
+#define DELTA_X					(1.0f / _DEPTH_BUFFER_WIDTH)
+#define DELTA_Y					(1.0f / _DEPTH_BUFFER_HEIGHT)
+
+#define MAX_DEPTH_TEXTURES		MAX_LIGHTS
+
 Texture2D<float> gtxtDepthTextures[MAX_DEPTH_TEXTURES] : register(t2);
 SamplerComparisonState gssComparisonPCFShadow : register(s2);
 float Compute3x3ShadowFactor(float2 uv, float fDepth, uint nIndex)
@@ -174,7 +185,8 @@ float4 Lighting(float3 vPosition, float3 vNormal, bool bShadow, float4 shadowMap
             if (bShadow)
                 fShadowFactor = Compute3x3ShadowFactor(shadowMapUVs[i].xy, shadowMapUVs[i].z, i);
 #else
-			if (bShadow) fShadowFactor = gtxtDepthTextures[i].SampleCmpLevelZero(gssComparisonPCFShadow, shadowMapUVs[i].xy, shadowMapUVs[i].z).r;
+            if (bShadow)
+                fShadowFactor = gtxtDepthTextures[i].SampleCmpLevelZero(gssComparisonPCFShadow, shadowMapUVs[i].xy, shadowMapUVs[i].z).r;
 #endif
 			
 			if (gLights[i].m_nType == DIRECTIONAL_LIGHT)

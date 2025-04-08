@@ -37,20 +37,20 @@ private:
 	UINT							m_nTextureType;
 
 	int								m_nTextures = 0;
-	ID3D12Resource** m_ppd3dTextures = NULL;
-	ID3D12Resource** m_ppd3dTextureUploadBuffers;
+	ID3D12Resource**				m_ppd3dTextures = NULL;
+	ID3D12Resource**				m_ppd3dTextureUploadBuffers;
 
-	UINT* m_pnResourceTypes = NULL;
+	UINT*							m_pnResourceTypes = NULL;
 
-	DXGI_FORMAT* m_pdxgiBufferFormats = NULL;
-	int* m_pnBufferElements = NULL;
+	DXGI_FORMAT*					m_pdxgiBufferFormats = NULL;
+	int*							m_pnBufferElements = NULL;
 
 	int								m_nRootParameters = 0;
-	UINT* m_pnRootParameterIndices = NULL;
-	D3D12_GPU_DESCRIPTOR_HANDLE* m_pd3dSrvGpuDescriptorHandles = NULL;
+	UINT*							m_pnRootParameterIndices = NULL;
+	D3D12_GPU_DESCRIPTOR_HANDLE*	m_pd3dSrvGpuDescriptorHandles = NULL;
 
 	int								m_nSamplers = 0;
-	D3D12_GPU_DESCRIPTOR_HANDLE* m_pd3dSamplerGpuDescriptorHandles = NULL;
+	D3D12_GPU_DESCRIPTOR_HANDLE*	m_pd3dSamplerGpuDescriptorHandles = NULL;
 
 public:
 	void AddRef() { m_nReferences++; }
