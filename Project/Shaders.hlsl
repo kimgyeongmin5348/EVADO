@@ -173,6 +173,102 @@ float4 PSShadowMapShadow(VS_SHADOW_MAP_OUTPUT input) : SV_TARGET
     return (cIllumination);
 }
 
+///////////////////////////////////////////////////////////////////////////////
+//
+struct VS_TEXTURED_OUTPUT
+{
+    float4 position : SV_POSITION;
+    float2 uv : TEXCOORD;
+};
+
+VS_TEXTURED_OUTPUT VSTextureToViewport(uint nVertexID : SV_VertexID)
+{
+    VS_TEXTURED_OUTPUT output = (VS_TEXTURED_OUTPUT) 0;
+
+    if (nVertexID == 0)
+    {
+        output.position = float4(-1.0f, +1.0f, 0.0f, 1.0f);
+        output.uv = float2(0.0f, 0.0f);
+    }
+    if (nVertexID == 1)
+    {
+        output.position = float4(+1.0f, +1.0f, 0.0f, 1.0f);
+        output.uv = float2(1.0f, 0.0f);
+    }
+    if (nVertexID == 2)
+    {
+        output.position = float4(+1.0f, -1.0f, 0.0f, 1.0f);
+        output.uv = float2(1.0f, 1.0f);
+    }
+    if (nVertexID == 3)
+    {
+        output.position = float4(-1.0f, +1.0f, 0.0f, 1.0f);
+        output.uv = float2(0.0f, 0.0f);
+    }
+    if (nVertexID == 4)
+    {
+        output.position = float4(+1.0f, -1.0f, 0.0f, 1.0f);
+        output.uv = float2(1.0f, 1.0f);
+    }
+    if (nVertexID == 5)
+    {
+        output.position = float4(-1.0f, -1.0f, 0.0f, 1.0f);
+        output.uv = float2(0.0f, 1.0f);
+    }
+
+    return (output);
+}
+
+float4 GetColorFromDepth(float fDepth)
+{
+    float4 cColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+
+    if (fDepth < 0.00625f)
+        cColor = float4(1.0f, 0.0f, 0.0f, 1.0f);
+    else if (fDepth < 0.0125f)
+        cColor = float4(0.0f, 1.0f, 0.0f, 1.0f);
+    else if (fDepth < 0.025f)
+        cColor = float4(0.0f, 0.0f, 1.0f, 1.0f);
+    else if (fDepth < 0.05f)
+        cColor = float4(1.0f, 1.0f, 0.0f, 1.0f);
+    else if (fDepth < 0.075f)
+        cColor = float4(0.0f, 1.0f, 1.0f, 1.0f);
+    else if (fDepth < 0.1f)
+        cColor = float4(1.0f, 0.5f, 0.5f, 1.0f);
+    else if (fDepth < 0.4f)
+        cColor = float4(0.5f, 1.0f, 1.0f, 1.0f);
+    else if (fDepth < 0.6f)
+        cColor = float4(1.0f, 0.0f, 1.0f, 1.0f);
+    else if (fDepth < 0.8f)
+        cColor = float4(0.5f, 0.5f, 1.0f, 1.0f);
+    else if (fDepth < 0.9f)
+        cColor = float4(0.5f, 1.0f, 0.5f, 1.0f);
+    else if (fDepth < 0.95f)
+        cColor = float4(0.5f, 0.0f, 0.5f, 1.0f);
+    else if (fDepth < 0.99f)
+        cColor = float4(1.0f, 1.0f, 1.0f, 1.0f);
+    else if (fDepth < 0.999f)
+        cColor = float4(1.0f, 0.0f, 1.0f, 1.0f);
+    else if (fDepth == 1.0f)
+        cColor = float4(0.5f, 0.5f, 0.5f, 1.0f);
+    else if (fDepth > 1.0f)
+        cColor = float4(0.0f, 0.0f, 0.5f, 1.0f);
+    else
+        cColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+
+    return (cColor);
+}
+
+SamplerState gssBorder : register(s3);
+
+float4 PSTextureToViewport(VS_TEXTURED_OUTPUT input) : SV_Target
+{
+    float fDepthFromLight0 = gtxtDepthTextures[0].SampleLevel(gssBorder, input.uv, 0).r;
+
+    return ((float4) (fDepthFromLight0));
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 #define MAX_VERTEX_INFLUENCES			4
