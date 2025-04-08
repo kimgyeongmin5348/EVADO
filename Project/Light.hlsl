@@ -35,7 +35,7 @@ cbuffer cbLights : register(b4)
 	int						gnLights;
 };
 
-//#define _WITH_PCF_FILTERING
+#define _WITH_PCF_FILTERING
 
 #define FRAME_BUFFER_WIDTH		1920
 #define FRAME_BUFFER_HEIGHT		1080
