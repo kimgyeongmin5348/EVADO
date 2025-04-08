@@ -350,10 +350,10 @@ public:
 public:
 	char							m_pstrFrameName[64];
 
-	CMesh* m_pMesh = NULL;
+	CMesh*							m_pMesh = NULL;
 
 	int								m_nMaterials = 0;
-	CMaterial** m_ppMaterials = NULL;
+	CMaterial**						m_ppMaterials = NULL;
 
 	XMFLOAT4X4						m_xmf4x4ToParent;
 	XMFLOAT4X4						m_xmf4x4World;
@@ -364,6 +364,9 @@ public:
 
 	CAnimationController* m_pSkinnedAnimationController = NULL;
 
+	BoundingBox						m_xmBoundingBox;
+
+public:
 	void SetMesh(CMesh* pMesh);
 	void SetShader(CShader* pShader);
 	void SetShader(int nMaterial, CShader* pShader);
@@ -430,6 +433,8 @@ public:
 	CTexture* FindReplicatedTexture(_TCHAR* pstrTextureName);
 
 	UINT GetMeshType() { return((m_pMesh) ? m_pMesh->GetType() : 0x00); }
+
+	void CalculateBoundingBox();
 
 public:
 	void FindAndSetSkinnedMesh(CSkinnedMesh** ppSkinnedMeshes, int* pnSkinnedMesh);

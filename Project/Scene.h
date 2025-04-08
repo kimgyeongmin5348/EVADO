@@ -9,11 +9,6 @@
 #include "Object_Items.h"
 #include "Map.h"
 
-#define MAX_LIGHTS						16 
-
-#define POINT_LIGHT						1
-#define SPOT_LIGHT						2
-#define DIRECTIONAL_LIGHT				3
 
 struct LIGHT
 {
@@ -115,11 +110,16 @@ public:
 	CHeightMapTerrain					*m_pTerrain = NULL;
 	Map									*m_pMap = NULL;
 
-	LIGHT								*m_pLights = NULL;
+	LIGHTS								*m_pLights = NULL;
 	int									m_nLights = 0;
 
 	XMFLOAT4							m_xmf4GlobalAmbient;
 
 	ID3D12Resource						*m_pd3dcbLights = NULL;
 	LIGHTS								*m_pcbMappedLights = NULL;
+
+	BoundingBox						m_xmBoundingBox;
+	CDepthRenderShader* m_pDepthRenderShader = NULL;
+	CShadowMapShader* m_pShadowShader = NULL;
+	CTextureToViewportShader* m_pShadowMapToViewport = NULL;
 };

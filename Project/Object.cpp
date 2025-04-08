@@ -1441,6 +1441,15 @@ CGameObject* CGameObject::Clone()
 	return pNewObject;
 }
 
+void CGameObject::CalculateBoundingBox()
+{
+	if (m_pMesh)
+	{
+		m_xmBoundingBox = m_pMesh->GetBoundingBox();
+		m_xmBoundingBox.Transform(m_xmBoundingBox, XMLoadFloat4x4(&m_xmf4x4World));
+	}
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 CHeightMapTerrain::CHeightMapTerrain(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, LPCTSTR pFileName, int nWidth, int nLength, XMFLOAT3 xmf3Scale, XMFLOAT4 xmf4Color) : CGameObject(1)
