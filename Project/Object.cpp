@@ -107,7 +107,7 @@ void CTexture::ReleaseUploadBuffers()
 void CTexture::LoadTextureFromDDSFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, wchar_t* pszFileName, UINT nResourceType, UINT nIndex)
 {
 	m_pnResourceTypes[nIndex] = nResourceType;
-	m_ppd3dTextures[nIndex] = ::CreateTextureResourceFromDDSFile(pd3dDevice, pd3dCommandList, pszFileName, &m_ppd3dTextureUploadBuffers[nIndex], D3D12_RESOURCE_STATE_GENERIC_READ/*D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE*/);
+		m_ppd3dTextures[nIndex] = ::CreateTextureResourceFromDDSFile(pd3dDevice, pd3dCommandList, pszFileName, &m_ppd3dTextureUploadBuffers[nIndex], D3D12_RESOURCE_STATE_GENERIC_READ/*D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE*/);
 }
 
 void CTexture::LoadBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, void* pData, UINT nElements, UINT nStride, DXGI_FORMAT ndxgiFormat, UINT nIndex)
@@ -1561,6 +1561,53 @@ CSpider::CSpider(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dComman
 
 CSpider::~CSpider()
 {
+}
+
+void CSpider::Update(float fTimeElapsed)
+{
+
+	XMFLOAT3 enemyPos = GetPosition();
+	XMFLOAT3 playerPos = pPlayer->GetPosition(); // 플레이어 위치 받아오기
+
+	XMFLOAT3 delta = Vector3::Subtract(playerPos, enemyPos);
+	float distance = Vector3::Length(delta);
+
+	if (distance <= 10.0f)
+	{
+		m_pSkinnedAnimationController->SetTrackEnable(0, false); // idle
+		m_pSkinnedAnimationController->SetTrackEnable(1, true);  // walk 
+		m_pSkinnedAnimationController->SetTrackEnable(2, false); // attack 
+		m_pSkinnedAnimationController->SetTrackPosition(1, 0.0f); // 걷기 초기화
+
+		// 추적 이동 방향 정규화
+		XMFLOAT3 direction = Vector3::Normalize(delta);
+		XMFLOAT3 velocity = Vector3::ScalarProduct(direction, 2.5f * fTimeElapsed, false); // 속도: 2.5
+
+		// 적 위치 갱신
+		XMFLOAT3 pos = Vector3::Add(GetPosition(), velocity);
+		SetPosition(pos);
+
+		if (distance <= 1.0f)
+		{
+			// 공격 애니메이션 트랙 2 실행
+			m_pSkinnedAnimationController->SetTrackEnable(0, false);
+			m_pSkinnedAnimationController->SetTrackEnable(1, false);
+			m_pSkinnedAnimationController->SetTrackEnable(2, true);
+			m_pSkinnedAnimationController->SetTrackPosition(2, 0.0f);
+		}
+	}
+	else
+	{
+		// 공격 범위 벗어나면 idle로
+		m_pSkinnedAnimationController->SetTrackEnable(0, true);
+		m_pSkinnedAnimationController->SetTrackEnable(1, false);
+		m_pSkinnedAnimationController->SetTrackEnable(2, false);
+	}
+}
+
+void CSpider::SetPlayer(CPlayer* p)
+{
+	p = pPlayer;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

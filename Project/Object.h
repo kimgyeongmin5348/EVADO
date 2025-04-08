@@ -520,6 +520,11 @@ class CSpider : public CGameObject
 public:
 	CSpider(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, int nAnimationTracks);
 	virtual ~CSpider();
+
+	virtual void Update(float fTimeElapsed);
+	virtual void SetPlayer(CPlayer* p);
+
+	CPlayer* pPlayer;
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
