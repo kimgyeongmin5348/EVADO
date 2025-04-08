@@ -10,6 +10,7 @@
 #define _WITH_THETA_PHI_CONES
 //#define _WITH_REFLECT
 
+
 struct LIGHT
 {
 	float4					m_cAmbient;
@@ -33,6 +34,32 @@ cbuffer cbLights : register(b4)
 	float4					gcGlobalAmbientLight;
 	int						gnLights;
 };
+
+//#define _WITH_PCF_FILTERING
+
+Texture2D<float> gtxtDepthTextures[MAX_DEPTH_TEXTURES] : register(t2);
+SamplerComparisonState gssComparisonPCFShadow : register(s2);
+float Compute3x3ShadowFactor(float2 uv, float fDepth, uint nIndex)
+{
+    float fPercentLit = gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv, fDepth).r;
+    fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(-DELTA_X, 0.0f), fDepth).r;
+    fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(+DELTA_X, 0.0f), fDepth).r;
+    fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(0.0f, -DELTA_Y), fDepth).r;
+    fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(0.0f, +DELTA_Y), fDepth).r;
+    fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(-DELTA_X, -DELTA_Y), fDepth).r;
+    fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(-DELTA_X, +DELTA_Y), fDepth).r;
+    fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(+DELTA_X, -DELTA_Y), fDepth).r;
+    fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(+DELTA_X, +DELTA_Y), fDepth).r;
+
+    return (fPercentLit / 9.0f);
+}
+
+float Compute5x5ShadowFactor(float2 uv, float fDepth, uint nIndex)
+{
+    float fPercentLit = 0.0f;
+
+    return (fPercentLit / 25.0f);
+}
 
 float4 DirectionalLight(int nIndex, float3 vNormal, float3 vToCamera)
 {
@@ -132,7 +159,7 @@ float4 SpotLight(int nIndex, float3 vPosition, float3 vNormal, float3 vToCamera)
 	return(float4(0.0f, 0.0f, 0.0f, 0.0f));
 }
 
-float4 Lighting(float3 vPosition, float3 vNormal)
+float4 Lighting(float3 vPosition, float3 vNormal, bool bShadow, float4 shadowMapUVs[MAX_LIGHTS])
 {
 	float3 vCameraPosition = float3(gvCameraPosition.x, gvCameraPosition.y, gvCameraPosition.z);
 	float3 vToCamera = normalize(vCameraPosition - vPosition);
@@ -142,6 +169,14 @@ float4 Lighting(float3 vPosition, float3 vNormal)
 	{
 		if (gLights[i].m_bEnable)
 		{
+            float fShadowFactor = 1.0f;
+#ifdef _WITH_PCF_FILTERING
+            if (bShadow)
+                fShadowFactor = Compute3x3ShadowFactor(shadowMapUVs[i].xy, shadowMapUVs[i].z, i);
+#else
+			if (bShadow) fShadowFactor = gtxtDepthTextures[i].SampleCmpLevelZero(gssComparisonPCFShadow, shadowMapUVs[i].xy, shadowMapUVs[i].z).r;
+#endif
+			
 			if (gLights[i].m_nType == DIRECTIONAL_LIGHT)
 			{
 				cColor += DirectionalLight(i, vNormal, vToCamera);
