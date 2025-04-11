@@ -371,6 +371,18 @@ public:
 
 	void SetChild(CGameObject* pChild, bool bReferenceUpdate = false);
 
+	virtual void SetPlayer(CPlayer* p) { }
+
+	void LookAt(XMFLOAT3& xmf3LookAt, XMFLOAT3& xmf3Up)
+	{
+		XMFLOAT4X4 xmf4x4View = Matrix4x4::LookAtLH(GetPosition(), xmf3LookAt, xmf3Up);
+		m_xmf4x4ToParent._11 = xmf4x4View._11; m_xmf4x4ToParent._12 = xmf4x4View._21; m_xmf4x4ToParent._13 = xmf4x4View._31;
+		m_xmf4x4ToParent._21 = xmf4x4View._12; m_xmf4x4ToParent._22 = xmf4x4View._22; m_xmf4x4ToParent._23 = xmf4x4View._32;
+		m_xmf4x4ToParent._31 = xmf4x4View._13; m_xmf4x4ToParent._32 = xmf4x4View._23; m_xmf4x4ToParent._33 = xmf4x4View._33;
+
+		UpdateTransform(NULL);
+	}
+
 	virtual void BuildMaterials(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) { }
 
 	virtual void OnPrepareAnimate() { }
@@ -521,10 +533,11 @@ public:
 	CSpider(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, int nAnimationTracks);
 	virtual ~CSpider();
 
-	virtual void Update(float fTimeElapsed);
-	virtual void SetPlayer(CPlayer* p);
+	virtual void Animate(float fTimeElapsed);
+	virtual void SetPlayer(CPlayer* p) { pPlayer = p; }
 
-	CPlayer* pPlayer;
+private:
+	CPlayer* pPlayer = NULL;
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

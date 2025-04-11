@@ -1550,20 +1550,20 @@ void CAngrybotAnimationController::OnRootMotion(CGameObject* pRootGameObject)
 
 }
 
-CSpider::CSpider(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, CLoadedModelInfo *pModel, int nAnimationTracks)
+CSpider::CSpider(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, CLoadedModelInfo *pModel, int nAnimationTracks) : CGameObject(1)
 {
 	CLoadedModelInfo *pSpiderModel = pModel;
 	if (!pSpiderModel) pSpiderModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Spider.bin", NULL);
 
 	SetChild(pSpiderModel->m_pModelRootObject, true);
-	m_pSkinnedAnimationController = new CAngrybotAnimationController(pd3dDevice, pd3dCommandList, nAnimationTracks, pSpiderModel);
+	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, nAnimationTracks, pSpiderModel);
 }
 
 CSpider::~CSpider()
 {
 }
 
-void CSpider::Update(float fTimeElapsed)
+void CSpider::Animate(float fTimeElapsed)
 {
 
 	XMFLOAT3 enemyPos = GetPosition();
@@ -1572,42 +1572,45 @@ void CSpider::Update(float fTimeElapsed)
 	XMFLOAT3 delta = Vector3::Subtract(playerPos, enemyPos);
 	float distance = Vector3::Length(delta);
 
-	if (distance <= 10.0f)
+	//cout << "[SpiderPos] \"" << enemyPos.x << "\"" << enemyPos.z << "\"" << endl;
+	//cout << "[PlayerPos] \"" << playerPos.x << "\"" << playerPos.z << "\"" << endl;
+
+	if (distance <= 50.0f)
 	{
-		m_pSkinnedAnimationController->SetTrackEnable(0, false); // idle
-		m_pSkinnedAnimationController->SetTrackEnable(1, true);  // walk 
+		m_pSkinnedAnimationController->SetTrackEnable(0, true); // walk
+		m_pSkinnedAnimationController->SetTrackEnable(1, false);  // idle 
 		m_pSkinnedAnimationController->SetTrackEnable(2, false); // attack 
-		m_pSkinnedAnimationController->SetTrackPosition(1, 0.0f); // 걷기 초기화
+
+		m_pSkinnedAnimationController->SetTrackSpeed(0, 5.f);
 
 		// 추적 이동 방향 정규화
 		XMFLOAT3 direction = Vector3::Normalize(delta);
 		XMFLOAT3 velocity = Vector3::ScalarProduct(direction, 2.5f * fTimeElapsed, false); // 속도: 2.5
+		LookAt(playerPos, XMFLOAT3(0.0f, 1.0f, 0.0f));
 
 		// 적 위치 갱신
 		XMFLOAT3 pos = Vector3::Add(GetPosition(), velocity);
 		SetPosition(pos);
 
-		if (distance <= 1.0f)
+		if (distance <= 10.0f)
 		{
 			// 공격 애니메이션 트랙 2 실행
 			m_pSkinnedAnimationController->SetTrackEnable(0, false);
 			m_pSkinnedAnimationController->SetTrackEnable(1, false);
 			m_pSkinnedAnimationController->SetTrackEnable(2, true);
-			m_pSkinnedAnimationController->SetTrackPosition(2, 0.0f);
+
+			m_pSkinnedAnimationController->SetTrackSpeed(2, 5.f);
 		}
 	}
 	else
 	{
 		// 공격 범위 벗어나면 idle로
-		m_pSkinnedAnimationController->SetTrackEnable(0, true);
-		m_pSkinnedAnimationController->SetTrackEnable(1, false);
+		m_pSkinnedAnimationController->SetTrackEnable(0, false);
+		m_pSkinnedAnimationController->SetTrackEnable(1, true);
 		m_pSkinnedAnimationController->SetTrackEnable(2, false);
 	}
-}
 
-void CSpider::SetPlayer(CPlayer* p)
-{
-	p = pPlayer;
+	CGameObject::Animate(fTimeElapsed);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
