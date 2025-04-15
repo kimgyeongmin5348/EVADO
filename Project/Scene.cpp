@@ -78,7 +78,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	XMFLOAT4 xmf4Color(0.0f, 0.3f, 0.0f, 0.0f);
 	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Terrain/HeightMap.raw"), 257, 257, xmf3Scale, xmf4Color);
 
-	m_nHierarchicalGameObjects = 4; // spider, flashlight, shovel, whistle
+	m_nHierarchicalGameObjects = 1; // spider, flashlight, shovel, whistle
 	m_ppHierarchicalGameObjects = new CGameObject * [m_nHierarchicalGameObjects];
 
 	CLoadedModelInfo* pSpiderModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Spider.bin", NULL);
@@ -88,23 +88,23 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_ppHierarchicalGameObjects[0]->Rotate(0, 180, 0);
 	if (pSpiderModel) delete pSpiderModel;
 
-	CLoadedModelInfo* pFlashlightModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Flashlightgold.bin", NULL);
-	m_ppHierarchicalGameObjects[1] = new FlashLight(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFlashlightModel);
-	m_ppHierarchicalGameObjects[1]->SetScale(10, 10, 10);
-	m_ppHierarchicalGameObjects[1]->SetPosition(3, 2, 10);
-	if (pFlashlightModel) delete pFlashlightModel;
+	//CLoadedModelInfo* pFlashlightModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Flashlightgold.bin", NULL);
+	//m_ppHierarchicalGameObjects[1] = new FlashLight(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFlashlightModel);
+	//m_ppHierarchicalGameObjects[1]->SetScale(10, 10, 10);
+	//m_ppHierarchicalGameObjects[1]->SetPosition(3, 2, 10);
+	//if (pFlashlightModel) delete pFlashlightModel;
 
-	CLoadedModelInfo* pShovelModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Shovel.bin", NULL);
-	m_ppHierarchicalGameObjects[2] = new Shovel(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShovelModel);
-	m_ppHierarchicalGameObjects[2]->SetScale(10, 10, 10);
-	m_ppHierarchicalGameObjects[2]->SetPosition(3, 2, 12);
-	if (pShovelModel) delete pShovelModel;
+	//CLoadedModelInfo* pShovelModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Shovel.bin", NULL);
+	//m_ppHierarchicalGameObjects[2] = new Shovel(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShovelModel);
+	//m_ppHierarchicalGameObjects[2]->SetScale(10, 10, 10);
+	//m_ppHierarchicalGameObjects[2]->SetPosition(3, 2, 12);
+	//if (pShovelModel) delete pShovelModel;
 
-	CLoadedModelInfo* pWhistleModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Whistle.bin", NULL);
-	m_ppHierarchicalGameObjects[3] = new Whistle(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pWhistleModel);
-	m_ppHierarchicalGameObjects[3]->SetScale(10, 10, 10);
-	m_ppHierarchicalGameObjects[3]->SetPosition(3, 2, 13);
-	if (pWhistleModel) delete pWhistleModel;
+	//CLoadedModelInfo* pWhistleModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Whistle.bin", NULL);
+	//m_ppHierarchicalGameObjects[3] = new Whistle(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pWhistleModel);
+	//m_ppHierarchicalGameObjects[3]->SetScale(10, 10, 10);
+	//m_ppHierarchicalGameObjects[3]->SetPosition(3, 2, 13);
+	//if (pWhistleModel) delete pWhistleModel;
 
 
 
@@ -122,15 +122,15 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_pDepthRenderShader = new CDepthRenderShader(pObjectShader, m_pLights->m_pLights);
 	DXGI_FORMAT pdxgiRtvFormats[1] = { DXGI_FORMAT_R32_FLOAT };
 	m_pDepthRenderShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, pdxgiRtvFormats, DXGI_FORMAT_D32_FLOAT);
-	m_pDepthRenderShader->BuildObjects(pd3dDevice, pd3dCommandList, NULL);
+	m_pDepthRenderShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 
 	m_pShadowShader = new CShadowMapShader(pObjectShader);
 	m_pShadowShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, NULL, DXGI_FORMAT_D24_UNORM_S8_UINT);
-	m_pShadowShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pDepthRenderShader->GetDepthTexture());
+	m_pShadowShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pDepthRenderShader->GetDepthTexture());
 
 	m_pShadowMapToViewport = new CTextureToViewportShader();
 	m_pShadowMapToViewport->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, NULL, DXGI_FORMAT_D24_UNORM_S8_UINT);
-	m_pShadowMapToViewport->BuildObjects(pd3dDevice, pd3dCommandList, m_pDepthRenderShader->GetDepthTexture());
+	m_pShadowMapToViewport->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pDepthRenderShader->GetDepthTexture());
 
 /////*
 //	m_nShaders = 1;

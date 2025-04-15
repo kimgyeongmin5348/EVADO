@@ -669,8 +669,45 @@ BoundingBox CIlluminatedObjectsShader::CalculateBoundingBox()
 	return(xmBoundingBox);
 }
 
-void CIlluminatedObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, void* pContext)
+void CIlluminatedObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
+	{
+		CLoadedModelInfo* pFlashlightModel = CGameObject::LoadGeometryAndAnimationFromFile(
+			pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Item/Flashlightgold.bin", NULL);
+
+		FlashLight* pFlashlight = new FlashLight(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pFlashlightModel);
+		pFlashlight->SetScale(10, 10, 10);
+		pFlashlight->SetPosition(3, 2, 10);
+		m_pObjects.push_back(pFlashlight);
+
+		if (pFlashlightModel) delete pFlashlightModel;
+	}
+
+	{
+		CLoadedModelInfo* pShovelModel = CGameObject::LoadGeometryAndAnimationFromFile(
+			pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Item/Shovel.bin", NULL);
+
+		Shovel* pShovel = new Shovel(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pShovelModel);
+		pShovel->SetScale(10, 10, 10);
+		pShovel->SetPosition(3, 2, 12);
+		m_pObjects.push_back(pShovel);
+
+		if (pShovelModel) delete pShovelModel;
+	}
+
+	{
+		CLoadedModelInfo* pWhistleModel = CGameObject::LoadGeometryAndAnimationFromFile(
+			pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Item/Whistle.bin", NULL);
+
+		Whistle* pWhistle = new Whistle(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pWhistleModel);
+		pWhistle->SetScale(10, 10, 10);
+		pWhistle->SetPosition(3, 2, 13);
+		m_pObjects.push_back(pWhistle);
+
+		if (pWhistleModel) delete pWhistleModel;
+	}
 
 }
 
@@ -790,7 +827,7 @@ D3D12_RASTERIZER_DESC CDepthRenderShader::CreateRasterizerState()
 	return(d3dRasterizerDesc);
 }
 
-void CDepthRenderShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, void* pContext)
+void CDepthRenderShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
 	// 1. RTV 赛 积己 (溅档快甘 坊歹 鸥百侩)
 	D3D12_DESCRIPTOR_HEAP_DESC d3dDescriptorHeapDesc;
@@ -1439,7 +1476,7 @@ void CShadowMapShader::ReleaseUploadBuffers()
 {
 }
 
-void CShadowMapShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, void* pContext)
+void CShadowMapShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
 	m_pDepthFromLightTexture = (CTexture*)pContext;
 	m_pDepthFromLightTexture->AddRef();
@@ -1517,7 +1554,7 @@ void CTextureToViewportShader::UpdateShaderVariables(ID3D12GraphicsCommandList* 
 	if (m_pDepthFromLightTexture) m_pDepthFromLightTexture->UpdateShaderVariables(pd3dCommandList);
 }
 
-void CTextureToViewportShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, void* pContext)
+void CTextureToViewportShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
 	m_pDepthFromLightTexture = (CTexture*)pContext;
 	m_pDepthFromLightTexture->AddRef();
