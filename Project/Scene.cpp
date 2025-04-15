@@ -110,6 +110,8 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_ppHierarchicalGameObjects[0]->m_pSkinnedAnimationController->SetTrackEnable(1, false);
 	m_ppHierarchicalGameObjects[0]->m_pSkinnedAnimationController->SetTrackEnable(2, false);
 
+	//m_ppHierarchicalGameObjects[0]->SetPlayer(m_pPlayer);
+
 	m_ppHierarchicalGameObjects[0]->SetPosition(3, 0, 30);
 	m_ppHierarchicalGameObjects[0]->Rotate(0, 180, 0);
 
