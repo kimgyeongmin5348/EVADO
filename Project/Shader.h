@@ -269,15 +269,15 @@ public:
 	ID3D12Resource* GetDepthTextureResource(UINT nIndex) { return(m_pDepthFromLightTexture->GetResource(nIndex)); }
 
 public:
-	CIlluminatedObjectsShader*		m_pObjectsShader = NULL;
+	CIlluminatedObjectsShader		*m_pObjectsShader = NULL;
 
 protected:
-	LIGHT* m_pLights = NULL;
+	LIGHT							*m_pLights = NULL;
 
-	TOLIGHTSPACEINFO* m_pToLightSpaces;
+	TOLIGHTSPACEINFO				*m_pToLightSpaces;
 
-	ID3D12Resource* m_pd3dcbToLightSpaces = NULL;
-	TOLIGHTSPACEINFO* m_pcbMappedToLightSpaces = NULL;
+	ID3D12Resource					*m_pd3dcbToLightSpaces = NULL;
+	TOLIGHTSPACEINFO				*m_pcbMappedToLightSpaces = NULL;
 };
 
 class CShadowMapShader : public CIlluminatedShader

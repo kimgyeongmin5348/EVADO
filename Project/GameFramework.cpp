@@ -517,7 +517,7 @@ void CGameFramework::FrameAdvance()
 	
 	ProcessInput();
 
-    AnimateObjects();
+    CGameFramework::AnimateObjects();
 
 	HRESULT hResult = m_pd3dCommandAllocator->Reset();
 	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
