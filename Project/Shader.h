@@ -217,10 +217,9 @@ public:
 
 	
 public:
-	CGameObject** m_ppObjects = 0;
-	int								m_nObjects = 0;
+	std::vector<CGameObject*>		m_pObjects;
 
-	CGameObject* m_pDirectionalLight = NULL;
+	CGameObject						*m_pDirectionalLight = NULL;
 };
 
 struct TOLIGHTSPACEINFO

@@ -106,6 +106,8 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_ppHierarchicalGameObjects[3]->SetPosition(3, 2, 13);
 	if (pWhistleModel) delete pWhistleModel;
 
+
+
 	m_nShaders = 1;
 	m_ppShaders = new CShader * [m_nShaders];
 
@@ -140,7 +142,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 //	m_ppShaders[0] = pEthanObjectsShader;
 ////*/
 //	if (pEthanModel) delete pEthanModel;
-
+	
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 

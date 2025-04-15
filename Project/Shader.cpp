@@ -650,42 +650,54 @@ CIlluminatedObjectsShader::~CIlluminatedObjectsShader()
 // Directional Light 의 투영 영역 설정을 위해 바운딩 박스가 필요함.
 BoundingBox CIlluminatedObjectsShader::CalculateBoundingBox()
 {
-	for (int i = 0; i < m_nObjects; i++) m_ppObjects[i]->CalculateBoundingBox();
+	if (m_pObjects.empty()) return BoundingBox();
 
-	BoundingBox xmBoundingBox = m_ppObjects[0]->m_xmBoundingBox;
-	for (int i = 1; i < m_nObjects; i++) BoundingBox::CreateMerged(xmBoundingBox, xmBoundingBox, m_ppObjects[i]->m_xmBoundingBox);
+	for (auto* pObject : m_pObjects)
+	{
+		pObject->CalculateBoundingBox();
+	}
+	
 
+	BoundingBox xmBoundingBox = m_pObjects[0]->m_xmBoundingBox;
+	for (size_t i = 1; i < m_pObjects.size(); ++i)
+	{
+		if (m_pObjects[i])
+		{
+			BoundingBox::CreateMerged(xmBoundingBox, xmBoundingBox, m_pObjects[i]->m_xmBoundingBox);
+		}
+	}
 	return(xmBoundingBox);
 }
 
 void CIlluminatedObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, void* pContext)
 {
+
 }
 
 void CIlluminatedObjectsShader::ReleaseObjects()
 {
-	if (m_ppObjects)
+	for (auto* pObject : m_pObjects)
 	{
-		for (int j = 0; j < m_nObjects; j++) if (m_ppObjects[j]) delete m_ppObjects[j];
-		delete[] m_ppObjects;
+		delete pObject;
 	}
+	m_pObjects.clear();
 
 	if (m_pDirectionalLight) delete m_pDirectionalLight;
 }
 
 void CIlluminatedObjectsShader::AnimateObjects(float fTimeElapsed)
 {
-	for (int j = 0; j < m_nObjects; j++)
+	for (auto* pObject : m_pObjects)
 	{
-		m_ppObjects[j]->Animate(fTimeElapsed);
+		pObject->Animate(fTimeElapsed);
 	}
 }
 
 void CIlluminatedObjectsShader::ReleaseUploadBuffers()
 {
-	if (m_ppObjects)
+	for (auto* pObject : m_pObjects)
 	{
-		for (int j = 0; j < m_nObjects; j++) if (m_ppObjects[j]) m_ppObjects[j]->ReleaseUploadBuffers();
+		pObject->ReleaseUploadBuffers();
 	}
 
 	if (m_pDirectionalLight) m_pDirectionalLight->ReleaseUploadBuffers();
@@ -695,13 +707,10 @@ void CIlluminatedObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandLis
 {
 	CIlluminatedShader::Render(pd3dCommandList, pCamera);
 
-	for (int j = 0; j < m_nObjects; j++)
+	for (auto* pObject : m_pObjects)
 	{
-		if (m_ppObjects[j])
-		{
-			m_ppObjects[j]->UpdateShaderVariables(pd3dCommandList);
-			m_ppObjects[j]->Render(pd3dCommandList, pCamera);
-		}
+		pObject->UpdateShaderVariables(pd3dCommandList);
+		pObject->Render(pd3dCommandList, pCamera);
 	}
 
 	if (m_pDirectionalLight)
@@ -1360,12 +1369,12 @@ void CDepthRenderShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pCamera->UpdateShaderVariables(pd3dCommandList);
 
-	for (int i = 0; i < m_pObjectsShader->m_nObjects; i++)
+	for (auto* pObject : m_pObjectsShader->m_pObjects)
 	{
-		if (m_pObjectsShader->m_ppObjects[i])
+		if (pObject)
 		{
-			m_pObjectsShader->m_ppObjects[i]->UpdateShaderVariables(pd3dCommandList);
-			m_pObjectsShader->m_ppObjects[i]->Render(pd3dCommandList, pCamera);
+			pObject->UpdateShaderVariables(pd3dCommandList);
+			pObject->Render(pd3dCommandList, pCamera);
 		}
 	}
 }
@@ -1449,12 +1458,12 @@ void CShadowMapShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 
 	UpdateShaderVariables(pd3dCommandList);
 
-	for (int i = 0; i < m_pObjectsShader->m_nObjects; i++)
+	for (auto* pObject : m_pObjectsShader->m_pObjects)
 	{
-		if (m_pObjectsShader->m_ppObjects[i])
+		if (pObject)
 		{
-			m_pObjectsShader->m_ppObjects[i]->UpdateShaderVariables(pd3dCommandList);
-			m_pObjectsShader->m_ppObjects[i]->Render(pd3dCommandList, pCamera);
+			pObject->UpdateShaderVariables(pd3dCommandList);
+			pObject->Render(pd3dCommandList, pCamera);
 		}
 	}
 	m_pObjectsShader->m_pDirectionalLight->UpdateShaderVariables(pd3dCommandList);

@@ -118,8 +118,9 @@ public:
 	ID3D12Resource						*m_pd3dcbLights = NULL;
 	LIGHTS								*m_pcbMappedLights = NULL;
 
-	BoundingBox						m_xmBoundingBox;
-	CDepthRenderShader* m_pDepthRenderShader = NULL;
-	CShadowMapShader* m_pShadowShader = NULL;
-	CTextureToViewportShader* m_pShadowMapToViewport = NULL;
+public:
+	BoundingBox							m_xmBoundingBox;
+	CDepthRenderShader					*m_pDepthRenderShader = NULL;
+	CShadowMapShader					*m_pShadowShader = NULL;
+	CTextureToViewportShader			*m_pShadowMapToViewport = NULL;
 };
