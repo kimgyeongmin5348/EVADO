@@ -131,17 +131,6 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_pShadowMapToViewport = new CTextureToViewportShader();
 	m_pShadowMapToViewport->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, NULL, DXGI_FORMAT_D24_UNORM_S8_UINT);
 	m_pShadowMapToViewport->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pDepthRenderShader->GetDepthTexture());
-
-/////*
-//	m_nShaders = 1;
-//	m_ppShaders = new CShader*[m_nShaders];
-//
-//	CEthanObjectsShader *pEthanObjectsShader = new CEthanObjectsShader();
-//	pEthanObjectsShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pEthanModel, m_pTerrain);
-//
-//	m_ppShaders[0] = pEthanObjectsShader;
-////*/
-//	if (pEthanModel) delete pEthanModel;
 	
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
@@ -383,7 +372,7 @@ void CScene::CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsComma
 
 void CScene::UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList)
 {
-	::memcpy(m_pcbMappedLights->m_pLights, m_pLights, sizeof(LIGHT) * m_nLights);
+	::memcpy(m_pcbMappedLights, m_pLights, sizeof(LIGHTS));
 	::memcpy(&m_pcbMappedLights->m_xmf4GlobalAmbient, &m_xmf4GlobalAmbient, sizeof(XMFLOAT4));
 	::memcpy(&m_pcbMappedLights->m_nLights, &m_nLights, sizeof(int));
 }
@@ -497,34 +486,98 @@ void CScene::AnimateObjects(float fTimeElapsed)
 	}
 }
 
-void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera)
+// 패스1 : 쉐도우 맵 생성
+void CScene::OnPreRender(ID3D12GraphicsCommandList * pd3dCommandList, CCamera * pCamera)
 {
-	if (m_pd3dGraphicsRootSignature) pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
-	if (m_pd3dCbvSrvDescriptorHeap) pd3dCommandList->SetDescriptorHeaps(1, &m_pd3dCbvSrvDescriptorHeap);
+	m_pDepthRenderShader->PrepareShadowMap(pd3dCommandList, pCamera);
+}
 
-	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
-	pCamera->UpdateShaderVariables(pd3dCommandList);
+// 쉐도우맵 및 조명 정보 바인딩
+void CScene::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
 
 	UpdateShaderVariables(pd3dCommandList);
 
-	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
-	pd3dCommandList->SetGraphicsRootConstantBufferView(2, d3dcbLightsGpuVirtualAddress); //Lights
+	if (m_pd3dcbLights)
+	{
+		D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
+		pd3dCommandList->SetGraphicsRootConstantBufferView(4, d3dcbLightsGpuVirtualAddress);
+	}
+}
 
-	if (m_pSkyBox) m_pSkyBox->Render(pd3dCommandList, pCamera);
-	if (m_pTerrain) m_pTerrain->Render(pd3dCommandList, pCamera);
-	if (m_pMap) m_pMap->Render(pd3dCommandList, pCamera);
+void CScene::OnPostRender(ID3D12GraphicsCommandList* pd3dCommandList)
+{
 
-	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Render(pd3dCommandList, pCamera);
-	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
+}
 
+void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	// 1. 빛에서의 변환 행렬 전달 (쉐도우맵 연산에 필요)
+	if (m_pDepthRenderShader)
+		m_pDepthRenderShader->UpdateShaderVariables(pd3dCommandList);
+
+	// 2. 카메라 정보 바인딩 (메인 카메라 view/proj/pos)
+	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
+	pCamera->UpdateShaderVariables(pd3dCommandList);
+
+	// 3. 그림자 적용 패스 (쉐도우맵에서 객체 깊이값 계산)
+	if (m_pShadowShader)
+		m_pShadowShader->Render(pd3dCommandList, pCamera);
+
+	// 4. Shadow Map 디버그 시각화용 렌더링 (작은 뷰포트에 쉐도우맵 출력)
+	if (m_pShadowMapToViewport)
+		m_pShadowMapToViewport->Render(pd3dCommandList, pCamera);
+
+	// 5. 뷰포트/카메라 정보 복구 (혹시 Shadow Pass에서 변경되었을 수 있음)
+	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
+	pCamera->UpdateShaderVariables(pd3dCommandList);
+
+	// 6. 루트 시그니처 / 디스크립터 힙 재설정: ShadowShader나 DebugShader가 바꿨을 수 있음
+	if (m_pd3dGraphicsRootSignature)
+		pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
+
+	if (m_pd3dCbvSrvDescriptorHeap)
+		pd3dCommandList->SetDescriptorHeaps(1, &m_pd3dCbvSrvDescriptorHeap); // 반드시 CBV 설정 전에
+
+	// 7. Scene의 공통 변수 업데이트 (예: Light, Material 등)
+	UpdateShaderVariables(pd3dCommandList);
+
+	// 8. 라이트 상수 버퍼 바인딩 (루트 시그니처의 2번 슬롯이라고 가정)
+	if (m_pd3dcbLights)
+	{
+		D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
+		pd3dCommandList->SetGraphicsRootConstantBufferView(2, d3dcbLightsGpuVirtualAddress);
+	}
+
+	// 9. Skybox, Terrain, Map 렌더링
+	if (m_pSkyBox)    m_pSkyBox->Render(pd3dCommandList, pCamera);
+	if (m_pTerrain)   m_pTerrain->Render(pd3dCommandList, pCamera);
+	if (m_pMap)       m_pMap->Render(pd3dCommandList, pCamera);
+
+	// 10. 일반 게임 오브젝트들 렌더링
+	for (int i = 0; i < m_nGameObjects; i++)
+		if (m_ppGameObjects[i])
+			m_ppGameObjects[i]->Render(pd3dCommandList, pCamera);
+
+	// 11. 셰이더 그룹을 통한 오브젝트 렌더링
+	for (int i = 0; i < m_nShaders; i++)
+		if (m_ppShaders[i])
+			m_ppShaders[i]->Render(pd3dCommandList, pCamera);
+
+	// 12. 계층적 오브젝트들 (애니메이션 포함)
 	for (int i = 0; i < m_nHierarchicalGameObjects; i++)
 	{
 		if (m_ppHierarchicalGameObjects[i])
 		{
 			m_ppHierarchicalGameObjects[i]->Animate(m_fElapsedTime);
-			if (!m_ppHierarchicalGameObjects[i]->m_pSkinnedAnimationController) m_ppHierarchicalGameObjects[i]->UpdateTransform(NULL);
+
+			if (!m_ppHierarchicalGameObjects[i]->m_pSkinnedAnimationController)
+				m_ppHierarchicalGameObjects[i]->UpdateTransform(NULL);
+
 			m_ppHierarchicalGameObjects[i]->Render(pd3dCommandList, pCamera);
 		}
 	}
 }
+
 
