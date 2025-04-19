@@ -61,6 +61,33 @@ protected:
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
+class CTextureToScreenShader : public CShader
+{
+public:
+	CTextureToScreenShader(int nMeshes);
+	virtual ~CTextureToScreenShader();
+
+	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();
+	virtual D3D12_DEPTH_STENCIL_DESC CreateDepthStencilState();
+	virtual D3D12_SHADER_BYTECODE CreateVertexShader();
+	virtual D3D12_SHADER_BYTECODE CreatePixelShader();
+
+	virtual void ReleaseUploadBuffers();
+
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState = 0);
+
+public:
+	int								m_nMeshes = 0;
+	CMesh							**m_ppMeshes = NULL;
+
+	CTexture* m_pTexture = NULL;
+
+	void SetMesh(UINT nIndex, CMesh* pMesh);
+	void SetTexture(CTexture* pTexture);
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
 class CTerrainShader : public CShader
 {
 public:
@@ -178,3 +205,4 @@ public:
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, void* pContext = NULL);
 
 };
+
