@@ -641,17 +641,32 @@ D3D12_SHADER_BYTECODE CTextureToScreenShader::CreatePixelShader()
 	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSTextureToScreen", "ps_5_1", &m_pd3dPixelShaderBlob));
 }
 
-void CTextureToScreenShader::ReleaseUploadBuffers()
-{
-	for (int i = 0; i < m_nMeshes; i++)
-	{
-		if (m_ppMeshes[i]) m_ppMeshes[i]->ReleaseUploadBuffers();
-	}
-
-	if (m_pTexture) m_pTexture->ReleaseUploadBuffers();
-}
-
-void CTextureToScreenShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
+//void CTextureToScreenShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
+//{
+//	m_nPipelineStates = 1;
+//	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
+//
+//	CShader::CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+//
+//	if (m_pd3dVertexShaderBlob) m_pd3dVertexShaderBlob->Release();
+//	if (m_pd3dPixelShaderBlob) m_pd3dPixelShaderBlob->Release();
+//
+//	if (m_d3dPipelineStateDesc.InputLayout.pInputElementDescs) delete[] m_d3dPipelineStateDesc.InputLayout.pInputElementDescs;
+//
+//	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+//}
+//
+//void CTextureToScreenShader::ReleaseUploadBuffers()
+//{
+//	for (int i = 0; i < m_nMeshes; i++)
+//	{
+//		if (m_ppMeshes[i]) m_ppMeshes[i]->ReleaseUploadBuffers();
+//	}
+//
+//	if (m_pTexture) m_pTexture->ReleaseUploadBuffers();
+//}
+//
+void CTextureToScreenShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	CShader::Render(pd3dCommandList, pCamera);
 

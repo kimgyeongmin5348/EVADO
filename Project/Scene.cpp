@@ -560,7 +560,7 @@ void CStartScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 200); 
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 20); 
 
 	m_nShaders = 1;
 	m_ppShaders = new CShader * [m_nShaders];
@@ -573,7 +573,7 @@ void CStartScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 	CreateShaderResourceViews(pd3dDevice, pTexture, 0, 15);
 
-	CScreenRectMeshTextured* pMesh = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList);
+	CScreenRectMeshTextured* pMesh = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, -1.0f, 2.0f, 1.0f, 2.0f);
 	pTextureToScreenShader->SetMesh(0, pMesh);
 	pTextureToScreenShader->SetTexture(pTexture);
 
