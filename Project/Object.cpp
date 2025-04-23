@@ -1594,7 +1594,7 @@ void CSpider::Animate(float fTimeElapsed)
 		m_pSkinnedAnimationController->SetTrackEnable(1, false);  // idle 
 		m_pSkinnedAnimationController->SetTrackEnable(2, false); // attack 
 
-		m_pSkinnedAnimationController->SetTrackSpeed(0, 5.f);
+		m_pSkinnedAnimationController->SetTrackSpeed(0, 2.5f);
 
 		// 추적 이동 방향 정규화
 		XMFLOAT3 direction = Vector3::Normalize(delta);
@@ -1612,7 +1612,7 @@ void CSpider::Animate(float fTimeElapsed)
 			m_pSkinnedAnimationController->SetTrackEnable(1, false);
 			m_pSkinnedAnimationController->SetTrackEnable(2, true);
 
-			m_pSkinnedAnimationController->SetTrackSpeed(2, 5.f);
+			m_pSkinnedAnimationController->SetTrackSpeed(2, 2.5f);
 		}
 	}
 	else
