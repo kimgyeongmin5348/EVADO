@@ -328,7 +328,22 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 				case VK_F9:
 					ChangeSwapChainState();
 					break;
-				default:
+				case 'F':
+					item = !item;
+					CGameObject* pItem = m_pScene->m_ppHierarchicalGameObjects[2];
+					CGameObject* pRightHand = m_pPlayer->FindFrame("hand_r");
+					if (item) {
+						while (pRightHand->GetSibling())
+							pRightHand = pRightHand->GetSibling();
+						pRightHand->m_pSibling = pItem;
+						cout << "item 들기" << endl;
+					}
+					else {
+						pItem->m_pSibling = nullptr;
+						pItem->m_pParent = nullptr;
+						pItem->SetPosition(pItem->GetPosition()); // 현재 위치 기억
+						cout << "item 놓기" << endl;
+					}
 					break;
 			}
 			break;
@@ -433,7 +448,11 @@ void CGameFramework::BuildObjects()
 	m_pScene->m_pPlayer = m_pPlayer = m_pScene->GetPlayer();
 	m_pCamera = m_pPlayer->GetCamera();
 
-	if(m_nCurrentScene == 1) m_pScene->m_ppHierarchicalGameObjects[0]->SetPlayer(m_pPlayer);
+	if (m_nCurrentScene == 1)
+	{ 
+		m_pScene->m_ppHierarchicalGameObjects[0]->SetPlayer(m_pPlayer);
+
+	}
 
 	m_pd3dCommandList->Close();
 	ID3D12CommandList *ppd3dCommandLists[] = { m_pd3dCommandList };
@@ -503,6 +522,12 @@ void CGameFramework::AnimateObjects()
 	if (m_pScene) m_pScene->AnimateObjects(fTimeElapsed);
 
 	m_pPlayer->Animate(fTimeElapsed);
+
+	if (item) {
+		CGameObject* pRightHand = m_pPlayer->FindFrame("hand_r");
+		m_pScene->m_ppHierarchicalGameObjects[2]->SetPosition(pRightHand->GetPosition().x, pRightHand->GetPosition().y+10, pRightHand->GetPosition().z);
+		//pRightHand->SetChild(m_pScene->m_ppHierarchicalGameObjects[2], true);
+	}
 
 	if (m_nCurrentScene == 0) m_pPlayer->SetPosition(XMFLOAT3(0, 0, 0));
 }

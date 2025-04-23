@@ -420,6 +420,7 @@ public:
 	XMFLOAT3 GetToParentPosition();
 	CGameObject* GetParent() { return(m_pParent); }
 	CGameObject* GetChild() { return(m_pChild); }
+	CGameObject* GetSibling() { return(m_pSibling); }
 
 	void Move(XMFLOAT3 xmf3Offset);
 

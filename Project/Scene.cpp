@@ -125,7 +125,8 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	CLoadedModelInfo* pShovelModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Shovel.bin", NULL);
 	m_ppHierarchicalGameObjects[2] = new Shovel(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShovelModel);
-	m_ppHierarchicalGameObjects[2]->SetScale(10, 10, 10);
+	m_ppHierarchicalGameObjects[2]->SetScale(1, 1, 1);
+	m_ppHierarchicalGameObjects[2]->Rotate(-90, 0, 0);
 	m_ppHierarchicalGameObjects[2]->SetPosition(3, 2, 12);
 	if (pShovelModel) delete pShovelModel;
 

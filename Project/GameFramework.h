@@ -91,5 +91,7 @@ private:
 	POINT						m_ptOldCursorPos;
 
 	_TCHAR						m_pszFrameRate[70];
+
+	bool						item = false;
 };
 
