@@ -396,21 +396,23 @@ void CTerrainPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVeloci
 		fDistance *= 1.5f; // Shift가 눌리면 이동 속도를 1.5배 증가
 	}
 
-	if ((dwDirection & DIR_DOWN) && (dwDirection & (DIR_FORWARD | DIR_BACKWARD | DIR_LEFT | DIR_RIGHT)))
-	{
-		m_pSkinnedAnimationController->SetTrackEnable(0, false);
-		m_pSkinnedAnimationController->SetTrackEnable(1, false);
-		m_pSkinnedAnimationController->SetTrackEnable(2, true);
-		m_pSkinnedAnimationController->SetTrackEnable(3, false);
+	if (!isJump) {
+		if ((dwDirection & DIR_DOWN) && (dwDirection & (DIR_FORWARD | DIR_BACKWARD | DIR_LEFT | DIR_RIGHT)))
+		{
+			m_pSkinnedAnimationController->SetTrackEnable(0, false);
+			m_pSkinnedAnimationController->SetTrackEnable(1, false);
+			m_pSkinnedAnimationController->SetTrackEnable(2, true);
+			m_pSkinnedAnimationController->SetTrackEnable(3, false);
+		}
+		else if (dwDirection & (DIR_FORWARD | DIR_BACKWARD | DIR_LEFT | DIR_RIGHT))
+		{
+			m_pSkinnedAnimationController->SetTrackEnable(0, false);
+			m_pSkinnedAnimationController->SetTrackEnable(1, true);
+			m_pSkinnedAnimationController->SetTrackEnable(2, false);
+			m_pSkinnedAnimationController->SetTrackEnable(3, false);
+		}
 	}
-	else if (dwDirection & (DIR_FORWARD | DIR_BACKWARD | DIR_LEFT | DIR_RIGHT))
-	{
-		m_pSkinnedAnimationController->SetTrackEnable(0, false);
-		m_pSkinnedAnimationController->SetTrackEnable(1, true);
-		m_pSkinnedAnimationController->SetTrackEnable(2, false);
-		m_pSkinnedAnimationController->SetTrackEnable(3, false);
-	}
-	else if (dwDirection & DIR_UP)
+	if (dwDirection & DIR_UP)
 	{
 		isJump = true;
 	}
@@ -433,9 +435,7 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 			m_pSkinnedAnimationController->SetTrackEnable(2, false);
 			m_pSkinnedAnimationController->SetTrackEnable(3, true);
 
-			m_pSkinnedAnimationController->SetTrackPosition(0, 0.0f); //idle 애니메이션 초기화
-			m_pSkinnedAnimationController->SetTrackPosition(1, 0.0f); //walk 애니메이션 초기화
-			m_pSkinnedAnimationController->SetTrackPosition(2, 0.0f); //run 애니메이션 초기화
+			m_pSkinnedAnimationController->SetTrackSpeed(3, 2.0f);
 
 			float currentPos = m_pSkinnedAnimationController->m_pAnimationTracks[3].m_fPosition;
 			int animSetIndex = m_pSkinnedAnimationController->m_pAnimationTracks[3].m_nAnimationSet;
@@ -444,9 +444,8 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 			if (currentPos >= 1.5)
 			{
 				isJump = false;
-				m_pSkinnedAnimationController->SetTrackEnable(0, true);
 				m_pSkinnedAnimationController->SetTrackEnable(3, false); // 애니메이션 끝났으니까 꺼!
-				m_pSkinnedAnimationController->SetTrackPosition(3, 0.0f); // 다음에 또 실행할 수 있게 초기화
+				//m_pSkinnedAnimationController->SetTrackPosition(3, 0.0f); // 다음에 또 실행할 수 있게 초기화
 			}
 
 		}
