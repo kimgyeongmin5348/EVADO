@@ -37,6 +37,7 @@ private:
 	UINT							m_nTextureType;
 
 	int								m_nTextures = 0;
+	_TCHAR(*m_ppstrTextureNames)[64] = NULL;
 	ID3D12Resource** m_ppd3dTextures = NULL;
 	ID3D12Resource** m_ppd3dTextureUploadBuffers;
 
@@ -64,6 +65,7 @@ public:
 
 	//	void LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, wchar_t* pszFileName, UINT nIndex);
 	void LoadTextureFromDDSFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, wchar_t* pszFileName, UINT nResourceType, UINT nIndex);
+	void LoadTextureFromWICFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, wchar_t* pszFileName, UINT nResourceType, UINT nIndex);
 	//	void LoadBufferFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, wchar_t *pszFileName, UINT nIndex);
 	void LoadBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, void* pData, UINT nElements, UINT nStride, DXGI_FORMAT ndxgiFormat, UINT nIndex);
 	ID3D12Resource* CreateTexture(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, UINT nIndex, UINT nResourceType, UINT nWidth, UINT nHeight, UINT nElements, UINT nMipLevels, DXGI_FORMAT dxgiFormat, D3D12_RESOURCE_FLAGS d3dResourceFlags, D3D12_RESOURCE_STATES d3dResourceStates, D3D12_CLEAR_VALUE* pd3dClearValue);
@@ -371,6 +373,18 @@ public:
 
 	void SetChild(CGameObject* pChild, bool bReferenceUpdate = false);
 
+	virtual void SetPlayer(CPlayer* p) { }
+
+	void LookAt(XMFLOAT3& xmf3LookAt, XMFLOAT3& xmf3Up)
+	{
+		XMFLOAT4X4 xmf4x4View = Matrix4x4::LookAtLH(GetPosition(), xmf3LookAt, xmf3Up);
+		m_xmf4x4ToParent._11 = xmf4x4View._11; m_xmf4x4ToParent._12 = xmf4x4View._21; m_xmf4x4ToParent._13 = xmf4x4View._31;
+		m_xmf4x4ToParent._21 = xmf4x4View._12; m_xmf4x4ToParent._22 = xmf4x4View._22; m_xmf4x4ToParent._23 = xmf4x4View._32;
+		m_xmf4x4ToParent._31 = xmf4x4View._13; m_xmf4x4ToParent._32 = xmf4x4View._23; m_xmf4x4ToParent._33 = xmf4x4View._33;
+
+		UpdateTransform(NULL);
+	}
+
 	virtual void BuildMaterials(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) { }
 
 	virtual void OnPrepareAnimate() { }
@@ -406,6 +420,7 @@ public:
 	XMFLOAT3 GetToParentPosition();
 	CGameObject* GetParent() { return(m_pParent); }
 	CGameObject* GetChild() { return(m_pChild); }
+	CGameObject* GetSibling() { return(m_pSibling); }
 
 	void Move(XMFLOAT3 xmf3Offset);
 
@@ -520,6 +535,12 @@ class CSpider : public CGameObject
 public:
 	CSpider(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, int nAnimationTracks);
 	virtual ~CSpider();
+
+	virtual void Animate(float fTimeElapsed);
+	virtual void SetPlayer(CPlayer* p) { pPlayer = p; }
+
+private:
+	CPlayer* pPlayer = NULL;
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

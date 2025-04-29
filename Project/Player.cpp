@@ -238,34 +238,38 @@ void CPlayer::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamer
 // 
 #define _WITH_DEBUG_CALLBACK_DATA
 
-void CSoundCallbackHandler::HandleCallback(void *pCallbackData, float fTrackPosition)
-{
-   _TCHAR *pWavName = (_TCHAR *)pCallbackData; 
-#ifdef _WITH_DEBUG_CALLBACK_DATA
-	TCHAR pstrDebug[256] = { 0 };
-	_stprintf_s(pstrDebug, 256, _T("%s(%f)\n"), pWavName, fTrackPosition);
-	OutputDebugString(pstrDebug);
-#endif
-#ifdef _WITH_SOUND_RESOURCE
-   PlaySound(pWavName, ::ghAppInstance, SND_RESOURCE | SND_ASYNC);
-#else
-   PlaySound(pWavName, NULL, SND_FILENAME | SND_ASYNC);
-#endif
-}
+//void CSoundCallbackHandler::HandleCallback(void *pCallbackData, float fTrackPosition)
+//{
+//   _TCHAR *pWavName = (_TCHAR *)pCallbackData; 
+//#ifdef _WITH_DEBUG_CALLBACK_DATA
+//	TCHAR pstrDebug[256] = { 0 };
+//	_stprintf_s(pstrDebug, 256, _T("%s(%f)\n"), pWavName, fTrackPosition);
+//	OutputDebugString(pstrDebug);
+//#endif
+//#ifdef _WITH_SOUND_RESOURCE
+//   PlaySound(pWavName, ::ghAppInstance, SND_RESOURCE | SND_ASYNC);
+//#else
+//   PlaySound(pWavName, NULL, SND_FILENAME | SND_ASYNC);
+//#endif
+//}
 
 CTerrainPlayer::CTerrainPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, void *pContext)
 {
 	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
 
-	CLoadedModelInfo *pPlayerModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/MainPlayer.bin", NULL);
+	CLoadedModelInfo *pPlayerModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Player.bin", NULL);
 	SetChild(pPlayerModel->m_pModelRootObject, true);
 
-	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 2, pPlayerModel);
+	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 5, pPlayerModel);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1);
-	//m_pSkinnedAnimationController->SetTrackAnimationSet(2, 2);
+	m_pSkinnedAnimationController->SetTrackAnimationSet(2, 2);
+	m_pSkinnedAnimationController->SetTrackAnimationSet(3, 3);
+	m_pSkinnedAnimationController->SetTrackAnimationSet(4, 4);
 	m_pSkinnedAnimationController->SetTrackEnable(1, false);
-	//m_pSkinnedAnimationController->SetTrackEnable(2, false);
+	m_pSkinnedAnimationController->SetTrackEnable(2, false);
+	m_pSkinnedAnimationController->SetTrackEnable(3, false);
+	m_pSkinnedAnimationController->SetTrackEnable(4, false);
 
 	m_pSkinnedAnimationController->SetCallbackKeys(1, 2);
 #ifdef _WITH_SOUND_RESOURCE
@@ -277,8 +281,8 @@ CTerrainPlayer::CTerrainPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandLi
 	//m_pSkinnedAnimationController->SetCallbackKey(1, 1, 0.5f, _T("Sound/Footstep02.wav"));
 //	m_pSkinnedAnimationController->SetCallbackKey(1, 2, 0.39f, _T("Sound/Footstep03.wav"));
 #endif
-	CAnimationCallbackHandler *pAnimationCallbackHandler = new CSoundCallbackHandler();
-	m_pSkinnedAnimationController->SetAnimationCallbackHandler(1, pAnimationCallbackHandler);
+	//CAnimationCallbackHandler *pAnimationCallbackHandler = new CSoundCallbackHandler();
+	//m_pSkinnedAnimationController->SetAnimationCallbackHandler(1, pAnimationCallbackHandler);
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	
@@ -387,14 +391,35 @@ void CTerrainPlayer::OnCameraUpdateCallback(float fTimeElapsed)
 
 void CTerrainPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 {
-	if (dwDirection)
+	if (dwDirection & DIR_DOWN)
 	{
-		m_pSkinnedAnimationController->SetTrackEnable(0, false);
-		m_pSkinnedAnimationController->SetTrackEnable(1, true);
+		fDistance *= 1.5f; // Shift가 눌리면 이동 속도를 1.5배 증가
 	}
 
+	if (!isJump) {
+		if ((dwDirection & DIR_DOWN) && (dwDirection & (DIR_FORWARD | DIR_BACKWARD | DIR_LEFT | DIR_RIGHT)))
+		{
+			m_pSkinnedAnimationController->SetTrackEnable(0, false);
+			m_pSkinnedAnimationController->SetTrackEnable(1, false);
+			m_pSkinnedAnimationController->SetTrackEnable(2, true);
+			m_pSkinnedAnimationController->SetTrackEnable(3, false);
+		}
+		else if (dwDirection & (DIR_FORWARD | DIR_BACKWARD | DIR_LEFT | DIR_RIGHT))
+		{
+			m_pSkinnedAnimationController->SetTrackEnable(0, false);
+			m_pSkinnedAnimationController->SetTrackEnable(1, true);
+			m_pSkinnedAnimationController->SetTrackEnable(2, false);
+			m_pSkinnedAnimationController->SetTrackEnable(3, false);
+		}
+	}
+	if (dwDirection & DIR_UP)
+	{
+		isJump = true;
+	}
+	
 	CPlayer::Move(dwDirection, fDistance, bUpdateVelocity);
 }
+
 
 void CTerrainPlayer::Update(float fTimeElapsed)
 {
@@ -403,11 +428,36 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 	if (m_pSkinnedAnimationController)
 	{
 		float fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
-		if (::IsZero(fLength))
+
+		if (isJump) {
+			m_pSkinnedAnimationController->SetTrackEnable(0, false);
+			m_pSkinnedAnimationController->SetTrackEnable(1, false);
+			m_pSkinnedAnimationController->SetTrackEnable(2, false);
+			m_pSkinnedAnimationController->SetTrackEnable(3, true);
+
+			m_pSkinnedAnimationController->SetTrackSpeed(3, 2.0f);
+
+			float currentPos = m_pSkinnedAnimationController->m_pAnimationTracks[3].m_fPosition;
+			int animSetIndex = m_pSkinnedAnimationController->m_pAnimationTracks[3].m_nAnimationSet;
+			float length = m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[animSetIndex]->m_fLength;
+
+			if (currentPos >= 1.5)
+			{
+				isJump = false;
+				m_pSkinnedAnimationController->SetTrackEnable(3, false); // 애니메이션 끝났으니까 꺼!
+				//m_pSkinnedAnimationController->SetTrackPosition(3, 0.0f); // 다음에 또 실행할 수 있게 초기화
+			}
+
+		}
+		else if (::IsZero(fLength))
 		{
 			m_pSkinnedAnimationController->SetTrackEnable(0, true);
 			m_pSkinnedAnimationController->SetTrackEnable(1, false);
+			m_pSkinnedAnimationController->SetTrackEnable(2, false);
+			m_pSkinnedAnimationController->SetTrackEnable(3, false);
 			m_pSkinnedAnimationController->SetTrackPosition(1, 0.0f);
+			m_pSkinnedAnimationController->SetTrackPosition(2, 0.0f);
+			m_pSkinnedAnimationController->SetTrackPosition(3, 0.0f);
 		}
 	}
 }

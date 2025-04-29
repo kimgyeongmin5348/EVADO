@@ -316,6 +316,9 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 					::PostQuitMessage(0);
 					break;
 				case VK_RETURN:
+					m_ppScenes[m_nScene]->ReleaseObjects();
+					m_nCurrentScene = m_nScene + 1;
+					BuildObjects();
 					break;
 				case VK_F1:
 				case VK_F2:
@@ -325,7 +328,22 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 				case VK_F9:
 					ChangeSwapChainState();
 					break;
-				default:
+				case 'F':
+					item = !item;
+					CGameObject* pItem = m_pScene->m_ppHierarchicalGameObjects[2];
+					CGameObject* pRightHand = m_pPlayer->FindFrame("hand_r");
+					if (item) {
+						while (pRightHand->GetSibling())
+							pRightHand = pRightHand->GetSibling();
+						pRightHand->m_pSibling = pItem;
+						cout << "item 들기" << endl;
+					}
+					else {
+						pItem->m_pSibling = nullptr;
+						pItem->m_pParent = nullptr;
+						pItem->SetPosition(pItem->GetPosition()); // 현재 위치 기억
+						cout << "item 놓기" << endl;
+					}
 					break;
 			}
 			break;
@@ -400,18 +418,41 @@ void CGameFramework::BuildObjects()
 {
 	m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 
-	m_pScene = new CScene();
-	if (m_pScene) m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
+	m_nScenes = 2; // 총 Scene 개수
+	m_ppScenes = new CScene * [m_nScenes];
 
-#ifdef _WITH_TERRAIN_PLAYER
-	CTerrainPlayer *pPlayer = new CTerrainPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), m_pScene->m_pTerrain);
-#else
-	CAirplanePlayer *pPlayer = new CAirplanePlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), NULL);
-	pPlayer->SetPosition(XMFLOAT3(425.0f, 240.0f, 640.0f));
-#endif
+	if (m_nCurrentScene == 0) {
+		m_ppScenes[0] = new CStartScene();
+		m_ppScenes[0]->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
 
-	m_pScene->m_pPlayer = m_pPlayer = pPlayer;
+		CTerrainPlayer* pPlayer = new CTerrainPlayer(m_pd3dDevice, m_pd3dCommandList, m_ppScenes[0]->GetGraphicsRootSignature(),NULL);
+		m_ppScenes[0]->SetPlayer(pPlayer);
+	}
+	else if (m_nCurrentScene == 1) {
+		m_ppScenes[1] = new CScene();
+		m_ppScenes[1]->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
+
+		CTerrainPlayer* pPlayer = new CTerrainPlayer(m_pd3dDevice, m_pd3dCommandList, m_ppScenes[1]->GetGraphicsRootSignature(), m_ppScenes[1]->m_pTerrain);
+		m_ppScenes[1]->SetPlayer(pPlayer);
+	}
+
+//#ifdef _WITH_TERRAIN_PLAYER
+//	CTerrainPlayer *pPlayer = new CTerrainPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), m_pScene->m_pTerrain);
+//#else
+//	CAirplanePlayer *pPlayer = new CAirplanePlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), NULL);
+//	pPlayer->SetPosition(XMFLOAT3(425.0f, 240.0f, 640.0f));
+//#endif
+
+	m_nScene = m_nCurrentScene; // 현재 활성화 Scene 인덱스
+	m_pScene = m_ppScenes[m_nScene];
+	m_pScene->m_pPlayer = m_pPlayer = m_pScene->GetPlayer();
 	m_pCamera = m_pPlayer->GetCamera();
+
+	if (m_nCurrentScene == 1)
+	{ 
+		m_pScene->m_ppHierarchicalGameObjects[0]->SetPlayer(m_pPlayer);
+
+	}
 
 	m_pd3dCommandList->Close();
 	ID3D12CommandList *ppd3dCommandLists[] = { m_pd3dCommandList };
@@ -481,6 +522,14 @@ void CGameFramework::AnimateObjects()
 	if (m_pScene) m_pScene->AnimateObjects(fTimeElapsed);
 
 	m_pPlayer->Animate(fTimeElapsed);
+
+	if (item) {
+		CGameObject* pRightHand = m_pPlayer->FindFrame("hand_r");
+		m_pScene->m_ppHierarchicalGameObjects[2]->SetPosition(pRightHand->GetPosition().x, pRightHand->GetPosition().y+10, pRightHand->GetPosition().z);
+		//pRightHand->SetChild(m_pScene->m_ppHierarchicalGameObjects[2], true);
+	}
+
+	if (m_nCurrentScene == 0) m_pPlayer->SetPosition(XMFLOAT3(0, 0, 0));
 }
 
 void CGameFramework::WaitForGpuComplete()

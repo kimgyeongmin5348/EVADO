@@ -89,15 +89,15 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera = NULL);
 };
 
-class CSoundCallbackHandler : public CAnimationCallbackHandler
-{
-public:
-	CSoundCallbackHandler() { }
-	~CSoundCallbackHandler() { }
-
-public:
-	virtual void HandleCallback(void *pCallbackData, float fTrackPosition); 
-};
+//class CSoundCallbackHandler : public CAnimationCallbackHandler
+//{
+//public:
+//	CSoundCallbackHandler() { }
+//	~CSoundCallbackHandler() { }
+//
+//public:
+//	virtual void HandleCallback(void *pCallbackData, float fTrackPosition); 
+//};
 
 class CTerrainPlayer : public CPlayer
 {
@@ -114,5 +114,7 @@ public:
 	virtual void Move(ULONG nDirection, float fDistance, bool bVelocity = false);
 
 	virtual void Update(float fTimeElapsed);
+
+	bool isJump = false;
 };
 
