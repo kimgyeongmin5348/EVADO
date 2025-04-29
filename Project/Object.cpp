@@ -16,9 +16,11 @@ CTexture::CTexture(int nTextures, UINT nTextureType, int nSamplers, int nRootPar
 	m_nTextures = nTextures;
 	if (m_nTextures > 0)
 	{
-		m_ppd3dTextureUploadBuffers = new ID3D12Resource * [m_nTextures];
 		m_ppd3dTextures = new ID3D12Resource * [m_nTextures];
-		for (int i = 0; i < m_nTextures; i++) m_ppd3dTextureUploadBuffers[i] = m_ppd3dTextures[i] = NULL;
+		for (int i = 0; i < m_nTextures; i++) m_ppd3dTextures[i] = NULL;
+
+		m_ppd3dTextureUploadBuffers = new ID3D12Resource * [m_nTextures];
+		for (int i = 0; i < m_nTextures; i++) m_ppd3dTextureUploadBuffers[i] = NULL;
 
 		m_ppstrTextureNames = new _TCHAR[m_nTextures][64];
 		for (int i = 0; i < m_nTextures; i++) m_ppstrTextureNames[i][0] = '\0';
@@ -27,11 +29,19 @@ CTexture::CTexture(int nTextures, UINT nTextureType, int nSamplers, int nRootPar
 		for (int i = 0; i < m_nTextures; i++) m_pd3dSrvGpuDescriptorHandles[i].ptr = NULL;
 
 		m_pnResourceTypes = new UINT[m_nTextures];
+		for (int i = 0; i < m_nTextures; i++) m_pnResourceTypes[i] = 0;
+
 		m_pdxgiBufferFormats = new DXGI_FORMAT[m_nTextures];
+		for (int i = 0; i < m_nTextures; i++) m_pdxgiBufferFormats[i] = DXGI_FORMAT_UNKNOWN;
+
 		m_pnBufferElements = new int[m_nTextures];
+		for (int i = 0; i < m_nTextures; i++) m_pnBufferElements[i] = 0;
 	}
+
 	m_nRootParameters = nRootParameters;
+
 	if (nRootParameters > 0) m_pnRootParameterIndices = new UINT[nRootParameters];
+	for (int i = 0; i < m_nRootParameters; i++) m_pnRootParameterIndices[i] = -1;
 
 	m_nSamplers = nSamplers;
 	if (m_nSamplers > 0) m_pd3dSamplerGpuDescriptorHandles = new D3D12_GPU_DESCRIPTOR_HANDLE[m_nSamplers];
@@ -78,6 +88,7 @@ void CTexture::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 	{
 		for (int i = 0; i < m_nRootParameters; i++)
 		{
+			std::cout << "[RootParam " << i << "] index: " << m_pnRootParameterIndices[i] << ", handle.ptr: " << m_pd3dSrvGpuDescriptorHandles[i].ptr << std::endl;
 			pd3dCommandList->SetGraphicsRootDescriptorTable(m_pnRootParameterIndices[i], m_pd3dSrvGpuDescriptorHandles[i]);
 		}
 	}
@@ -919,6 +930,11 @@ void CGameObject::SetScale(XMFLOAT3 xmf3Scale)
 	SetScale(xmf3Scale.x, xmf3Scale.y, xmf3Scale.z);
 }
 
+void CGameObject::SetFrameName(char* framename)
+{
+	strcpy_s(m_pstrFrameName, sizeof(m_pstrFrameName), framename);
+}
+
 void CGameObject::Move(XMFLOAT3 xmf3Offset)
 {
 	m_xmf4x4ToParent._41 += xmf3Offset.x;
@@ -1452,6 +1468,19 @@ CGameObject* CGameObject::Clone()
 	}
 
 	return pNewObject;
+}
+
+void CGameObject::CalculateBoundingBox()
+{
+	if (m_pChild)
+	{
+		cout << "calculateBB : " << m_pChild->GetFrameName();
+		if (m_pChild->m_pMesh)
+		{
+			m_xmBoundingBox = m_pChild->m_pMesh->GetBoundingBox();
+			m_xmBoundingBox.Transform(m_xmBoundingBox, XMLoadFloat4x4(&m_xmf4x4World));
+		}
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

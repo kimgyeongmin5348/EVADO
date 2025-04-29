@@ -41,17 +41,17 @@ private:
 	ID3D12Resource** m_ppd3dTextures = NULL;
 	ID3D12Resource** m_ppd3dTextureUploadBuffers;
 
-	UINT* m_pnResourceTypes = NULL;
+	UINT*							m_pnResourceTypes = NULL;
 
-	DXGI_FORMAT* m_pdxgiBufferFormats = NULL;
-	int* m_pnBufferElements = NULL;
+	DXGI_FORMAT*					m_pdxgiBufferFormats = NULL;
+	int*							m_pnBufferElements = NULL;
 
 	int								m_nRootParameters = 0;
-	UINT* m_pnRootParameterIndices = NULL;
-	D3D12_GPU_DESCRIPTOR_HANDLE* m_pd3dSrvGpuDescriptorHandles = NULL;
+	UINT*							m_pnRootParameterIndices = NULL;
+	D3D12_GPU_DESCRIPTOR_HANDLE*	m_pd3dSrvGpuDescriptorHandles = NULL;
 
 	int								m_nSamplers = 0;
-	D3D12_GPU_DESCRIPTOR_HANDLE* m_pd3dSamplerGpuDescriptorHandles = NULL;
+	D3D12_GPU_DESCRIPTOR_HANDLE*	m_pd3dSamplerGpuDescriptorHandles = NULL;
 
 public:
 	void AddRef() { m_nReferences++; }
@@ -352,10 +352,10 @@ public:
 public:
 	char							m_pstrFrameName[64];
 
-	CMesh* m_pMesh = NULL;
+	CMesh*							m_pMesh = NULL;
 
 	int								m_nMaterials = 0;
-	CMaterial** m_ppMaterials = NULL;
+	CMaterial**						m_ppMaterials = NULL;
 
 	XMFLOAT4X4						m_xmf4x4ToParent;
 	XMFLOAT4X4						m_xmf4x4World;
@@ -366,6 +366,9 @@ public:
 
 	CAnimationController* m_pSkinnedAnimationController = NULL;
 
+	BoundingBox						m_xmBoundingBox;
+
+public:
 	void SetMesh(CMesh* pMesh);
 	void SetShader(CShader* pShader);
 	void SetShader(int nMaterial, CShader* pShader);
@@ -399,7 +402,7 @@ public:
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void ReleaseShaderVariables();
 
-	// CPU¿¡¼­ °è»êµÈ ¿ùµå º¯È¯ Çà·ÄÀ» GPUÀÇ ¼ÎÀÌ´õ¿¡¼­ »ç¿ëÇÒ ¼ö ÀÖµµ·Ï Àü´Ş
+	// CPUì—ì„œ ê³„ì‚°ëœ ì›”ë“œ ë³€í™˜ í–‰ë ¬ì„ GPUì˜ ì…°ì´ë”ì—ì„œ ì‚¬ìš©í•  ìˆ˜ ìˆë„ë¡ ì „ë‹¬
 	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT4X4* pxmf4x4World);
 	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, CMaterial* pMaterial);
 
@@ -428,6 +431,7 @@ public:
 	virtual void SetPosition(XMFLOAT3 xmf3Position);
 	void SetScale(float x, float y, float z);
 	void SetScale(XMFLOAT3 xmf3Scale);
+	void SetFrameName(char* framename);
 
 	void MoveStrafe(float fDistance = 1.0f);
 	void MoveUp(float fDistance = 1.0f);
@@ -441,10 +445,12 @@ public:
 	void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
 	CGameObject* FindFrame(char* pstrFrameName);
 
-	// °ÔÀÓ ¿ÀºêÁ§Æ®ÀÇ °èÃş ±¸Á¶ ³»¿¡¼­ Æ¯Á¤ ÀÌ¸§À» °¡Áø ÅØ½ºÃ³¸¦ Ã£´Â´Ù.
+	// ê²Œì„ ì˜¤ë¸Œì íŠ¸ì˜ ê³„ì¸µ êµ¬ì¡° ë‚´ì—ì„œ íŠ¹ì • ì´ë¦„ì„ ê°€ì§„ í…ìŠ¤ì²˜ë¥¼ ì°¾ëŠ”ë‹¤.
 	CTexture* FindReplicatedTexture(_TCHAR* pstrTextureName);
 
 	UINT GetMeshType() { return((m_pMesh) ? m_pMesh->GetType() : 0x00); }
+
+	void CalculateBoundingBox();
 
 public:
 	void FindAndSetSkinnedMesh(CSkinnedMesh** ppSkinnedMeshes, int* pnSkinnedMesh);
@@ -459,14 +465,14 @@ public:
 	static void LoadAnimationFromFile(FILE* pInFile, CLoadedModelInfo* pLoadedModel);
 	static CGameObject* LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CGameObject* pParent, FILE* pInFile, CShader* pShader, int* pnSkinnedMeshes);
 
-	// ¸ğµ¨ÀÇ ±âÇÏÇĞÀû µ¥ÀÌÅÍ(¸Ş½Ã)¿Í ¾Ö´Ï¸ŞÀÌ¼Ç µ¥ÀÌÅÍ¸¦ µ¿½Ã¿¡ ·Îµå
+	// ëª¨ë¸ì˜ ê¸°í•˜í•™ì  ë°ì´í„°(ë©”ì‹œ)ì™€ ì• ë‹ˆë©”ì´ì…˜ ë°ì´í„°ë¥¼ ë™ì‹œì— ë¡œë“œ
 	static CLoadedModelInfo* LoadGeometryAndAnimationFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, char* pstrFileName, CShader* pShader);
 	static CLoadedModelInfo* LoadGeometryAndAnimationFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, std::filesystem::path pstrFileName, CShader* pShader);
 
-	// °¢ ÇÁ·¹ÀÓ(°ÔÀÓ ¿ÀºêÁ§Æ®)ÀÇ ¸Ş¸ğ¸® ÁÖ¼Ò¿Í ºÎ¸ğ °´Ã¼ÀÇ ¸Ş¸ğ¸® ÁÖ¼Ò°¡ Ãâ·Â
+	// ê° í”„ë ˆì„(ê²Œì„ ì˜¤ë¸Œì íŠ¸)ì˜ ë©”ëª¨ë¦¬ ì£¼ì†Œì™€ ë¶€ëª¨ ê°ì²´ì˜ ë©”ëª¨ë¦¬ ì£¼ì†Œê°€ ì¶œë ¥
 	static void PrintFrameInfo(CGameObject* pGameObject, CGameObject* pParent);
 
-	// ¿ÀºêÁ§Æ®ÀÇ °èÃş ±¸Á¶ ÀüÃ¼¸¦ º¹»ç
+	// ì˜¤ë¸Œì íŠ¸ì˜ ê³„ì¸µ êµ¬ì¡° ì „ì²´ë¥¼ ë³µì‚¬
 	CGameObject* Clone();
 };
 

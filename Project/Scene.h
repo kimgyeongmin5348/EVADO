@@ -9,11 +9,6 @@
 #include "Object_Items.h"
 #include "Map.h"
 
-#define MAX_LIGHTS						16 
-
-#define POINT_LIGHT						1
-#define SPOT_LIGHT						2
-#define DIRECTIONAL_LIGHT				3
 
 struct LIGHT
 {
@@ -26,7 +21,7 @@ struct LIGHT
 	float 								m_fTheta; //cos(m_fTheta)
 	XMFLOAT3							m_xmf3Attenuation;
 	float								m_fPhi; //cos(m_fPhi)
-	bool								m_bEnable;
+	bool								m_bEnable {false};
 	int									m_nType;
 	float								m_fRange;
 	float								padding;
@@ -62,6 +57,10 @@ public:
 	bool ProcessInput(UCHAR *pKeysBuffer);
     void AnimateObjects(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera=NULL);
+
+	void OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList);
+	void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+	void OnPostRender(ID3D12GraphicsCommandList* pd3dCommandList);
 
 	void ReleaseUploadBuffers();
 
@@ -118,13 +117,19 @@ public:
 	CHeightMapTerrain					*m_pTerrain = NULL;
 	Map									*m_pMap = NULL;
 
-	LIGHT								*m_pLights = NULL;
+	LIGHTS								*m_pLights = NULL;
 	int									m_nLights = 0;
 
 	XMFLOAT4							m_xmf4GlobalAmbient;
 
 	ID3D12Resource						*m_pd3dcbLights = NULL;
 	LIGHTS								*m_pcbMappedLights = NULL;
+
+public:
+	BoundingBox							m_xmBoundingBox;
+	CDepthRenderShader					*m_pDepthRenderShader = NULL;
+	CShadowMapShader					*m_pShadowShader = NULL;
+	CTextureToViewportShader			*m_pShadowMapToViewport = NULL;
 };
 
 class CMainScene : public CScene

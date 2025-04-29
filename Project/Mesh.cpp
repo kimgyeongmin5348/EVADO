@@ -440,6 +440,8 @@ void CStandardMesh::LoadMeshFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCom
 		{
 			nReads = (UINT)::fread(&m_xmf3AABBCenter, sizeof(XMFLOAT3), 1, pInFile);
 			nReads = (UINT)::fread(&m_xmf3AABBExtents, sizeof(XMFLOAT3), 1, pInFile);
+			m_xmBoundingBox.Center = m_xmf3AABBCenter;
+			m_xmBoundingBox.Extents = m_xmf3AABBExtents;
 		}
 		else if (!strcmp(pstrToken, "<Positions>:"))
 		{
@@ -682,6 +684,8 @@ void CSkinnedMesh::LoadSkinInfoFromFile(ID3D12Device *pd3dDevice, ID3D12Graphics
 		{
 			nReads = (UINT)::fread(&m_xmf3AABBCenter, sizeof(XMFLOAT3), 1, pInFile);
 			nReads = (UINT)::fread(&m_xmf3AABBExtents, sizeof(XMFLOAT3), 1, pInFile);
+			m_xmBoundingBox.Center = m_xmf3AABBCenter;
+			m_xmBoundingBox.Extents = m_xmf3AABBExtents;
 		}
 		else if (!strcmp(pstrToken, "<BoneNames>:"))
 		{
