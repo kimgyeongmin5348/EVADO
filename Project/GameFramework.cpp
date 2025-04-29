@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------------
+ï»¿//-----------------------------------------------------------------------------
 // File: CGameFramework.cpp
 //-----------------------------------------------------------------------------
 
@@ -312,39 +312,38 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		case WM_KEYUP:
 			switch (wParam)
 			{
-				case VK_ESCAPE:
-					::PostQuitMessage(0);
-					break;
-				case VK_RETURN:
-					m_ppScenes[m_nScene]->ReleaseObjects();
-					m_nCurrentScene = m_nScene + 1;
-					BuildObjects();
-					break;
-				case VK_F1:
-				case VK_F2:
-				case VK_F3:
-					m_pCamera = m_pPlayer->ChangeCamera((DWORD)(wParam - VK_F1 + 1), m_GameTimer.GetTimeElapsed());
-					break;
-				case VK_F9:
-					ChangeSwapChainState();
-					break;
-				case 'F':
-					item = !item;
-					CGameObject* pItem = m_pScene->m_ppHierarchicalGameObjects[2];
-					CGameObject* pRightHand = m_pPlayer->FindFrame("hand_r");
-					if (item) {
-						while (pRightHand->GetSibling())
-							pRightHand = pRightHand->GetSibling();
-						pRightHand->m_pSibling = pItem;
-						cout << "item µé±â" << endl;
-					}
-					else {
-						pItem->m_pSibling = nullptr;
-						pItem->m_pParent = nullptr;
-						pItem->SetPosition(pItem->GetPosition()); // ÇöÀç À§Ä¡ ±â¾ï
-						cout << "item ³õ±â" << endl;
+			case VK_ESCAPE:
+				::PostQuitMessage(0);
+				break;
+			case VK_RETURN:
+				m_ppScenes[m_nScene]->ReleaseObjects();
+				m_nCurrentScene = m_nScene + 1;
+				BuildObjects();
+				break;
+			case VK_F1:
+			case VK_F2:
+			case VK_F3:
+				m_pCamera = m_pPlayer->ChangeCamera((DWORD)(wParam - VK_F1 + 1), m_GameTimer.GetTimeElapsed());
+				break;
+			case VK_F9:
+				ChangeSwapChainState();
+				break;		
+			case 'F':
+				for (int i = 1; i < 4; ++i)
+					std::cout << m_pScene->m_ppHierarchicalGameObjects[i]->GetPosition().y << endl;
+				break;
+				case '1':
+				case '2':
+				case '3':
+				{
+					int itemIndex = wParam - '0';
+					if (itemIndex < m_pScene->m_nHierarchicalGameObjects) {
+						ItemToHand(itemIndex);
+						items[itemIndex] = !items[itemIndex];
 					}
 					break;
+				}
+
 			}
 			break;
 		default:
@@ -379,6 +378,60 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 			break;
 	}
 	return(0);
+}
+
+void CGameFramework::ItemToHand(int objectIndex)
+{
+	CGameObject* pItem = m_pScene->m_ppHierarchicalGameObjects[objectIndex];
+	CGameObject* pRightHand = m_pPlayer->FindFrame("hand_r");
+
+	// ì´ë¯¸ ë¶™ì–´ìžˆë‚˜ í™•ì¸
+	CGameObject* pCurr = pRightHand->GetChild();
+	CGameObject* pPrev = nullptr;
+	bool alreadyHeld = false;
+
+	while (pCurr) {
+		if (pCurr == pItem) {
+			alreadyHeld = true;
+			break;
+		}
+		pPrev = pCurr;
+		pCurr = pCurr->GetSibling();
+	}
+
+	if (!alreadyHeld) {
+		// ë“¤ê¸°
+		if (pRightHand->GetChild() == nullptr) {
+			pRightHand->SetChild(pItem);
+		}
+		else {
+			CGameObject* last = pRightHand->GetChild();
+			while (last->GetSibling()) last = last->GetSibling();
+			last->m_pSibling = pItem;
+		}
+		pItem->m_pParent = pRightHand;
+		pItem->m_pSibling = nullptr;
+
+		if (objectIndex == 2)pItem->SetPosition(0.05f, -0.05f, 1.f);
+		else pItem->SetPosition(0.05f, -0.05f, 0.1f);
+
+		m_pPlayer->UpdateTransform(nullptr);
+
+		std::cout << "ì•„ì´í…œ [" << objectIndex << "] ë“¤ê¸°" << std::endl;
+	}
+	else {
+		// ë†“ê¸°
+		if (pPrev) {
+			pPrev->m_pSibling = pItem->GetSibling();
+		}
+		else {
+			pRightHand->SetChild(pItem->GetSibling());
+		}
+		pItem->m_pParent = nullptr;
+		pItem->m_pSibling = nullptr;
+
+		std::cout << "ì•„ì´í…œ [" << objectIndex << "] ë†“ê¸°" << std::endl;
+	}
 }
 
 void CGameFramework::OnDestroy()
@@ -418,7 +471,7 @@ void CGameFramework::BuildObjects()
 {
 	m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 
-	m_nScenes = 2; // ÃÑ Scene °³¼ö
+	m_nScenes = 2; // ì´ Scene ê°œìˆ˜
 	m_ppScenes = new CScene * [m_nScenes];
 
 	if (m_nCurrentScene == 0) {
@@ -443,7 +496,7 @@ void CGameFramework::BuildObjects()
 //	pPlayer->SetPosition(XMFLOAT3(425.0f, 240.0f, 640.0f));
 //#endif
 
-	m_nScene = m_nCurrentScene; // ÇöÀç È°¼ºÈ­ Scene ÀÎµ¦½º
+	m_nScene = m_nCurrentScene; // í˜„ìž¬ í™œì„±í™” Scene ì¸ë±ìŠ¤
 	m_pScene = m_ppScenes[m_nScene];
 	m_pScene->m_pPlayer = m_pPlayer = m_pScene->GetPlayer();
 	m_pCamera = m_pPlayer->GetCamera();
@@ -522,12 +575,6 @@ void CGameFramework::AnimateObjects()
 	if (m_pScene) m_pScene->AnimateObjects(fTimeElapsed);
 
 	m_pPlayer->Animate(fTimeElapsed);
-
-	if (item) {
-		CGameObject* pRightHand = m_pPlayer->FindFrame("hand_r");
-		m_pScene->m_ppHierarchicalGameObjects[2]->SetPosition(pRightHand->GetPosition().x, pRightHand->GetPosition().y+10, pRightHand->GetPosition().z);
-		//pRightHand->SetChild(m_pScene->m_ppHierarchicalGameObjects[2], true);
-	}
 
 	if (m_nCurrentScene == 0) m_pPlayer->SetPosition(XMFLOAT3(0, 0, 0));
 }
