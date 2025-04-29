@@ -146,6 +146,7 @@
     <ClCompile Include="Client.cpp" />
     <ClCompile Include="Map.cpp" />
     <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="Network.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="Object_Items.cpp" />
     <ClCompile Include="Player.cpp" />
@@ -157,12 +158,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Common.h" />
     <ClInclude Include="d3dx12.h" />
     <ClInclude Include="DDSTextureLoader12.h" />
     <ClInclude Include="GameFramework.h" />
     <ClInclude Include="Client.h" />
     <ClInclude Include="Map.h" />
     <ClInclude Include="Mesh.h" />
+    <ClInclude Include="Network.h" />
     <ClInclude Include="object.h" />
     <ClInclude Include="Object_Items.h" />
     <ClInclude Include="Player.h" />
