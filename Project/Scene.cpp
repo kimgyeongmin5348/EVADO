@@ -49,7 +49,7 @@ void CScene::BuildDefaultLightsAndMaterials()
 	m_pLights->m_pLights[0].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
 	m_pLights->m_pLights[0].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
 
-	// Shadow Å×½ºÆ®¿ë Á¶¸í
+	// Shadow Ã…Ã—Â½ÂºÃ†Â®Â¿Ã« ÃÂ¶Â¸Ã­
 	m_pLights->m_pLights[1].m_bEnable = true;
 	m_pLights->m_pLights[1].m_nType = DIRECTIONAL_LIGHT;
 	m_pLights->m_pLights[1].m_fRange = 2000.0f;
@@ -82,17 +82,49 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_ppHierarchicalGameObjects = new CGameObject * [m_nHierarchicalGameObjects];
 
 	CLoadedModelInfo* pSpiderModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Spider.bin", NULL);
-	m_ppHierarchicalGameObjects[0] = new CSpider(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pSpiderModel, 1);
+	m_ppHierarchicalGameObjects[0] = new CSpider(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pSpiderModel, 3);
 	m_ppHierarchicalGameObjects[0]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+	m_ppHierarchicalGameObjects[0]->m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1);
+	m_ppHierarchicalGameObjects[0]->m_pSkinnedAnimationController->SetTrackAnimationSet(2, 2);
+	m_ppHierarchicalGameObjects[0]->m_pSkinnedAnimationController->SetTrackEnable(1, false);
+	m_ppHierarchicalGameObjects[0]->m_pSkinnedAnimationController->SetTrackEnable(2, false);
+
+	//m_ppHierarchicalGameObjects[0]->SetPlayer(m_pPlayer);
+
 	m_ppHierarchicalGameObjects[0]->SetPosition(3, 0, 30);
 	m_ppHierarchicalGameObjects[0]->Rotate(0, 180, 0);
+
 	if (pSpiderModel) delete pSpiderModel;
 
-	//CLoadedModelInfo* pFlashlightModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Flashlightgold.bin", NULL);
-	//m_ppHierarchicalGameObjects[1] = new FlashLight(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFlashlightModel);
-	//m_ppHierarchicalGameObjects[1]->SetScale(10, 10, 10);
-	//m_ppHierarchicalGameObjects[1]->SetPosition(3, 2, 10);
-	//if (pFlashlightModel) delete pFlashlightModel;
+	CLoadedModelInfo* pFlashlightModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Flashlightgold.bin", NULL);
+	m_ppHierarchicalGameObjects[1] = new FlashLight(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFlashlightModel);
+	m_ppHierarchicalGameObjects[1]->SetScale(10, 10, 10);
+	m_ppHierarchicalGameObjects[1]->SetPosition(3, 2, 10);
+	if (pFlashlightModel) delete pFlashlightModel;
+
+	CLoadedModelInfo* pShovelModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Shovel.bin", NULL);
+	m_ppHierarchicalGameObjects[2] = new Shovel(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShovelModel);
+	m_ppHierarchicalGameObjects[2]->SetScale(1, 1, 1);
+	m_ppHierarchicalGameObjects[2]->Rotate(-90, 0, 0);
+	m_ppHierarchicalGameObjects[2]->SetPosition(3, 2, 12);
+	if (pShovelModel) delete pShovelModel;
+
+	CLoadedModelInfo* pWhistleModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Whistle.bin", NULL);
+	m_ppHierarchicalGameObjects[3] = new Whistle(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pWhistleModel);
+	m_ppHierarchicalGameObjects[3]->SetScale(10, 10, 10);
+	m_ppHierarchicalGameObjects[3]->SetPosition(3, 2, 13);
+	if (pWhistleModel) delete pWhistleModel;
+
+/////*
+//	m_nShaders = 1;
+//	m_ppShaders = new CShader*[m_nShaders];
+//
+//	CEthanObjectsShader *pEthanObjectsShader = new CEthanObjectsShader();
+//	pEthanObjectsShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pEthanModel, m_pTerrain);
+//
+//	m_ppShaders[0] = pEthanObjectsShader;
+////*/
+//	if (pEthanModel) delete pEthanModel
 
 	//CLoadedModelInfo* pShovelModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Shovel.bin", NULL);
 	//m_ppHierarchicalGameObjects[2] = new Shovel(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShovelModel);
@@ -175,7 +207,7 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 {
 	ID3D12RootSignature *pd3dGraphicsRootSignature = NULL;
 
-	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[11];
+	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[12];
 
 	pd3dDescriptorRanges[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRanges[0].NumDescriptors = 1;
@@ -239,9 +271,15 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 
 	pd3dDescriptorRanges[10].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRanges[10].NumDescriptors = 1;
-	pd3dDescriptorRanges[10].BaseShaderRegister = 5; //t5: Depth Buffer gtxtShadowDepthTexture?
+	pd3dDescriptorRanges[10].BaseShaderRegister = 0; //t: gtxTexture
 	pd3dDescriptorRanges[10].RegisterSpace = 0;
 	pd3dDescriptorRanges[10].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+  
+  pd3dDescriptorRanges[11].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	pd3dDescriptorRanges[11].NumDescriptors = 1;
+	pd3dDescriptorRanges[11].BaseShaderRegister = 5; //t5: Depth Buffer gtxtShadowDepthTexture?
+	pd3dDescriptorRanges[11].RegisterSpace = 0;
+	pd3dDescriptorRanges[11].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 	D3D12_ROOT_PARAMETER pd3dRootParameters[16];
 
@@ -410,7 +448,7 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 
 void CScene::CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
 {
-	UINT ncbElementBytes = ((sizeof(LIGHTS) + 255) & ~255); //256ÀÇ ¹è¼ö
+	UINT ncbElementBytes = ((sizeof(LIGHTS) + 255) & ~255); //256Ã€Ã‡ Â¹Ã¨Â¼Ã¶
 	m_pd3dcbLights = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 
 	m_pd3dcbLights->Map(0, NULL, (void **)&m_pcbMappedLights);
@@ -532,13 +570,13 @@ void CScene::AnimateObjects(float fTimeElapsed)
 	}
 }
 
-// ÆĞ½º1 : ½¦µµ¿ì ¸Ê »ı¼º
+// Ã†ÃÂ½Âº1 : Â½Â¦ÂµÂµÂ¿Ã¬ Â¸ÃŠ Â»Ã½Â¼Âº
 void CScene::OnPreRender(ID3D12GraphicsCommandList * pd3dCommandList, CCamera * pCamera)
 {
 	m_pDepthRenderShader->PrepareShadowMap(pd3dCommandList, pCamera);
 }
 
-// ½¦µµ¿ì¸Ê ¹× Á¶¸í Á¤º¸ ¹ÙÀÎµù
+// Â½Â¦ÂµÂµÂ¿Ã¬Â¸ÃŠ Â¹Ã— ÃÂ¶Â¸Ã­ ÃÂ¤ÂºÂ¸ Â¹Ã™Ã€ÃÂµÃ¹
 void CScene::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
@@ -559,59 +597,59 @@ void CScene::OnPostRender(ID3D12GraphicsCommandList* pd3dCommandList)
 
 void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
-	// 1. ºû¿¡¼­ÀÇ º¯È¯ Çà·Ä Àü´Ş (½¦µµ¿ì¸Ê ¿¬»ê¿¡ ÇÊ¿ä)
+	// 1. ÂºÃ»Â¿Â¡Â¼Â­Ã€Ã‡ ÂºÂ¯ÃˆÂ¯ Ã‡Ã Â·Ã„ Ã€Ã¼Â´Ã (Â½Â¦ÂµÂµÂ¿Ã¬Â¸ÃŠ Â¿Â¬Â»ÃªÂ¿Â¡ Ã‡ÃŠÂ¿Ã¤)
 	if (m_pDepthRenderShader)
 		m_pDepthRenderShader->UpdateShaderVariables(pd3dCommandList);
 
-	// 2. Ä«¸Ş¶ó Á¤º¸ ¹ÙÀÎµù (¸ŞÀÎ Ä«¸Ş¶ó view/proj/pos)
+	// 2. Ã„Â«Â¸ÃÂ¶Ã³ ÃÂ¤ÂºÂ¸ Â¹Ã™Ã€ÃÂµÃ¹ (Â¸ÃÃ€Ã Ã„Â«Â¸ÃÂ¶Ã³ view/proj/pos)
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pCamera->UpdateShaderVariables(pd3dCommandList);
 
-	// 3. ±×¸²ÀÚ Àû¿ë ÆĞ½º (½¦µµ¿ì¸Ê¿¡¼­ °´Ã¼ ±íÀÌ°ª °è»ê)
+	// 3. Â±Ã—Â¸Â²Ã€Ãš Ã€Ã»Â¿Ã« Ã†ÃÂ½Âº (Â½Â¦ÂµÂµÂ¿Ã¬Â¸ÃŠÂ¿Â¡Â¼Â­ Â°Â´ÃƒÂ¼ Â±Ã­Ã€ÃŒÂ°Âª Â°Ã¨Â»Ãª)
 	if (m_pShadowShader)
 		m_pShadowShader->Render(pd3dCommandList, pCamera);
 
-	// 4. Shadow Map µğ¹ö±× ½Ã°¢È­¿ë ·»´õ¸µ (ÀÛÀº ºäÆ÷Æ®¿¡ ½¦µµ¿ì¸Ê Ãâ·Â)
+	// 4. Shadow Map ÂµÃ°Â¹Ã¶Â±Ã— Â½ÃƒÂ°Â¢ÃˆÂ­Â¿Ã« Â·Â»Â´ÃµÂ¸Âµ (Ã€Ã›Ã€Âº ÂºÃ¤Ã†Ã·Ã†Â®Â¿Â¡ Â½Â¦ÂµÂµÂ¿Ã¬Â¸ÃŠ ÃƒÃ¢Â·Ã‚)
 	if (m_pShadowMapToViewport)
 		m_pShadowMapToViewport->Render(pd3dCommandList, pCamera);
 
-	// 5. ºäÆ÷Æ®/Ä«¸Ş¶ó Á¤º¸ º¹±¸ (È¤½Ã Shadow Pass¿¡¼­ º¯°æµÇ¾úÀ» ¼ö ÀÖÀ½)
+	// 5. ÂºÃ¤Ã†Ã·Ã†Â®/Ã„Â«Â¸ÃÂ¶Ã³ ÃÂ¤ÂºÂ¸ ÂºÂ¹Â±Â¸ (ÃˆÂ¤Â½Ãƒ Shadow PassÂ¿Â¡Â¼Â­ ÂºÂ¯Â°Ã¦ÂµÃ‡Â¾ÃºÃ€Â» Â¼Ã¶ Ã€Ã–Ã€Â½)
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pCamera->UpdateShaderVariables(pd3dCommandList);
 
-	// 6. ·çÆ® ½Ã±×´ÏÃ³ / µğ½ºÅ©¸³ÅÍ Èü Àç¼³Á¤: ShadowShader³ª DebugShader°¡ ¹Ù²åÀ» ¼ö ÀÖÀ½
+	// 6. Â·Ã§Ã†Â® Â½ÃƒÂ±Ã—Â´ÃÃƒÂ³ / ÂµÃ°Â½ÂºÃ…Â©Â¸Â³Ã…Ã ÃˆÃ¼ Ã€Ã§Â¼Â³ÃÂ¤: ShadowShaderÂ³Âª DebugShaderÂ°Â¡ Â¹Ã™Â²Ã¥Ã€Â» Â¼Ã¶ Ã€Ã–Ã€Â½
 	if (m_pd3dGraphicsRootSignature)
 		pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
 
 	if (m_pd3dCbvSrvDescriptorHeap)
-		pd3dCommandList->SetDescriptorHeaps(1, &m_pd3dCbvSrvDescriptorHeap); // ¹İµå½Ã CBV ¼³Á¤ Àü¿¡
+		pd3dCommandList->SetDescriptorHeaps(1, &m_pd3dCbvSrvDescriptorHeap); // Â¹ÃÂµÃ¥Â½Ãƒ CBV Â¼Â³ÃÂ¤ Ã€Ã¼Â¿Â¡
 
-	// 7. SceneÀÇ °øÅë º¯¼ö ¾÷µ¥ÀÌÆ® (¿¹: Light, Material µî)
+	// 7. SceneÃ€Ã‡ Â°Ã¸Ã…Ã« ÂºÂ¯Â¼Ã¶ Â¾Ã·ÂµÂ¥Ã€ÃŒÃ†Â® (Â¿Â¹: Light, Material ÂµÃ®)
 	UpdateShaderVariables(pd3dCommandList);
 
-	// 8. ¶óÀÌÆ® »ó¼ö ¹öÆÛ ¹ÙÀÎµù (·çÆ® ½Ã±×´ÏÃ³ÀÇ 2¹ø ½½·ÔÀÌ¶ó°í °¡Á¤)
+	// 8. Â¶Ã³Ã€ÃŒÃ†Â® Â»Ã³Â¼Ã¶ Â¹Ã¶Ã†Ã› Â¹Ã™Ã€ÃÂµÃ¹ (Â·Ã§Ã†Â® Â½ÃƒÂ±Ã—Â´ÃÃƒÂ³Ã€Ã‡ 2Â¹Ã¸ Â½Â½Â·Ã”Ã€ÃŒÂ¶Ã³Â°Ã­ Â°Â¡ÃÂ¤)
 	if (m_pd3dcbLights)
 	{
 		D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
 		pd3dCommandList->SetGraphicsRootConstantBufferView(2, d3dcbLightsGpuVirtualAddress);
 	}
 
-	// 9. Skybox, Terrain, Map ·»´õ¸µ
+	// 9. Skybox, Terrain, Map Â·Â»Â´ÃµÂ¸Âµ
 	if (m_pSkyBox)    m_pSkyBox->Render(pd3dCommandList, pCamera);
 	if (m_pTerrain)   m_pTerrain->Render(pd3dCommandList, pCamera);
 	if (m_pMap)       m_pMap->Render(pd3dCommandList, pCamera);
 
-	// 10. ÀÏ¹İ °ÔÀÓ ¿ÀºêÁ§Æ®µé ·»´õ¸µ
+	// 10. Ã€ÃÂ¹Ã Â°Ã”Ã€Ã“ Â¿Ã€ÂºÃªÃÂ§Ã†Â®ÂµÃ© Â·Â»Â´ÃµÂ¸Âµ
 	for (int i = 0; i < m_nGameObjects; i++)
 		if (m_ppGameObjects[i])
 			m_ppGameObjects[i]->Render(pd3dCommandList, pCamera);
 
-	// 11. ¼ÎÀÌ´õ ±×·ìÀ» ÅëÇÑ ¿ÀºêÁ§Æ® ·»´õ¸µ
+	// 11. Â¼ÃÃ€ÃŒÂ´Ãµ Â±Ã—Â·Ã¬Ã€Â» Ã…Ã«Ã‡Ã‘ Â¿Ã€ÂºÃªÃÂ§Ã†Â® Â·Â»Â´ÃµÂ¸Âµ
 	for (int i = 0; i < m_nShaders; i++)
 		if (m_ppShaders[i])
 			m_ppShaders[i]->Render(pd3dCommandList, pCamera);
 
-	// 12. °èÃşÀû ¿ÀºêÁ§Æ®µé (¾Ö´Ï¸ŞÀÌ¼Ç Æ÷ÇÔ)
+	// 12. Â°Ã¨ÃƒÃ¾Ã€Ã» Â¿Ã€ÂºÃªÃÂ§Ã†Â®ÂµÃ© (Â¾Ã–Â´ÃÂ¸ÃÃ€ÃŒÂ¼Ã‡ Ã†Ã·Ã‡Ã”)
 	for (int i = 0; i < m_nHierarchicalGameObjects; i++)
 	{
 		if (m_ppHierarchicalGameObjects[i])
@@ -626,4 +664,76 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	}
 }
 
+void CStartScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 20); 
+
+	m_nShaders = 1;
+	m_ppShaders = new CShader * [m_nShaders];
+
+	CTextureToScreenShader* pTextureToScreenShader = new CTextureToScreenShader(1);
+	pTextureToScreenShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+
+	CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/StartScene.dds", RESOURCE_TEXTURE2D, 0);
+
+	CreateShaderResourceViews(pd3dDevice, pTexture, 0, 15);
+
+	CScreenRectMeshTextured* pMesh = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, -1.0f, 2.0f, 1.0f, 2.0f);
+	pTextureToScreenShader->SetMesh(0, pMesh);
+	pTextureToScreenShader->SetTexture(pTexture);
+
+	m_ppShaders[0] = pTextureToScreenShader;
+
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+}
+
+void CStartScene::ReleaseObjects()
+{
+	if (m_pd3dGraphicsRootSignature) m_pd3dGraphicsRootSignature->Release();
+
+	if (m_ppShaders)
+	{
+		for (int i = 0; i < m_nShaders; i++)
+		{
+			m_ppShaders[i]->ReleaseShaderVariables();
+			m_ppShaders[i]->ReleaseObjects();
+			m_ppShaders[i]->Release();
+		}
+		delete[] m_ppShaders;
+	}
+}
+
+void CStartScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	if (m_pd3dGraphicsRootSignature) pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
+	if (m_pd3dCbvSrvDescriptorHeap) pd3dCommandList->SetDescriptorHeaps(1, &m_pd3dCbvSrvDescriptorHeap);
+
+	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
+	pCamera->UpdateShaderVariables(pd3dCommandList);
+
+	UpdateShaderVariables(pd3dCommandList);
+
+	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
+}
+
+bool CStartScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+{
+	switch (nMessageID)
+	{
+	case WM_KEYDOWN:
+		switch (wParam)
+		{
+		case VK_RETURN:
+			break;
+		default:
+			break;
+		}
+		break;
+	default:
+		break;
+	}
+	return false;
+}

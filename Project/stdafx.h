@@ -11,6 +11,16 @@
 
 #define COUT_FILE_LOADING_LIST
 
+// network
+#include <WinSock2.h>
+#include <mswsock.h>
+#include <unordered_map>
+#include <WS2tcpip.h>
+#include <thread>
+
+#pragma comment (lib, "WS2_32.LIB")
+#pragma comment (lib, "MSWSock.LIB")
+
 // C의 런타임 헤더 파일입니다.
 #include <stdlib.h>
 #include <malloc.h>
