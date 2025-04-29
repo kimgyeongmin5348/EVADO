@@ -82,8 +82,7 @@ void CTexture::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 	{
 		for (int i = 0; i < m_nRootParameters; i++)
 		{
-			std::cout << "[RootParam " << i << "] index: " << m_pnRootParameterIndices[i]
-				<< ", handle.ptr: " << m_pd3dSrvGpuDescriptorHandles[i].ptr << std::endl;
+			std::cout << "[RootParam " << i << "] index: " << m_pnRootParameterIndices[i] << ", handle.ptr: " << m_pd3dSrvGpuDescriptorHandles[i].ptr << std::endl;
 			pd3dCommandList->SetGraphicsRootDescriptorTable(m_pnRootParameterIndices[i], m_pd3dSrvGpuDescriptorHandles[i]);
 		}
 	}
@@ -919,6 +918,11 @@ void CGameObject::SetScale(XMFLOAT3 xmf3Scale)
 	SetScale(xmf3Scale.x, xmf3Scale.y, xmf3Scale.z);
 }
 
+void CGameObject::SetFrameName(char* framename)
+{
+	strcpy_s(m_pstrFrameName, sizeof(m_pstrFrameName), framename);
+}
+
 void CGameObject::Move(XMFLOAT3 xmf3Offset)
 {
 	m_xmf4x4ToParent._41 += xmf3Offset.x;
@@ -1456,10 +1460,14 @@ CGameObject* CGameObject::Clone()
 
 void CGameObject::CalculateBoundingBox()
 {
-	if (m_pMesh)
+	if (m_pChild)
 	{
-		m_xmBoundingBox = m_pMesh->GetBoundingBox();
-		m_xmBoundingBox.Transform(m_xmBoundingBox, XMLoadFloat4x4(&m_xmf4x4World));
+		cout << "calculateBB : " << m_pChild->GetFrameName();
+		if (m_pChild->m_pMesh)
+		{
+			m_xmBoundingBox = m_pChild->m_pMesh->GetBoundingBox();
+			m_xmBoundingBox.Transform(m_xmBoundingBox, XMLoadFloat4x4(&m_xmf4x4World));
+		}
 	}
 }
 

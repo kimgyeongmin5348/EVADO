@@ -63,7 +63,7 @@ extern HINSTANCE						ghAppInstance;
 #pragma comment(lib, "dxguid.lib")
 
 // TODO: 프로그램에 필요한 추가 헤더는 여기에서 참조합니다.
-#define MAX_LIGHTS				4 
+#define MAX_LIGHTS				4
 
 #define _WITH_SHADOW_MAP_SHADOW
 #define MAX_DEPTH_TEXTURES		MAX_LIGHTS

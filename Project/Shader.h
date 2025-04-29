@@ -264,6 +264,10 @@ protected:
 
 	XMMATRIX						m_xmProjectionToTexture;
 
+	ID3D12DescriptorHeap*			m_pd3dCbvSrvUavDescriptorHeap = NULL;
+	D3D12_CPU_DESCRIPTOR_HANDLE		m_d3dSrvCPUDescriptorHandle = {};
+	D3D12_GPU_DESCRIPTOR_HANDLE		m_d3dSrvGPUDescriptorHandle = {};
+
 public:
 	CTexture* GetDepthTexture() { return(m_pDepthFromLightTexture); }
 	ID3D12Resource* GetDepthTextureResource(UINT nIndex) { return(m_pDepthFromLightTexture->GetResource(nIndex)); }
