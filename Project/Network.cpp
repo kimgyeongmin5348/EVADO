@@ -38,7 +38,6 @@ void ProcessPacket(char* ptr)
         g_myid = packet->id;
         player.SetPosition(packet->position);
 
-        // 서버와 구조체 일치화
         if (player.GetCamera()) {
             player.GetCamera()->SetPosition(packet->position);
         }
@@ -76,6 +75,11 @@ void ProcessPacket(char* ptr)
     case SC_P_MOVE: // 서버가 클라이언트에게 다른 플레이어의 이동 정보를 보내는 패킷 타입
     {
         sc_packet_move* packet = reinterpret_cast<sc_packet_move*>(ptr);
+        
+        // 수신 정보 출력
+        std::cout << "[클라] 서버로부터 위치 수신 - ID: " << packet->id
+            << " (" << packet->position.x << ", " << packet->position.y
+            << ", " << packet->position.z << ")\n";
 
         // 이동 처리
         auto it = g_other_players.find(packet->id);
@@ -170,10 +174,10 @@ void send_packet(void* packet)
     }
 }
 
-void send_position_to_server() {
+void send_position_to_server(const XMFLOAT3& position) {
     cs_packet_move p;
     p.size = sizeof(p);
     p.type = CS_P_MOVE;
-    p.position = player.GetPosition();
+    p.position = position;
     send_packet(&p);
 }

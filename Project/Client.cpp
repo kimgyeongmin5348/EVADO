@@ -73,6 +73,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	}
 	gGameFramework.OnDestroy();
 
+	// 서버 관련
 	CleanupNetwork();
 
 	return((int)msg.wParam);

@@ -85,5 +85,13 @@ private:
 	POINT						m_ptOldCursorPos;
 
 	_TCHAR						m_pszFrameRate[70];
+<<<<<<< Updated upstream
+=======
+
+	bool						item = false;
+
+	//server
+	float m_fLastPositionSendTime = 0.0f;  // 위치 전송 시간 추적
+>>>>>>> Stashed changes
 };
 

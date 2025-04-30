@@ -20,6 +20,9 @@ public:
     float GetTimeElapsed();
 	float GetTotalTime();
 
+	// 서버와 연관
+	float GetTotalElapsedTime();
+
 private:
 	double							m_fTimeScale;						
 	float							m_fTimeElapsed;		

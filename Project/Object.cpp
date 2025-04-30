@@ -40,6 +40,12 @@ CTexture::~CTexture()
 		for (int i = 0; i < m_nTextures; i++) if (m_ppd3dTextures[i]) m_ppd3dTextures[i]->Release();
 		delete[] m_ppd3dTextures;
 	}
+<<<<<<< Updated upstream
+=======
+	
+	if (m_ppstrTextureNames) delete[] m_ppstrTextureNames;
+
+>>>>>>> Stashed changes
 	if (m_pnResourceTypes) delete[] m_pnResourceTypes;
 	if (m_pdxgiBufferFormats) delete[] m_pdxgiBufferFormats;
 	if (m_pnBufferElements) delete[] m_pnBufferElements;

@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "GameFramework.h"
+#include "Network.h"
 
 CGameFramework::CGameFramework()
 {
@@ -520,6 +521,20 @@ void CGameFramework::FrameAdvance()
 	ProcessInput();
 
     AnimateObjects();
+
+	// ▼▼▼ 여기에 네트워크 로직 추가 ▼▼▼
+	float fCurrentTime = m_GameTimer.GetTotalElapsedTime();
+	if (fCurrentTime - m_fLastPositionSendTime > 0.5f) {
+		if (m_pPlayer) {
+			XMFLOAT3 vPosition = m_pPlayer->GetPosition();
+			send_position_to_server(vPosition);
+			std::cout << "[클라이언트] 위치 전송: ("
+				<< vPosition.x << ", " << vPosition.y << ", " << vPosition.z << ")\n";
+		}
+		m_fLastPositionSendTime = fCurrentTime;
+	}
+	// ▲▲▲ 네트워크 로직 추가 끝 ▲▲▲
+
 
 	HRESULT hResult = m_pd3dCommandAllocator->Reset();
 	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
