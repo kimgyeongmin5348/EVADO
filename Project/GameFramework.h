@@ -41,6 +41,8 @@ public:
 	void OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	LRESULT CALLBACK OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 
+	void ItemToHand(int objectIndex);
+
 private:
 	HINSTANCE					m_hInstance;
 	HWND						m_hWnd; 
@@ -92,6 +94,6 @@ private:
 
 	_TCHAR						m_pszFrameRate[70];
 
-	bool						item = false;
+	bool						items[4] = { false,false,false,false };
 };
 
