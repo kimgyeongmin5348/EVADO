@@ -119,13 +119,14 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	CLoadedModelInfo* pFlashlightModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Flashlightgold.bin", NULL);
 	m_ppHierarchicalGameObjects[1] = new FlashLight(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFlashlightModel);
-	m_ppHierarchicalGameObjects[1]->SetScale(1, 1, 1);
+	m_ppHierarchicalGameObjects[1]->SetScale(3, 3, 3);
 	m_ppHierarchicalGameObjects[1]->SetPosition(3, 2, 10);
 	if (pFlashlightModel) delete pFlashlightModel;
 
 	CLoadedModelInfo* pShovelModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Shovel.bin", NULL);
 	m_ppHierarchicalGameObjects[2] = new Shovel(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShovelModel);
 	m_ppHierarchicalGameObjects[2]->SetScale(1, 1, 1);
+	m_ppHierarchicalGameObjects[1]->Rotate(-90, 0, 0);
 	m_ppHierarchicalGameObjects[2]->SetPosition(3, 2, 12);
 	if (pShovelModel) delete pShovelModel;
 
@@ -479,7 +480,7 @@ bool CScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam,
 	return(false);
 }
 
-bool CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+void CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
 	switch (nMessageID)
 	{
@@ -488,7 +489,6 @@ bool CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 	default:
 		break;
 	}
-	return(false);
 }
 
 bool CScene::ProcessInput(UCHAR *pKeysBuffer)
@@ -570,11 +570,14 @@ void CStartScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 	CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
 	pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/StartScene.dds", RESOURCE_TEXTURE2D, 0);
+	//pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Font.dds", RESOURCE_TEXTURE2D, 1);
 
 	CreateShaderResourceViews(pd3dDevice, pTexture, 0, 15);
 
 	CScreenRectMeshTextured* pMesh = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, -1.0f, 2.0f, 1.0f, 2.0f);
 	pTextureToScreenShader->SetMesh(0, pMesh);
+	//pMesh = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, -1.f, 0.12f * 36, -0.5f, 0.20f, 1);
+	//pTextureToScreenShader->SetMesh(1, pMesh);
 	pTextureToScreenShader->SetTexture(pTexture);
 
 	m_ppShaders[0] = pTextureToScreenShader;
@@ -611,7 +614,7 @@ void CStartScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
 }
 
-bool CStartScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+void CStartScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
 	switch (nMessageID)
 	{
@@ -620,12 +623,9 @@ bool CStartScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM
 		{
 		case VK_RETURN:
 			break;
-		default:
-			break;
 		}
 		break;
 	default:
 		break;
 	}
-	return false;
 }

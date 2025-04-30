@@ -487,6 +487,7 @@ void CGameFramework::BuildObjects()
 
 		CTerrainPlayer* pPlayer = new CTerrainPlayer(m_pd3dDevice, m_pd3dCommandList, m_ppScenes[1]->GetGraphicsRootSignature(), m_ppScenes[1]->m_pTerrain);
 		m_ppScenes[1]->SetPlayer(pPlayer);
+		m_pPlayer->SetPosition(XMFLOAT3(0,0,0));
 	}
 
 //#ifdef _WITH_TERRAIN_PLAYER
@@ -499,7 +500,7 @@ void CGameFramework::BuildObjects()
 	m_nScene = m_nCurrentScene; // 현재 활성화 Scene 인덱스
 	m_pScene = m_ppScenes[m_nScene];
 	m_pScene->m_pPlayer = m_pPlayer = m_pScene->GetPlayer();
-	m_pCamera = m_pPlayer->GetCamera();
+	m_pCamera = m_pPlayer->ChangeCamera(FIRST_PERSON_CAMERA, m_GameTimer.GetTimeElapsed());
 
 	if (m_nCurrentScene == 1)
 	{ 
