@@ -11,6 +11,11 @@
 
 CPlayer::CPlayer()
 {
+	//----------------------------------------------------------------------
+	m_pCamera = new CCamera(); // 명시적 생성
+	m_pCamera->SetPosition({ 0,0,0 }); // 기본 위치 설정
+	//----------------------------------------------------------------------
+
 	m_pCamera = NULL;
 
 	m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
@@ -71,6 +76,17 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 
 void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
 {
+	// 이부분 서버때문에 한번 손좀 봤음...
+	if (!bUpdateVelocity) {
+		if (nullptr != m_pCamera) { // NULL 체크 추가
+			m_pCamera->Move(xmf3Shift);
+		}
+		else {
+			// 에러 로깅 또는 카메라 생성
+			std::cerr << "[WARN] 카메라가 초기화되지 않았습니다!" << std::endl;
+			m_pCamera = new CCamera(); // 임시 생성 (필요시)
+		}
+	}
 	if (bUpdateVelocity)
 	{
 		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, xmf3Shift);

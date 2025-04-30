@@ -77,6 +77,11 @@ void ProcessPacket(char* ptr)
     {
         sc_packet_move* packet = reinterpret_cast<sc_packet_move*>(ptr);
 
+        // 수신 정보 출력
+        std::cout << "[클라] 서버로부터 위치 수신 - ID: " << packet->id
+            << " (" << packet->position.x << ", " << packet->position.y
+            << ", " << packet->position.z << ")\n";
+
         // 이동 처리
         auto it = g_other_players.find(packet->id);
         if (it != g_other_players.end()) {
@@ -170,10 +175,11 @@ void send_packet(void* packet)
     }
 }
 
-void send_position_to_server() {
+void send_position_to_server(const XMFLOAT3& position)
+{
     cs_packet_move p;
     p.size = sizeof(p);
     p.type = CS_P_MOVE;
-    p.position = player.GetPosition();
+    p.position = position;
     send_packet(&p);
 }

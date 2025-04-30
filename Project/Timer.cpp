@@ -123,3 +123,10 @@ void CGameTimer::Stop()
 		m_bStopped = true;
 	}
 }
+
+float CGameTimer::GetTotalElapsedTime()
+{
+	if (m_bStopped)
+		return float(((m_nStopPerformanceCounter - m_nPausedPerformanceCounter) - m_nBasePerformanceCounter) * m_fTimeScale);
+	return float(((m_nCurrentPerformanceCounter - m_nPausedPerformanceCounter) - m_nBasePerformanceCounter) * m_fTimeScale);
+}
