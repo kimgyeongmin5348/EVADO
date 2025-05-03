@@ -109,10 +109,17 @@ private:
 <<<<<<< Updated upstream
 =======
 
+<<<<<<< Updated upstream
 	bool						item = false;
 
 	//server
 	float m_fLastPositionSendTime = 0.0f;  // 위치 전송 시간 추적
+>>>>>>> Stashed changes
+=======
+	bool						items[4] = { false,false,false,false };
+
+	float m_fLastPositionSendTime = 0.0f;
+
 >>>>>>> Stashed changes
 };
 =======

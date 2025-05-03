@@ -20,7 +20,11 @@ public:
 	float GetTimeElapsed()const;
 	float GetTotalTime();
 
+<<<<<<< Updated upstream
 	// 서버와 연관
+=======
+	//server
+>>>>>>> Stashed changes
 	float GetTotalElapsedTime();
 
 private:
