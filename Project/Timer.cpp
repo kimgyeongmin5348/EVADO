@@ -125,17 +125,24 @@ void CGameTimer::Stop()
 }
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 // 서버와 연관
+=======
+//server
+>>>>>>> Stashed changes
 float CGameTimer::GetTotalElapsedTime()
 {
 	if (m_bStopped)
 		return float(((m_nStopPerformanceCounter - m_nPausedPerformanceCounter) - m_nBasePerformanceCounter) * m_fTimeScale);
 	return float(((m_nCurrentPerformanceCounter - m_nPausedPerformanceCounter) - m_nBasePerformanceCounter) * m_fTimeScale);
 }
+<<<<<<< Updated upstream
 =======
 //server
 float CGameTimer::GetTimeElapsed() const {  // 함수 선언에 const 추가
 	// 타이머 로직 구현
 	return m_fTimeElapsed;
 }
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes

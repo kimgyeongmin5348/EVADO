@@ -32,6 +32,9 @@ void send_position_to_server(const XMFLOAT3& position);
 void SendPlayerPosition(const DirectX::XMFLOAT3& position);
 >>>>>>> Stashed changes
 
+// 패킷 전송 함수 선언
+extern void send_position_to_server(const DirectX::XMFLOAT3& position);
+
 
 //extern OBJECT monster, user;
 //std::vector<OBJECT> players[MAX_USER];
