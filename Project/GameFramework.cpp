@@ -698,3 +698,9 @@ void CGameFramework::FrameAdvance()
 	::SetWindowText(m_hWnd, m_pszFrameRate);
 }
 
+
+//server
+float CGameFramework::GetTimeElapsed() const {
+	return m_GameTimer.GetTimeElapsed();
+}
+

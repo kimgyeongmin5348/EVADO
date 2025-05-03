@@ -17,7 +17,7 @@ public:
 	void Reset();
 
     unsigned long GetFrameRate(LPTSTR lpszString = NULL, int nCharacters=0);
-    float GetTimeElapsed();
+	float GetTimeElapsed()const;
 	float GetTotalTime();
 
 	// 서버와 연관

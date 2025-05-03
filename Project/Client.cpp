@@ -32,6 +32,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
+	CPlayer player;
 	MSG msg;
 	HACCEL hAccelTable;
 
@@ -67,16 +68,29 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 		{
 			gGameFramework.FrameAdvance();
 
-			// 예시: 주기적으로 내 위치를 서버로 전송
-			// send_position_to_server(); // 필요에 따라 호출
+			// 0.1초 간격으로 위치 전송
+			static float time_accumulator = 0.0f;
+			time_accumulator += gGameFramework.GetTimeElapsed();
+			if (time_accumulator > 0.1f) {
+				SendPlayerPosition(player.GetPosition());
+				time_accumulator = 0.0f;
+			}
 		}
+		gGameFramework.OnDestroy();
+
+		CleanupNetwork();
+
+		return((int)msg.wParam);
 	}
+<<<<<<< Updated upstream
 	gGameFramework.OnDestroy();
 
 	// 서버 관련
 	CleanupNetwork();
 
 	return((int)msg.wParam);
+=======
+>>>>>>> Stashed changes
 }
 
 ATOM MyRegisterClass(HINSTANCE hInstance)

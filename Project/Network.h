@@ -26,7 +26,11 @@ extern SOCKET ConnectSocket;
 void ProcessPacket(char* ptr);
 void process_data(char* net_buf, size_t io_byte);
 void send_packet(void* packet);
+<<<<<<< Updated upstream
 void send_position_to_server(const XMFLOAT3& position);
+=======
+void SendPlayerPosition(const DirectX::XMFLOAT3& position);
+>>>>>>> Stashed changes
 
 
 //extern OBJECT monster, user;

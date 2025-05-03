@@ -81,21 +81,16 @@ void ProcessPacket(char* ptr)
             << " (" << packet->position.x << ", " << packet->position.y
             << ", " << packet->position.z << ")\n";
 
-        // 이동 처리
         auto it = g_other_players.find(packet->id);
         if (it != g_other_players.end()) {
-            // 부드러운 이동을 위해 속도 기반 업데이트
-            XMFLOAT3 target = packet->position;
-            XMFLOAT3 current = it->second.GetPosition();
-            XMFLOAT3 velocity = { // 이부분은 클라랑 이야기 하면서? 하면 될듯
-                (packet->position.x - it->second.GetPosition().x) * 10.0f,
-                (packet->position.y - it->second.GetPosition().y) * 10.0f,
-                (packet->position.z - it->second.GetPosition().z) * 10.0f
-            };
-            it->second.SetVelocity(velocity);
+            it->second.SetPosition(packet->position);
+
+            // 다른 플레이어 위치 업데이트 확인
+            std::cout << "[클라] " << packet->id << "번 플레이어 위치 갱신: ("
+                << packet->position.x << ", "
+                << packet->position.y << ", "
+                << packet->position.z << ")\n";
         }
-
-
         break;
     }
 
@@ -174,10 +169,18 @@ void send_packet(void* packet)
     }
 }
 
+<<<<<<< Updated upstream
 void send_position_to_server(const XMFLOAT3& position) {
+=======
+void SendPlayerPosition(const XMFLOAT3& position) {
+>>>>>>> Stashed changes
     cs_packet_move p;
     p.size = sizeof(p);
     p.type = CS_P_MOVE;
     p.position = position;
     send_packet(&p);
+
+    // 전송 확인 출력
+    std::cout << "[클라] 위치 전송: (" << position.x << ", " << position.y << ", " << position.z << ")\n";
+
 }
