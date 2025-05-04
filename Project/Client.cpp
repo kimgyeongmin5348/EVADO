@@ -206,7 +206,7 @@ void InitializeNetwork()
 	struct sockaddr_in serverAddress;
 	serverAddress.sin_family = AF_INET;
 	serverAddress.sin_port = htons(SERVER_PORT);
-	inet_pton(AF_INET, "192.168.64.252", &serverAddress.sin_addr.s_addr);
+	inet_pton(AF_INET, "127.0.0.1", &serverAddress.sin_addr.s_addr);
 
 	if (connect(ConnectSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) == SOCKET_ERROR) {
 		std::cerr << "서버 연결 실패, 오류: " << WSAGetLastError() << std::endl;

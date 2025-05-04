@@ -290,14 +290,15 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 	{
 		case WM_LBUTTONDOWN:
 		case WM_RBUTTONDOWN:
-			::SetCapture(hWnd);
-			::GetCursorPos(&m_ptOldCursorPos);
+			m_pPlayer->isSwing = true;
 			break;
 		case WM_LBUTTONUP:
 		case WM_RBUTTONUP:
-			::ReleaseCapture();
+			//::ReleaseCapture();
 			break;
 		case WM_MOUSEMOVE:
+			::SetCapture(hWnd);
+			::GetCursorPos(&m_ptOldCursorPos);
 			break;
 		default:
 			break;
@@ -500,7 +501,7 @@ void CGameFramework::BuildObjects()
 	m_nScene = m_nCurrentScene; // 현재 활성화 Scene 인덱스
 	m_pScene = m_ppScenes[m_nScene];
 	m_pScene->m_pPlayer = m_pPlayer = m_pScene->GetPlayer();
-	m_pCamera = m_pPlayer->ChangeCamera(FIRST_PERSON_CAMERA, m_GameTimer.GetTimeElapsed());
+	m_pCamera = m_pPlayer->ChangeCamera(THIRD_PERSON_CAMERA, m_GameTimer.GetTimeElapsed());
 
 	if (m_nCurrentScene == 1)
 	{ 
