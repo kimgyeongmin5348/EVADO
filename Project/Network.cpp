@@ -5,21 +5,131 @@
 
 std::unordered_map<long long, CPlayer> g_other_players;
 SOCKET ConnectSocket = INVALID_SOCKET;
+HANDLE g_hIOCP = INVALID_HANDLE_VALUE;
 
 CPlayer player;
 CGameObject object;
-
-
 long long g_myid = 0;
+
+void PostRecv();
+
+
+DWORD WINAPI WorkerThread(LPVOID lpParam) {
+    while (true) {
+        DWORD bytesTransferred = 0;
+        ULONG_PTR completionKey = 0;
+        OverlappedEx* overlapped = nullptr;
+
+        BOOL result = GetQueuedCompletionStatus(g_hIOCP, &bytesTransferred, &completionKey, reinterpret_cast<LPOVERLAPPED*>(&overlapped), INFINITE);
+
+        if (!result) {
+            // 연결 종료 처리
+            closesocket(ConnectSocket);
+            ConnectSocket = INVALID_SOCKET;
+            continue;
+        }
+
+        // 연결 완료 처리
+        if (completionKey == 1) {
+            if (bytesTransferred == 0) {
+                std::cout << "서버 연결 성공!" << std::endl;
+                PostRecv();
+            }
+            continue;
+        }
+
+        switch (overlapped->operation) {
+        case IO_RECV:
+            if (bytesTransferred > 0) {
+                process_data(overlapped->buffer, bytesTransferred);
+                PostRecv();
+            }
+            delete overlapped;
+            break;
+
+        case IO_SEND:
+            delete overlapped;
+            break;
+        }
+    }
+    return 0;
+}
+
+void PostRecv() {
+    OverlappedEx* overlapped = new OverlappedEx{};
+    overlapped->operation = IO_RECV;
+    overlapped->wsaBuf.buf = overlapped->buffer;
+    overlapped->wsaBuf.len = MAX_PACKET_SIZE;
+
+    DWORD flags = 0;
+    WSARecv(ConnectSocket, &overlapped->wsaBuf, 1, nullptr, &flags, reinterpret_cast<LPWSAOVERLAPPED>(overlapped), nullptr);
+}
+
+void InitializeNetwork()
+{
+    WSADATA wsaData;
+    WSAStartup(MAKEWORD(2, 2), &wsaData);
+
+    // 1. IOCP 핸들 생성
+    g_hIOCP = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, NUM_WORKER_THREADS);
+
+    // 2. 워커 스레드 생성
+    for (int i = 0; i < NUM_WORKER_THREADS; ++i) {
+        CreateThread(NULL, 0, WorkerThread, NULL, 0, NULL);
+    }
+
+    // 3. Overlapped 소켓 생성
+    ConnectSocket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
+
+    // 4. 논블로킹 소켓 설정
+    u_long nonBlockingMode = 1;
+    ioctlsocket(ConnectSocket, FIONBIO, &nonBlockingMode);
+
+    // 5. 비동기 연결 설정
+    sockaddr_in serverAddr{};
+    serverAddr.sin_family = AF_INET;
+    inet_pton(AF_INET, "127.0.0.1", &serverAddr.sin_addr);
+    serverAddr.sin_port = htons(SERVER_PORT);
+
+    // 6. 비동기 연결 시작
+    int connectResult = WSAConnect(ConnectSocket, (sockaddr*)&serverAddr, sizeof(serverAddr), NULL, NULL, NULL, NULL);
+
+    if (connectResult == SOCKET_ERROR) {
+        int err = WSAGetLastError();
+        if (err != WSAEWOULDBLOCK) {
+            std::cerr << "연결 실패: " << err << std::endl;
+            closesocket(ConnectSocket);
+            WSACleanup();
+            exit(1);
+        }
+    }
+
+    // 7. IOCP에 소켓 등록
+    CreateIoCompletionPort((HANDLE)ConnectSocket, g_hIOCP, 0, 0);
+
+    // 8. 초기 수신 작업 시작
+    PostRecv();
+
+    std::cout << "서버에 성공적으로 연결되었습니다." << std::endl;
+
+    // 9. 로그인 패킷 전송
+    cs_packet_login p;
+    p.size = sizeof(p);
+    p.type = CS_P_LOGIN;
+    p.position = player.GetPosition();
+    strcpy_s(p.name, sizeof(p.name), user_name.c_str());
+    send_packet(&p);
+
+    std::cout << "[클라] 로그인 패킷 전송: 이름=" << p.name << " 위치(" << p.position.x << "," << p.position.y << "," << p.position.z << ")\n";
+}
+
 
 void ProcessPacket(char* ptr)
 {
 
     const unsigned char packet_type = ptr[1];
 
-#ifdef _DEBUG
-    std::cout << "[PROCESS] 패킷 타입: " << static_cast<int>(packet_type) << std::endl;
-#endif
+    std::cout << "[클라] 패킷 처리 시작 - 타입: " << (int)packet_type << "\n";
 
     switch (packet_type)
     {
@@ -27,13 +137,7 @@ void ProcessPacket(char* ptr)
     {
         sc_packet_user_info* packet = reinterpret_cast<sc_packet_user_info*>(ptr);
 
-        // 패킷 크기 검증 추가
-        if (packet->size != sizeof(sc_packet_user_info)) {
-            std::cerr << "[ERROR] 잘못된 USER_INFO 패킷: "
-                << packet->size << " vs " << sizeof(sc_packet_user_info) << std::endl;
-            closesocket(ConnectSocket);
-            return;
-        }
+        std::cout << "[클라] 내 정보 수신 - ID:" << packet->id << " 위치(" << packet->position.x << "," << packet->position.y << "," << packet->position.z << ")\n";
 
         g_myid = packet->id;
         player.SetPosition(packet->position);
@@ -55,21 +159,12 @@ void ProcessPacket(char* ptr)
     case SC_P_ENTER: // 새로 들어온 플레이어의 정보를 포함하고 있는 패킷 타입
     {
         sc_packet_enter* packet = reinterpret_cast<sc_packet_enter*>(ptr);
-
-        // o_type 필드 처리 추가
-        if (packet->o_type != 0) { // 0=플레이어, 1=NPC 등
-            std::cout << "NPC 생성: 타입 " << (int)packet->o_type << std::endl;
-            return;
+        // 새 플레이어 객체 생성 및 초기화
+        if (g_other_players.find(packet->id) == g_other_players.end()) {
+            g_other_players[packet->id] = CPlayer{};
+            std::cout << "[클라] 새 플레이어 생성: " << packet->id << std::endl;
         }
-
-        CPlayer new_player;
-
-        // 해당 플레이어의 위치를 패킷에 포함된 좌표로 설정하는 코드 추가
-        new_player.SetPosition(packet->position);
-
-        g_other_players[packet->id] = new_player;
-        std::cout << "새 플레이어 접속: " << packet->name << " (ID:" << packet->id << ")" << std::endl;
-
+        g_other_players[packet->id].SetPosition(packet->position);
         break;
     }
     case SC_P_MOVE: // 서버가 클라이언트에게 다른 플레이어의 이동 정보를 보내는 패킷 타입
@@ -77,17 +172,11 @@ void ProcessPacket(char* ptr)
         sc_packet_move* packet = reinterpret_cast<sc_packet_move*>(ptr);
         
         // 수신 정보 출력
-        std::cout << "[클라] 서버로부터 위치 수신 - ID: " << packet->id
-            << " (" << packet->position.x << ", " << packet->position.y
-            << ", " << packet->position.z << ")\n";
+        std::cout << "[클라] 이동 패킷 수신 - ID: " << packet->id << " (" << packet->position.x << ", " << packet->position.y << ", " << packet->position.z << ")\n";
 
-<<<<<<< Updated upstream
-=======
-        // 수신 정보 출력
-        std::cout << "[클라] 서버로부터 위치 수신 - ID: " << packet->id << " (" << packet->position.x << ", " << packet->position.y << ", " << packet->position.z << ")\n";
 
         // 이동 처리
->>>>>>> Stashed changes
+
         auto it = g_other_players.find(packet->id);
         if (it != g_other_players.end()) {
             it->second.SetPosition(packet->position);
@@ -145,50 +234,45 @@ void process_data(char* net_buf, size_t io_byte) {
     }
 }
 
+void send_packet(void* packet) {
 
-
-void send_packet(void* packet)
-{
     unsigned char* p = reinterpret_cast<unsigned char*>(packet);
+    int packet_size = p[0];
 
-    std::cout << "[클라] 전송 패킷 내용: ";
-    for (int i = 0; i < p[0]; ++i) {
-        printf("%02X ", p[i]);
+    // 패킷 크기 유효성 검사
+    if (packet_size > MAX_PACKET_SIZE) {
+        std::cerr << "패킷 크기 초과: " << packet_size << std::endl;
+        return;
     }
-    std::cout << std::endl;
 
-    int iSendResult = send(ConnectSocket, (char*)packet, p[0], 0);
-    if (iSendResult == SOCKET_ERROR) {
-        std::cerr << "[ERROR] 패킷 전송 실패: " << WSAGetLastError() << " (Type: " << static_cast<int>(p[1]) << ")" << std::endl;
+    OverlappedEx* overlapped = new OverlappedEx{};
+    overlapped->operation = IO_SEND;
+    memcpy(overlapped->buffer, packet, packet_size);
+
+    overlapped->wsaBuf.buf = overlapped->buffer;
+    overlapped->wsaBuf.len = packet_size;
+
+    int result = WSASend(ConnectSocket, &overlapped->wsaBuf, 1, nullptr, 0, reinterpret_cast<LPWSAOVERLAPPED>(overlapped), nullptr);
+
+    if (result == SOCKET_ERROR && WSAGetLastError() != WSA_IO_PENDING) {
+        std::cerr << "WSASend 오류: " << WSAGetLastError() << std::endl;
+        delete overlapped;
     }
+
+
 }
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-void send_position_to_server(const XMFLOAT3& position) {
-=======
-void SendPlayerPosition(const XMFLOAT3& position) {
->>>>>>> Stashed changes
-=======
 void send_position_to_server(const XMFLOAT3& position)
 {
->>>>>>> Stashed changes
+
     cs_packet_move p;
     p.size = sizeof(p);
     p.type = CS_P_MOVE;
     p.position = position;
-<<<<<<< Updated upstream
+
     send_packet(&p);
 
     // 전송 확인 출력
     std::cout << "[클라] 위치 전송: (" << position.x << ", " << position.y << ", " << position.z << ")\n";
 
-=======
-
-    // 실제 패킷 전송 함수 호출 (구현 필요)
-    send_packet(&p);
-
-    // 디버그 출력
-    std::cout << "[네트워크] 위치 전송: (" << position.x << ", " << position.y << ", " << position.z << ")\n";
->>>>>>> Stashed changes
 }

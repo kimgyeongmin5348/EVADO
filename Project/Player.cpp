@@ -80,11 +80,11 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 
 void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
 {
-<<<<<<< Updated upstream
+
 	// 이부분 서버때문에 한번 손좀 봤음...
-=======
+
 	//server
->>>>>>> Stashed changes
+
 	if (!bUpdateVelocity) {
 		if (nullptr != m_pCamera) { // NULL 체크 추가
 			m_pCamera->Move(xmf3Shift);
@@ -96,10 +96,7 @@ void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
 		}
 	}
 
-<<<<<<< Updated upstream
-=======
 
->>>>>>> Stashed changes
 	if (bUpdateVelocity)
 	{
 		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, xmf3Shift);

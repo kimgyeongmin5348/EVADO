@@ -41,14 +41,10 @@ public:
 	void OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	LRESULT CALLBACK OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 
-<<<<<<< Updated upstream
-=======
+
 	void ItemToHand(int objectIndex);
 
-	//server
-	float GetTimeElapsed() const;
 
->>>>>>> Stashed changes
 private:
 	HINSTANCE m_hInstance;
 	HWND m_hWnd;
@@ -86,45 +82,33 @@ private:
 
 	CGameTimer m_GameTimer;
 
-<<<<<<< Updated upstream
+
 	CScene						*m_pScene = NULL;
 	CPlayer						*m_pPlayer = NULL;
 	CCamera						*m_pCamera = NULL;
-=======
-	CScene* m_pScene = NULL;
+
 	int m_nCurrentScene = 0;
 	int m_nScene = 0;
 
 	int m_nScenes = 0;
 	CScene** m_ppScenes = NULL;
 
-	CPlayer* m_pPlayer = NULL;
-	CCamera* m_pCamera = NULL;
->>>>>>> Stashed changes
+
 
 	POINT m_ptOldCursorPos;
 
-<<<<<<< Updated upstream
-	_TCHAR						m_pszFrameRate[70];
-<<<<<<< Updated upstream
-=======
 
-<<<<<<< Updated upstream
-	bool						item = false;
+	_TCHAR						m_pszFrameRate[70];
+
+	bool	items[4] = { false,false,false,false };
 
 	//server
 	float m_fLastPositionSendTime = 0.0f;  // 위치 전송 시간 추적
->>>>>>> Stashed changes
-=======
-	bool						items[4] = { false,false,false,false };
 
-	float m_fLastPositionSendTime = 0.0f;
 
->>>>>>> Stashed changes
+	
+
 };
-=======
-	_TCHAR m_pszFrameRate[70];
->>>>>>> Stashed changes
 
-	bool items[4] = { false,false,false,false };
-};
+
+

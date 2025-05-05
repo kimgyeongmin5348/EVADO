@@ -24,6 +24,14 @@ std::string user_name;
 void InitializeNetwork();
 void CleanupNetwork();
 
+// Overlapped 구조체 정의
+struct ClientOverlapped : public WSAOVERLAPPED {
+	WSABUF wsaBuf;
+	char buffer[1024];
+	IO_OPERATION operation;
+};
+
+
 //----------------------------------------------------------------
 
 
@@ -68,29 +76,18 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 		{
 			gGameFramework.FrameAdvance();
 
-			// 0.1초 간격으로 위치 전송
-			static float time_accumulator = 0.0f;
-			time_accumulator += gGameFramework.GetTimeElapsed();
-			if (time_accumulator > 0.1f) {
-				SendPlayerPosition(player.GetPosition());
-				time_accumulator = 0.0f;
-			}
 		}
-		gGameFramework.OnDestroy();
 
-		CleanupNetwork();
 
-		return((int)msg.wParam);
 	}
-<<<<<<< Updated upstream
+
 	gGameFramework.OnDestroy();
 
 	// 서버 관련
 	CleanupNetwork();
 
 	return((int)msg.wParam);
-=======
->>>>>>> Stashed changes
+
 }
 
 ATOM MyRegisterClass(HINSTANCE hInstance)
@@ -200,59 +197,13 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 
 // ---------------- 네트워크 초기화 및 종료 ----------------
 
-void InitializeNetwork()
-{
-	WSADATA wsaData;
-	int wsaResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
-	if (wsaResult != 0) {
-		std::cerr << "WSAStartup 실패, 오류: " << wsaResult << std::endl;
-		exit(1);
-	}
-
-	// 서버 연결
-	ConnectSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	if (ConnectSocket == INVALID_SOCKET) {
-		std::cerr << "[ERROR] 소켓 생성 실패: " << WSAGetLastError()
-			<< " (Port: " << SERVER_PORT << ")" << std::endl;
-		WSACleanup();
-		exit(1);
-	}
-
-	struct sockaddr_in serverAddress;
-	serverAddress.sin_family = AF_INET;
-	serverAddress.sin_port = htons(SERVER_PORT);
-	inet_pton(AF_INET, "127.0.0.1", &serverAddress.sin_addr.s_addr);
-
-	if (connect(ConnectSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) == SOCKET_ERROR) {
-		std::cerr << "서버 연결 실패, 오류: " << WSAGetLastError() << std::endl;
-		closesocket(ConnectSocket);
-		WSACleanup();
-		exit(1);
-	}
-
-	std::cout << "서버에 성공적으로 연결되었습니다." << std::endl;
-
-	// 로그인 패킷 보내기
-	cs_packet_login p;
-	p.size = sizeof(p);
-	p.type = CS_P_LOGIN;
-	strcpy_s(p.name, sizeof(p.name), user_name.c_str());
-	send_packet(&p);
-
-	std::thread([]() {
-		char buffer[1024];
-		while (true) {
-			int recv_len = recv(ConnectSocket, buffer, sizeof(buffer), 0);
-			if (recv_len <= 0) break;
-			process_data(buffer, recv_len);
-		}
-		}).detach(); // 메인 스레드와 분리
-
-}
 
 void CleanupNetwork()
 {
-	if (ConnectSocket != INVALID_SOCKET) closesocket(ConnectSocket);
+	if (ConnectSocket != INVALID_SOCKET) {
+		closesocket(ConnectSocket);
+		ConnectSocket = INVALID_SOCKET;
+	}
 	WSACleanup();
 }
 
