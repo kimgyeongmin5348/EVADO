@@ -17,14 +17,11 @@ public:
 	void Reset();
 
     unsigned long GetFrameRate(LPTSTR lpszString = NULL, int nCharacters=0);
-	float GetTimeElapsed()const;
+	float GetTimeElapsed();
 	float GetTotalTime();
 
-<<<<<<< Updated upstream
-	// 서버와 연관
-=======
+
 	//server
->>>>>>> Stashed changes
 	float GetTotalElapsedTime();
 
 private:

@@ -617,32 +617,16 @@ void CGameFramework::FrameAdvance()
 
     AnimateObjects();
 
-<<<<<<< Updated upstream
-	// ¡å¡å¡å ¿©±â¿¡ ³×Æ®¿öÅ© ·ÎÁ÷ Ãß°¡ ¡å¡å¡å
-=======
-
-	// â–¼â–¼â–¼ ì—¬ê¸°ì— ë„¤íŠ¸ì›Œí¬ ë¡œì§ ì¶”ê°€ â–¼â–¼â–¼
->>>>>>> Stashed changes
+	// server ----------------------------------------------------------------------------
 	float fCurrentTime = m_GameTimer.GetTotalElapsedTime();
 	if (fCurrentTime - m_fLastPositionSendTime > 0.5f) {
 		if (m_pPlayer) {
 			XMFLOAT3 vPosition = m_pPlayer->GetPosition();
 			send_position_to_server(vPosition);
-<<<<<<< Updated upstream
-			std::cout << "[Å¬¶óÀÌ¾ðÆ®] À§Ä¡ Àü¼Û: ("
-=======
-			std::cout << "[í´ë¼ì´ì–¸íŠ¸] ìœ„ì¹˜ ì „ì†¡: ("
->>>>>>> Stashed changes
-				<< vPosition.x << ", " << vPosition.y << ", " << vPosition.z << ")\n";
 		}
 		m_fLastPositionSendTime = fCurrentTime;
 	}
-<<<<<<< Updated upstream
-	// ¡ã¡ã¡ã ³×Æ®¿öÅ© ·ÎÁ÷ Ãß°¡ ³¡ ¡ã¡ã¡ã
-
-=======
-	// â–²â–²â–² ë„¤íŠ¸ì›Œí¬ ë¡œì§ ì¶”ê°€ ë â–²â–²â–²
->>>>>>> Stashed changes
+	// -----------------------------------------------------------------------------------
 
 	HRESULT hResult = m_pd3dCommandAllocator->Reset();
 	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
@@ -709,11 +693,5 @@ void CGameFramework::FrameAdvance()
 	XMFLOAT3 xmf3Position = m_pPlayer->GetPosition();
 	_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%4f, %4f, %4f)"), xmf3Position.x, xmf3Position.y, xmf3Position.z);
 	::SetWindowText(m_hWnd, m_pszFrameRate);
-}
-
-
-//server
-float CGameFramework::GetTimeElapsed() const {
-	return m_GameTimer.GetTimeElapsed();
 }
 
