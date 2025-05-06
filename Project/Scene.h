@@ -85,6 +85,10 @@ protected:
 	static D3D12_CPU_DESCRIPTOR_HANDLE	m_d3dSrvCPUDescriptorNextHandle;
 	static D3D12_GPU_DESCRIPTOR_HANDLE	m_d3dSrvGPUDescriptorNextHandle;
 
+	//server
+	std::unordered_map<long long, CRemotePlayer*> m_remotePlayers;
+	CRITICAL_SECTION m_csRemotePlayers;
+
 public:
 	static void CreateCbvSrvDescriptorHeaps(ID3D12Device *pd3dDevice, int nConstantBufferViews, int nShaderResourceViews);
 
@@ -125,6 +129,13 @@ public:
 
 	ID3D12Resource						*m_pd3dcbLights = NULL;
 	LIGHTS								*m_pcbMappedLights = NULL;
+
+	//server
+	
+public:
+	void AddRemotePlayer(long long id, const XMFLOAT3& pos, ID3D12Device* device, ID3D12GraphicsCommandList* cmd, ID3D12RootSignature* root, void* context);
+	void RemoveRemotePlayer(long long id);
+	void UpdateRemotePlayer(long long id, const XMFLOAT3& pos);
 };
 
 class CMainScene : public CScene
