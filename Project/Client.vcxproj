@@ -149,6 +149,7 @@
     <ClCompile Include="Network.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="Object_Items.cpp" />
+    <ClCompile Include="OtherPlayer.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Shader.cpp" />
@@ -168,6 +169,7 @@
     <ClInclude Include="Network.h" />
     <ClInclude Include="object.h" />
     <ClInclude Include="Object_Items.h" />
+    <ClInclude Include="OtherPlayer.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Shader.h" />

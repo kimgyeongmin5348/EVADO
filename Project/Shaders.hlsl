@@ -198,8 +198,8 @@ float4 PSTextureToScreen(VS_TEXTURED_OUTPUT input) : SV_TARGET
 {
     float4 cColor = gtxtTexture.Sample(gssWrap, input.uv);
 
-    //if ((cColor.r >= 1.f) && (cColor.g >= 1.f) && (cColor.b >= 1.f))
-       // discard;
+    if ((cColor.r >= 1.f) && (cColor.g == 0.f) && (cColor.b == 0.f))
+        discard;
 	
     return (cColor);
 }

@@ -1594,7 +1594,7 @@ void CSpider::Animate(float fTimeElapsed)
 		XMFLOAT3 pos = Vector3::Add(GetPosition(), velocity);
 		SetPosition(pos);
 
-		if (distance <= 10.0f)
+		if (distance <= 15.0f)
 		{
 			// 공격 애니메이션 트랙 2 실행
 			m_pSkinnedAnimationController->SetTrackEnable(0, false);
