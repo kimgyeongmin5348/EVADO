@@ -7,6 +7,7 @@
 #include "Shader.h"
 #include "Player.h"
 #include "Object_Items.h"
+#include "OtherPlayer.h"
 #include "Map.h"
 
 #define MAX_LIGHTS						16 
