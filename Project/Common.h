@@ -29,6 +29,7 @@ constexpr unsigned short MAP_WIDTH = 8;
 
 #pragma pack (push, 1)
 
+#define MAX_PACKET_SIZE 1024
 #define MAX_USER 100
 #define BUF_SIZE 1024
 
@@ -57,7 +58,7 @@ struct sc_packet_enter {
 	char			type;
 	long long		id;
 	char			name[MAX_ID_LENGTH];
-	char			o_type;
+	//char			o_type;
 	XMFLOAT3		position;
 };
 

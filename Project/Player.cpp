@@ -487,3 +487,4 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 		}
 	}
 }
+

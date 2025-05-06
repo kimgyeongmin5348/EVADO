@@ -2,6 +2,7 @@
 #include "Common.h"
 #include "Object.h"
 #include "Player.h"
+#include "Scene.h"
 
 // 클라이언트에서 서버로 가야할것 -----------
 // 
@@ -18,7 +19,6 @@
 // 
 // ----------------------------------------
 
-constexpr int MAX_PACKET_SIZE = 4096;
 
 enum IO_OPERATION { IO_RECV, IO_SEND, IO_CONNECT };
 
@@ -36,6 +36,13 @@ extern SOCKET ConnectSocket;
 extern std::unordered_map<long long, CPlayer> g_other_players;
 extern long long g_myid;
 extern std::string user_name;
+
+extern CScene* g_pScene;
+extern ID3D12Device* g_pd3dDevice;
+extern ID3D12GraphicsCommandList* g_pd3dCommandList;
+extern ID3D12RootSignature* g_pd3dGraphicsRootSignature;
+extern void* g_pContext;
+
 
 void ProcessPacket(char* ptr);
 void process_data(char* net_buf, size_t io_byte);

@@ -19,10 +19,14 @@ D3D12_GPU_DESCRIPTOR_HANDLE	CScene::m_d3dSrvGPUDescriptorNextHandle;
 
 CScene::CScene()
 {
+	InitializeCriticalSection(&m_csRemotePlayers);
 }
 
 CScene::~CScene()
 {
+	DeleteCriticalSection(&m_csRemotePlayers);
+	// m_remotePlayers 메모리 해제 추가
+	for (auto& [id, pPlayer] : m_remotePlayers) delete pPlayer;
 }
 
 void CScene::BuildDefaultLightsAndMaterials()
@@ -612,6 +616,12 @@ void CStartScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 	UpdateShaderVariables(pd3dCommandList);
 
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
+
+	EnterCriticalSection(&m_csRemotePlayers);
+	for (auto& [id, pPlayer] : m_remotePlayers) {
+		pPlayer->Render(pd3dCommandList, pCamera);
+	}
+	LeaveCriticalSection(&m_csRemotePlayers);
 }
 
 void CStartScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
@@ -629,3 +639,36 @@ void CStartScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM
 		break;
 	}
 }
+
+//server
+void CScene::AddRemotePlayer(long long id, const XMFLOAT3& pos, ID3D12Device* device, ID3D12GraphicsCommandList* cmd, ID3D12RootSignature* root, void* context) {
+	EnterCriticalSection(&m_csRemotePlayers);
+	if (m_remotePlayers.find(id) == m_remotePlayers.end()) {
+		CRemotePlayer* pNew = new CRemotePlayer();
+		//pNew->BuildObjects(device, cmd, root, context);
+		pNew->SetPosition(pos);
+		m_remotePlayers[id] = pNew;
+	}
+	LeaveCriticalSection(&m_csRemotePlayers);
+}
+
+void CScene::RemoveRemotePlayer(long long id) {
+	EnterCriticalSection(&m_csRemotePlayers);
+	auto it = m_remotePlayers.find(id);
+	if (it != m_remotePlayers.end()) {
+		it->second->ReleaseShaderVariables();
+		delete it->second;
+		m_remotePlayers.erase(it);
+	}
+	LeaveCriticalSection(&m_csRemotePlayers);
+}
+
+void CScene::UpdateRemotePlayer(long long id, const XMFLOAT3& pos) {
+	EnterCriticalSection(&m_csRemotePlayers);
+	auto it = m_remotePlayers.find(id);
+	if (it != m_remotePlayers.end()) {
+		it->second->SetPosition(pos);
+	}
+	LeaveCriticalSection(&m_csRemotePlayers);
+}
+
