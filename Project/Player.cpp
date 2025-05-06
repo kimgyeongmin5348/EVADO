@@ -475,6 +475,27 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 			}
 
 		}
+		else if (isSwing) {
+			m_pSkinnedAnimationController->SetTrackEnable(0, false);
+			m_pSkinnedAnimationController->SetTrackEnable(1, false);
+			m_pSkinnedAnimationController->SetTrackEnable(2, false);
+			m_pSkinnedAnimationController->SetTrackEnable(3, false);
+			m_pSkinnedAnimationController->SetTrackEnable(4, true);
+
+			m_pSkinnedAnimationController->SetTrackSpeed(4, 2.0f);
+
+			float currentPos = m_pSkinnedAnimationController->m_pAnimationTracks[4].m_fPosition;
+			int animSetIndex = m_pSkinnedAnimationController->m_pAnimationTracks[4].m_nAnimationSet;
+			float length = m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[animSetIndex]->m_fLength;
+
+			if (currentPos >= 1.5)
+			{
+				isSwing = false;
+				m_pSkinnedAnimationController->SetTrackEnable(4, false); // 애니메이션 끝났으니까 꺼!
+				m_pSkinnedAnimationController->SetTrackPosition(4, 0.0f); // 다음에 또 실행할 수 있게 초기화
+			}
+
+		}
 		else if (::IsZero(fLength))
 		{
 			m_pSkinnedAnimationController->SetTrackEnable(0, true);
