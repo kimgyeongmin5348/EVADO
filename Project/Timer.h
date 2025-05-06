@@ -19,9 +19,6 @@ public:
     unsigned long GetFrameRate(LPTSTR lpszString = NULL, int nCharacters=0);
 	float GetTimeElapsed();
 	float GetTotalTime();
-	// 서버와 연관
-	float GetTotalElapsedTime();
-
 
 	//server
 	float GetTotalElapsedTime();
