@@ -12,9 +12,13 @@ std::unordered_map<long long, CPlayer> g_other_players;
 SOCKET ConnectSocket = INVALID_SOCKET;
 HANDLE g_hIOCP = INVALID_HANDLE_VALUE;
 
+WSADATA wsaData;
+
 CPlayer player;
 CGameObject object;
 long long g_myid = 0;
+
+
 
 void PostRecv();
 
@@ -100,7 +104,6 @@ void send_packet(void* packet) {
 
 void InitializeNetwork()
 {
-    WSADATA wsaData;
     WSAStartup(MAKEWORD(2, 2), &wsaData);
 
     // 1. IOCP 핸들 생성
@@ -149,11 +152,11 @@ void InitializeNetwork()
     cs_packet_login p;
     p.size = sizeof(p);
     p.type = CS_P_LOGIN;
-    p.position = player.GetPosition();
+   // p.position = player.GetPosition();
     strcpy_s(p.name, sizeof(p.name), user_name.c_str());
     send_packet(&p);
 
-    std::cout << "[클라] 로그인 패킷 전송: 이름=" << p.name << " 위치(" << p.position.x << "," << p.position.y << "," << p.position.z << ")\n";
+    std::cout << "[클라] 로그인 패킷 전송: 이름=" << p.name << "\n";
 }
 
 void ProcessPacket(char* ptr)
@@ -191,88 +194,111 @@ void ProcessPacket(char* ptr)
     case SC_P_ENTER: // 새로 들어온 플레이어의 정보를 포함하고 있는 패킷 타입
     {
         sc_packet_enter* packet = reinterpret_cast<sc_packet_enter*>(ptr);
-        std::cout << "[클라] 새 플레이어 생성: " << packet->id << std::endl;
-        g_pScene->AddRemotePlayer(packet->id, packet->position, g_pd3dDevice, g_pd3dCommandList, g_pd3dGraphicsRootSignature, g_pContext);
+        int id = packet->id;
+        std::cout << "[클라] 내 플레이어 생성: " << id << std::endl;
 
-        //// 새 플레이어 객체 생성 및 초기화
-        //if (g_other_players.find(packet->id) == g_other_players.end()) {
-        //    g_other_players[packet->id] = CPlayer{};
-        //    std::cout << "[클라] 새 플레이어 생성: " << packet->id << std::endl;
-        //}
-        //g_other_players[packet->id].SetPosition(packet->position);
+        if (id == g_myid) { // 자신의 아바타 생성 및 카메라 위치 조정            
+            std::cout << "[클라] 새 플레이어 생성: " << id
+                << " (" << packet->name << ")" << std::endl;
+
+            // 밑에 이거 맞는지 모르겠음..
+            //g_pScene->AddRemotePlayer(packet->id, packet->position, g_pd3dDevice, g_pd3dCommandList, g_pd3dGraphicsRootSignature, g_pContext);
+
+        }
+        else if (id < MAX_USER) {  // 다른플레이어 show()
+           
+        }
+        else { // NPC 담당
+            std::cout << "[클라] NPC 생성: " << id << std::endl;
+
+        }
+
         break;
     }
-    case SC_P_MOVE: // 서버가 클라이언트에게 다른 플레이어의 이동 정보를 보내는 패킷 타입
+    case SC_P_MOVE: 
     {
         sc_packet_move* packet = reinterpret_cast<sc_packet_move*>(ptr);
-        std::cout << "[클라] 이동 패킷 수신 - ID: " << packet->id << " (" << packet->position.x << ", " << packet->position.y << ", " << packet->position.z << ")\n";
-        g_pScene->UpdateRemotePlayer(packet->id, packet->position);
+        int other_id = packet->id;
+        if (other_id == g_myid) { // 자기 위치 갱신
+            std::cout << "[클라] 내 위치 이동 - ID: " << other_id << " (" 
+                << packet->position.x << ", " 
+                << packet->position.y << ", " 
+                << packet->position.z << ")\n";
 
 
-
-        // 이동 처리
-
-        auto it = g_other_players.find(packet->id);
-        if (it != g_other_players.end()) {
-            it->second.SetPosition(packet->position);
-
+        }
+        else if (other_id < MAX_USER) { // 다른 플레이어 위치 갱신
             // 다른 플레이어 위치 업데이트 확인
-            std::cout << "[클라] " << packet->id << "번 플레이어 위치 갱신: ("
+            std::cout << "[클라] " << other_id << "번 플레이어 위치 갱신: ("
                 << packet->position.x << ", "
                 << packet->position.y << ", "
                 << packet->position.z << ")\n";
+
+            // 다른플레이어 보이게 하는부분 넣어야 할듯?
+            //g_pScene->UpdateRemotePlayer(packet->id, packet->position);
+
         }
+        else { //NPC 위치 갱신
+            std::cout << "[클라] NPC 이동: " << other_id << std::endl;
+        }
+
+        
         break;
     }
 
     case SC_P_LEAVE: // 서버가 클라에게 다른 플레이어가 게임을 떠났음을 알려주는 패킷 타입
     {
         sc_packet_leave* packet = reinterpret_cast<sc_packet_leave*>(ptr);
+        int other_id = packet->id;
 
-        // 플레이어 제거 및 리소스 정리
-        auto it = g_other_players.find(packet->id);
-        if (it != g_other_players.end()) {
-            it->second.ReleaseShaderVariables(); // 그래픽 리소스 해제
-            g_other_players.erase(it);
+        if (other_id == g_myid) {
+            std::cout << "[클라] 내 플레이어 제거: " << other_id << std::endl;
 
-            // 플레이어 퇴장 알림
-            std::cout << "플레이어 퇴장: ID=" << packet->id << std::endl;
+            //예시
+            // avatar.hide();
+
         }
+        else if (other_id < MAX_USER) {
+            std::cout << "[클라] 플레이어 퇴장: " << other_id << std::endl;
+
+            //예시
+            g_other_players.erase(other_id);
+        }
+        else {
+            std::cout << "[클라] NPC 제거: " << other_id << std::endl;
+        }
+
+        
         break;
     }
     default:
         printf("알 수 없는 패킷 타입 [%d]\n", ptr[1]);
-        closesocket(ConnectSocket);
-        exit(1);
     }
 }
 
 // process_data() 함수 개선
 void process_data(char* net_buf, size_t io_byte) {
-    static vector<char> packet_buffer;
-    packet_buffer.insert(packet_buffer.end(), net_buf, net_buf + io_byte);
 
-    while (!packet_buffer.empty()) {
-        // 1. 최소 패킷 크기 검증
-        if (packet_buffer.size() < sizeof(unsigned char)) break;
-        unsigned char packet_size = packet_buffer[0];
+    char* ptr = net_buf;
+    static size_t in_packet_size = 0;
+    static size_t saved_packet_size = 0;
+    static char packet_buffer[BUF_SIZE];
 
-        // 2. 패킷 크기 유효성 검사
-        if (packet_size < 2 || packet_size > MAX_PACKET_SIZE) {
-            std::cerr << "[클라] 잘못된 패킷 크기: " << (int)packet_size << std::endl;
-            closesocket(ConnectSocket);
-            packet_buffer.clear();
-            return;
+    while (0 != io_byte) {
+        if (0 == in_packet_size) in_packet_size = ptr[0];
+        if (io_byte + saved_packet_size >= in_packet_size) {
+            memcpy(packet_buffer + saved_packet_size, ptr, in_packet_size - saved_packet_size);
+            ProcessPacket(packet_buffer);
+            ptr += in_packet_size - saved_packet_size;
+            io_byte -= in_packet_size - saved_packet_size;
+            in_packet_size = 0;
+            saved_packet_size = 0;
         }
-
-        // 3. 완전한 패킷 도착 확인
-        if (packet_buffer.size() < packet_size) break;
-
-        // 4. 패킷 처리
-        ProcessPacket(packet_buffer.data());
-
-        // 5. 처리된 데이터 제거
-        packet_buffer.erase(packet_buffer.begin(), packet_buffer.begin() + packet_size);
+        else {
+            memcpy(packet_buffer + saved_packet_size, ptr, io_byte);
+            saved_packet_size += io_byte;
+            io_byte = 0;
+        }
     }
 }
 

@@ -25,9 +25,8 @@ enum IO_OPERATION { IO_RECV, IO_SEND, IO_CONNECT };
 struct OverlappedEx {
     WSAOVERLAPPED overlapped;
     WSABUF wsaBuf;
-    char buffer[MAX_PACKET_SIZE];
+    char buffer[BUF_SIZE];
     IO_OPERATION operation;
-    int bytesTransferred;
 };
 
 
