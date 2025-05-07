@@ -5,9 +5,12 @@
 //#define SET_DATA_FROM_DATABASE
 #define SERVER_STRESS_TEST
 
+#define MAX_PACKET_SIZE 1024
 #define SERVER_PORT 3000
 #define NUM_WORKER_THREADS 4
+#define MAX_USER 5000
 
+#define BUF_SIZE 1024
 
 constexpr char SC_P_USER_INFO = 1;
 constexpr char SC_P_MOVE = 2;
@@ -29,9 +32,7 @@ constexpr unsigned short MAP_WIDTH = 8;
 
 #pragma pack (push, 1)
 
-#define MAX_PACKET_SIZE 1024
-#define MAX_USER 100
-#define BUF_SIZE 1024
+
 
 
 struct sc_packet_user_info {
@@ -71,7 +72,7 @@ struct sc_packet_leave {
 struct cs_packet_login {
 	unsigned char	size;
 	char			type;
-	XMFLOAT3		position;
+	//XMFLOAT3		position;
 	char			name[MAX_ID_LENGTH];
 
 };
