@@ -85,16 +85,16 @@ void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
 
 	//server
 
-	if (!bUpdateVelocity) {
-		if (nullptr != m_pCamera) { // NULL 체크 추가
-			m_pCamera->Move(xmf3Shift);
-		}
-		else {
-			// 에러 로깅 또는 카메라 생성
-			std::cerr << "[WARN] 카메라가 초기화되지 않았습니다!" << std::endl;
-			m_pCamera = new CCamera(); // 임시 생성 (필요시)
-		}
-	}
+	//if (!bUpdateVelocity) {
+	//	if (nullptr != m_pCamera) { // NULL 체크 추가
+	//		m_pCamera->Move(xmf3Shift);
+	//	}
+	//	else {
+	//		// 에러 로깅 또는 카메라 생성
+	//		std::cerr << "[WARN] 카메라가 초기화되지 않았습니다!" << std::endl;
+	//		m_pCamera = new CCamera(); // 임시 생성 (필요시)
+	//	}
+	//}
 
 
 	if (bUpdateVelocity)
@@ -334,9 +334,9 @@ CCamera *CTerrainPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 	{
 		case FIRST_PERSON_CAMERA:
 			SetFriction(250.0f);
-			SetGravity(XMFLOAT3(0.0f, -400.0f, 0.0f));
+			SetGravity(XMFLOAT3(0.0f, -100.0f, 0.0f));
 			SetMaxVelocityXZ(300.0f);
-			SetMaxVelocityY(400.0f);
+			SetMaxVelocityY(800.0f);
 			m_pCamera = OnChangeCamera(FIRST_PERSON_CAMERA, nCurrentCameraMode);
 			m_pCamera->SetTimeLag(0.0f);
 			m_pCamera->SetOffset(XMFLOAT3(0.0f, 1.5f, 0.0f));
@@ -471,7 +471,7 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 			{
 				isJump = false;
 				m_pSkinnedAnimationController->SetTrackEnable(3, false); // 애니메이션 끝났으니까 꺼!
-				//m_pSkinnedAnimationController->SetTrackPosition(3, 0.0f); // 다음에 또 실행할 수 있게 초기화
+				m_pSkinnedAnimationController->SetTrackPosition(3, 0.0f); // 다음에 또 실행할 수 있게 초기화
 			}
 
 		}
