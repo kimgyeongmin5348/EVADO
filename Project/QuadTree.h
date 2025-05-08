@@ -89,7 +89,7 @@ private:
             for (int i = 0; i < 4; i++)
             {
                 if (node->children[i]->bounds.Intersects(object->GetBoundingBox())) // CGameObject에서 BoundingBox 반환 가정
-                    InsertObject(node->children[i], object);
+                    InsertObject(node->children[i], object, maxDepth);
             }
         }
     }
