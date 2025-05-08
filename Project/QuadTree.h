@@ -39,7 +39,7 @@ public:
 
     void Insert(CGameObject* object)
     {
-        InsertObject(root, object);
+        InsertObject(root, object, 0);
     }
 
 private:
