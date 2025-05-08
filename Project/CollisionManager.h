@@ -20,7 +20,7 @@ public:
 
     void Update(CGameObject* player, std::vector<CGameObject*>& collisions)
     {
-        // 플레이어가 속한 노드 탐색 (FindNode 메서드 추가 필요)
+        // 플레이어가 속한 노드 탐색
         QuadTreeNode* playerNode = m_pQuadTree->FindNode(m_pQuadTree->root, player->GetBoundingBox());
         if (!playerNode) return;
 

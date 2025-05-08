@@ -995,6 +995,50 @@ void CGameObject::Rotate(XMFLOAT4 *pxmf4Quaternion)
 	UpdateTransform(NULL);
 }
 
+void CGameObject::CalculateBoundingBox()
+{
+	m_BoundingBox = BoundingBox();
+
+	std::vector<CGameObject*> nodesToProcess = { this };
+	bool isFirst = true;
+
+	while (!nodesToProcess.empty())
+	{
+		CGameObject* current = nodesToProcess.back();
+		nodesToProcess.pop_back();
+
+		if (current->m_pMesh)
+		{
+			BoundingBox localBox = current->m_pMesh->GetBoundingBox();
+			BoundingBox transformedBox;
+
+			localBox.Transform(transformedBox, XMLoadFloat4x4(&current->m_xmf4x4World));
+
+			if (isFirst)
+			{
+				m_BoundingBox = transformedBox;
+				isFirst = false;
+			}
+			else
+			{
+				BoundingBox::CreateMerged(m_BoundingBox, m_BoundingBox, transformedBox);
+			}
+		}
+
+		if (current->m_pChild)
+		{
+			CGameObject* child = current->m_pChild;
+			nodesToProcess.push_back(child);
+
+			while (child->m_pSibling)
+			{
+				child = child->m_pSibling;
+				nodesToProcess.push_back(child);
+			}
+		}
+	}
+}
+
 //#define _WITH_DEBUG_FRAME_HIERARCHY
 
 CTexture *CGameObject::FindReplicatedTexture(_TCHAR *pstrTextureName)

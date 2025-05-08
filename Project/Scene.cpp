@@ -90,8 +90,12 @@ void CScene::InitializeCollisionSystem()
 	BoundingBox worldBounds(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1000.0f, 1000.0f, 100.0f));
 	m_CollisionManager.Build(worldBounds, 5, 5);
 
-	for (int i = 0; i < m_nGameObjects; i++) {
+	for (int i = 0; i < m_nGameObjects; ++i) {
 		m_CollisionManager.InsertObject(m_ppGameObjects[i]);
+	}
+
+	for (int i = 0; i < m_nHierarchicalGameObjects; ++i) {
+		m_CollisionManager.InsertObject(m_ppHierarchicalGameObjects[i]);
 	}
 }
 
@@ -104,8 +108,6 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature); 
 
 	BuildDefaultLightsAndMaterials();
-
-	InitializeCollisionSystem();
 
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
@@ -179,6 +181,8 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	//pTextureToScreenShader->SetTexture(pTexture);
 
 	//m_ppShaders[0] = pTextureToScreenShader;
+
+	InitializeCollisionSystem();
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
