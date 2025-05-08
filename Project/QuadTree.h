@@ -42,6 +42,23 @@ public:
         InsertObject(root, object, 0);
     }
 
+    QuadTreeNode* FindNode(QuadTreeNode* node, const BoundingBox& aabb)
+    {
+        if (!node || !node->bounds.Intersects(aabb))
+            return nullptr;
+
+        if (node->isLeaf || !node->children[0])
+            return node;
+
+        for (int i = 0; i < 4; i++)
+        {
+            QuadTreeNode* result = FindNode(node->children[i], aabb);
+            if (result)
+                return result;
+        }
+        return node; // 자식 노드가 없거나 교차하지 않을 경우 현재 노드 반환
+    }
+
 private:
     void Subdivide(QuadTreeNode* node, int depth)
     {
@@ -53,10 +70,10 @@ private:
         float halfY = extents.y * 0.5f;
 
         BoundingBox childBounds[4];
-        childBounds[0] = BoundingBox(XMFLOAT3(center.x - halfX, center.y - halfY, center.z), XMFLOAT3(halfX, halfY, extents.z)); // 왼쪽 아래
-        childBounds[1] = BoundingBox(XMFLOAT3(center.x + halfX, center.y - halfY, center.z), XMFLOAT3(halfX, halfY, extents.z)); // 오른쪽 아래
-        childBounds[2] = BoundingBox(XMFLOAT3(center.x - halfX, center.y + halfY, center.z), XMFLOAT3(halfX, halfY, extents.z)); // 왼쪽 위
-        childBounds[3] = BoundingBox(XMFLOAT3(center.x + halfX, center.y + halfY, center.z), XMFLOAT3(halfX, halfY, extents.z)); // 오른쪽 위
+        childBounds[0] = BoundingBox(XMFLOAT3(center.x + halfX, center.y + halfY, center.z), XMFLOAT3(halfX, halfY, extents.z)); // 오른쪽 위
+        childBounds[1] = BoundingBox(XMFLOAT3(center.x - halfX, center.y + halfY, center.z), XMFLOAT3(halfX, halfY, extents.z)); // 왼쪽 위
+        childBounds[2] = BoundingBox(XMFLOAT3(center.x - halfX, center.y - halfY, center.z), XMFLOAT3(halfX, halfY, extents.z)); // 왼쪽 아래
+        childBounds[3] = BoundingBox(XMFLOAT3(center.x + halfX, center.y - halfY, center.z), XMFLOAT3(halfX, halfY, extents.z)); // 오른쪽 아래
 
         for (int i = 0; i < 4; i++)
         {
@@ -73,12 +90,12 @@ private:
             if (node->objects.size() < maxObjectsPerNode || depth >= maxDepth)
             {
                 node->objects.push_back(object);
-                object->m_pNode = node; // CGameObject에 node 포인터 설정
+                object->m_pNode = node;
             }
             else
             {
                 Subdivide(node, depth + 1);
-                node->objects.push_back(object); // 임시 삽입
+                node->objects.push_back(object);
                 for (CGameObject* obj : node->objects)
                     Redistribute(node, obj);
                 node->objects.clear();
