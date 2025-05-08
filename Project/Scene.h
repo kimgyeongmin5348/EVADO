@@ -140,6 +140,8 @@ public:
 	void AddRemotePlayer(long long id, const XMFLOAT3& pos, ID3D12Device* device, ID3D12GraphicsCommandList* cmd, ID3D12RootSignature* root, void* context);
 	void RemoveRemotePlayer(long long id);
 	void UpdateRemotePlayer(long long id, const XMFLOAT3& pos);
+
+	void InitializeCollisionSystem();
 };
 
 class CMainScene : public CScene

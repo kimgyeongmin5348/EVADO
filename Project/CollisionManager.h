@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Object.h"
 #include "QuadTree.h"
 
 class CCollisionManager
