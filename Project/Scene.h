@@ -142,6 +142,7 @@ public:
 	void UpdateRemotePlayer(long long id, const XMFLOAT3& pos);
 
 	void InitializeCollisionSystem();
+	void GenerateGameObjectsBoundingBox();
 };
 
 class CMainScene : public CScene

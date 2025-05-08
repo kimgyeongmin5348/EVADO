@@ -94,8 +94,15 @@ void CScene::InitializeCollisionSystem()
 		m_CollisionManager.InsertObject(m_ppGameObjects[i]);
 	}
 
-	for (int i = 0; i < m_nHierarchicalGameObjects; ++i) {
-		m_CollisionManager.InsertObject(m_ppHierarchicalGameObjects[i]);
+	//for (int i = 0; i < m_nHierarchicalGameObjects; ++i) {
+	//	m_CollisionManager.InsertObject(m_ppHierarchicalGameObjects[i]);
+	//}
+}
+
+void CScene::GenerateGameObjectsBoundingBox()
+{
+	for (int i = 0; i < m_nGameObjects; ++i) {
+		m_ppGameObjects[i]->CalculateBoundingBox();
 	}
 }
 
@@ -181,6 +188,8 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	//pTextureToScreenShader->SetTexture(pTexture);
 
 	//m_ppShaders[0] = pTextureToScreenShader;
+
+	GenerateGameObjectsBoundingBox();
 
 	InitializeCollisionSystem();
 
