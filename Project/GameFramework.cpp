@@ -291,15 +291,19 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 	{
 		case WM_LBUTTONDOWN:
 		case WM_RBUTTONDOWN:
-			m_pPlayer->isSwing = true;
+			if (items[1]) {
+				flashlightToggle = !flashlightToggle;
+				m_pScene->BuildDefaultLightsAndMaterials(flashlightToggle);
+			}
+			if (items[2]) m_pPlayer->isSwing = true;
 			break;
 		case WM_LBUTTONUP:
 		case WM_RBUTTONUP:
-			//::ReleaseCapture();
 			break;
 		case WM_MOUSEMOVE:
 			::SetCapture(hWnd);
 			::GetCursorPos(&m_ptOldCursorPos);
+			//::ReleaseCapture();
 			break;
 		default:
 			break;
@@ -331,8 +335,6 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 				ChangeSwapChainState();
 				break;		
 			case 'F':
-				for (int i = 1; i < 4; ++i)
-					std::cout << m_pScene->m_ppHierarchicalGameObjects[i]->GetPosition().y << endl;
 				break;
 				case '1':
 				case '2':
