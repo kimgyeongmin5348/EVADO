@@ -997,8 +997,6 @@ void CGameObject::Rotate(XMFLOAT4 *pxmf4Quaternion)
 
 void CGameObject::CalculateBoundingBox()
 {
-	m_BoundingBox = BoundingBox();
-
 	std::vector<CGameObject*> nodesToProcess = { this };
 	bool isFirst = true;
 

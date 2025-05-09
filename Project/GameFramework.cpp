@@ -489,7 +489,10 @@ void CGameFramework::BuildObjects()
 
 		CTerrainPlayer* pPlayer = new CTerrainPlayer(m_pd3dDevice, m_pd3dCommandList, m_ppScenes[1]->GetGraphicsRootSignature(), m_ppScenes[1]->m_pTerrain);
 		m_ppScenes[1]->SetPlayer(pPlayer);
-		m_pPlayer->SetPosition(XMFLOAT3(0,0,0));
+		m_pPlayer->SetPosition(XMFLOAT3(0, 0, 0));
+
+		m_ppScenes[1]->GenerateGameObjectsBoundingBox();
+		m_ppScenes[1]->InitializeCollisionSystem();
 	}
 
 //#ifdef _WITH_TERRAIN_PLAYER

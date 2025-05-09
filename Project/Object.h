@@ -367,7 +367,7 @@ public:
 
 	CAnimationController* m_pSkinnedAnimationController = NULL;
 
-	BoundingBox						m_BoundingBox;
+	BoundingBox						m_BoundingBox = BoundingBox();
 	QuadTreeNode*					m_pNode;
 
 	void SetMesh(CMesh* pMesh);

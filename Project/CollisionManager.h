@@ -6,6 +6,7 @@ class CCollisionManager
 {
 private:
     CQuadTree* m_pQuadTree;
+    std::vector<CGameObject*> m_collisions;
 
 public:
     CCollisionManager() { m_pQuadTree = new CQuadTree(); }
@@ -18,17 +19,17 @@ public:
 
     void InsertObject(CGameObject* object) { m_pQuadTree->Insert(object); }
 
-    void Update(CGameObject* player, std::vector<CGameObject*>& collisions)
+    void Update(CGameObject* player)
     {
         // 플레이어가 속한 노드 탐색
         QuadTreeNode* playerNode = m_pQuadTree->FindNode(m_pQuadTree->root, player->GetBoundingBox());
         if (!playerNode) return;
 
         // 근처 오브젝트 수집
-        CollectNearbyObjects(playerNode, player->GetBoundingBox(), collisions);
+        CollectNearbyObjects(playerNode, player->GetBoundingBox(), m_collisions);
 
         // 충돌 검사 및 처리
-        for (CGameObject* obj : collisions)
+        for (CGameObject* obj : m_collisions)
         {
             if (obj != player && player->GetBoundingBox().Intersects(obj->GetBoundingBox()))
             {
@@ -59,7 +60,7 @@ private:
     void HandleCollision(CGameObject* a, CGameObject* b)
     {
         // 충돌 처리 로직 (예: 위치 조정, 이벤트 발생 등)
-        OutputDebugStringA("Collision detected between objects\n");
+       cout << "Collision detected between objects" << endl;
         // 예: a->SetPosition(...), b->SetPosition(...)
     }
 };
