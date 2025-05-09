@@ -580,6 +580,19 @@ void CGameFramework::AnimateObjects()
 	m_pPlayer->Animate(fTimeElapsed);
 
 	if (m_nCurrentScene == 0) m_pPlayer->SetPosition(XMFLOAT3(0, 0, 0));
+	if (m_nCurrentScene == 1) {
+		for (int i = 0; i < 4; ++i)
+		{
+			if (!items[i]) // 손에 들리지 않은 상태일 때만
+			{	
+				if (m_pScene->m_ppHierarchicalGameObjects[i]) {
+					XMFLOAT3 pos = m_pScene->m_ppHierarchicalGameObjects[i]->GetPosition();
+					if (pos.y > 0.0f) pos.y -= 0.1;
+					m_pScene->m_ppHierarchicalGameObjects[i]->SetPosition(pos);
+				}
+			}
+		}
+	}
 }
 
 void CGameFramework::WaitForGpuComplete()
