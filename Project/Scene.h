@@ -87,8 +87,8 @@ protected:
 	static D3D12_GPU_DESCRIPTOR_HANDLE	m_d3dSrvGPUDescriptorNextHandle;
 
 	//server
-	std::unordered_map<long long, CRemotePlayer*> m_remotePlayers;
-	CRITICAL_SECTION m_csRemotePlayers;
+	//std::unordered_map<long long, CRemotePlayer*> m_remotePlayers;
+	//CRITICAL_SECTION m_csRemotePlayers;
 
 public:
 	static void CreateCbvSrvDescriptorHeaps(ID3D12Device *pd3dDevice, int nConstantBufferViews, int nShaderResourceViews);

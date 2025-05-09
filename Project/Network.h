@@ -36,7 +36,7 @@ extern std::unordered_map<long long, CPlayer> g_other_players;
 extern long long g_myid;
 extern std::string user_name;
 
-extern CScene* g_pScene;
+//extern CScene* g_pScene;
 extern ID3D12Device* g_pd3dDevice;
 extern ID3D12GraphicsCommandList* g_pd3dCommandList;
 extern ID3D12RootSignature* g_pd3dGraphicsRootSignature;

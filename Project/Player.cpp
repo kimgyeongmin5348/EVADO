@@ -12,8 +12,8 @@
 CPlayer::CPlayer()
 {
 	//----------------------------------------------------------------------
-	m_pCamera = new CCamera(); // ¸í½ÃÀû »ý¼º
-	m_pCamera->SetPosition({ 0,0,0 }); // ±âº» À§Ä¡ ¼³Á¤
+	m_pCamera = new CCamera(); // ëª…ì‹œì  ìƒì„±
+	m_pCamera->SetPosition({ 0,0,0 }); // ê¸°ë³¸ ìœ„ì¹˜ ì„¤ì •
 	//----------------------------------------------------------------------
 
 	m_pCamera = NULL;
@@ -37,8 +37,8 @@ CPlayer::CPlayer()
 	m_pCameraUpdatedContext = NULL;
 
 	//server
-	m_pCamera = new CCamera(); // ¸í½ÃÀû »ý¼º
-	m_pCamera->SetPosition({ 0,0,0 }); // ±âº» À§Ä¡ ¼³Á¤
+	m_pCamera = new CCamera(); // ëª…ì‹œì  ìƒì„±
+	m_pCamera->SetPosition({ 0,0,0 }); // ê¸°ë³¸ ìœ„ì¹˜ ì„¤ì •
 }
 
 CPlayer::~CPlayer()
@@ -81,20 +81,8 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
 {
 
-	// ÀÌºÎºÐ ¼­¹ö¶§¹®¿¡ ÇÑ¹ø ¼ÕÁ» ºÃÀ½...
+	// ì´ë¶€ë¶„ ì„œë²„ë•Œë¬¸ì— í•œë²ˆ ì†ì¢€ ë´¤ìŒ...
 
-	//server
-
-	//if (!bUpdateVelocity) {
-	//	if (nullptr != m_pCamera) { // NULL Ã¼Å© Ãß°¡
-	//		m_pCamera->Move(xmf3Shift);
-	//	}
-	//	else {
-	//		// ¿¡·¯ ·Î±ë ¶Ç´Â Ä«¸Þ¶ó »ý¼º
-	//		std::cerr << "[WARN] Ä«¸Þ¶ó°¡ ÃÊ±âÈ­µÇÁö ¾Ê¾Ò½À´Ï´Ù!" << std::endl;
-	//		m_pCamera = new CCamera(); // ÀÓ½Ã »ý¼º (ÇÊ¿ä½Ã)
-	//	}
-	//}
 
 
 	if (bUpdateVelocity)
@@ -260,6 +248,7 @@ void CPlayer::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamer
 	if (nCameraMode == THIRD_PERSON_CAMERA) CGameObject::Render(pd3dCommandList, pCamera);
 }
 
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 
 #define _WITH_DEBUG_CALLBACK_DATA
@@ -419,7 +408,7 @@ void CTerrainPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVeloci
 {
 	if (dwDirection & DIR_DOWN)
 	{
-		fDistance *= 1.5f; // Shift°¡ ´­¸®¸é ÀÌµ¿ ¼Óµµ¸¦ 1.5¹è Áõ°¡
+		fDistance *= 1.5f; // Shiftê°€ ëˆŒë¦¬ë©´ ì´ë™ ì†ë„ë¥¼ 1.5ë°° ì¦ê°€
 	}
 
 	if (!isJump) {
@@ -470,8 +459,8 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 			if (currentPos >= 1.5)
 			{
 				isJump = false;
-				m_pSkinnedAnimationController->SetTrackEnable(3, false); // ¾Ö´Ï¸ÞÀÌ¼Ç ³¡³µÀ¸´Ï±î ²¨!
-				m_pSkinnedAnimationController->SetTrackPosition(3, 0.0f); // ´ÙÀ½¿¡ ¶Ç ½ÇÇàÇÒ ¼ö ÀÖ°Ô ÃÊ±âÈ­
+				m_pSkinnedAnimationController->SetTrackEnable(3, false); // ì• ë‹ˆë©”ì´ì…˜ ëë‚¬ìœ¼ë‹ˆê¹Œ êº¼!
+				m_pSkinnedAnimationController->SetTrackPosition(3, 0.0f); // ë‹¤ìŒì— ë˜ ì‹¤í–‰í•  ìˆ˜ ìžˆê²Œ ì´ˆê¸°í™”
 			}
 
 		}
@@ -491,8 +480,8 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 			if (currentPos >= 1.5)
 			{
 				isSwing = false;
-				m_pSkinnedAnimationController->SetTrackEnable(4, false); // ¾Ö´Ï¸ÞÀÌ¼Ç ³¡³µÀ¸´Ï±î ²¨!
-				m_pSkinnedAnimationController->SetTrackPosition(4, 0.0f); // ´ÙÀ½¿¡ ¶Ç ½ÇÇàÇÒ ¼ö ÀÖ°Ô ÃÊ±âÈ­
+				m_pSkinnedAnimationController->SetTrackEnable(4, false); // ì• ë‹ˆë©”ì´ì…˜ ëë‚¬ìœ¼ë‹ˆê¹Œ êº¼!
+				m_pSkinnedAnimationController->SetTrackPosition(4, 0.0f); // ë‹¤ìŒì— ë˜ ì‹¤í–‰í•  ìˆ˜ ìžˆê²Œ ì´ˆê¸°í™”
 			}
 
 		}
@@ -507,5 +496,20 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 			m_pSkinnedAnimationController->SetTrackPosition(3, 0.0f);
 		}
 	}
+
+
+	// server
+
+	static XMFLOAT3 prevPosition = GetPosition();
+	XMFLOAT3 currPosition = GetPosition();
+
+	if (currPosition.x != prevPosition.x ||
+		currPosition.y != prevPosition.y ||
+		currPosition.z != prevPosition.z)
+	{
+		send_position_to_server(currPosition);
+		prevPosition = currPosition;
+	}
+
 }
 
