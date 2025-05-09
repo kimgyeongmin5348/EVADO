@@ -11,10 +11,7 @@
 
 CPlayer::CPlayer()
 {
-	//----------------------------------------------------------------------
-	m_pCamera = new CCamera(); // 명시적 생성
-	m_pCamera->SetPosition({ 0,0,0 }); // 기본 위치 설정
-	//----------------------------------------------------------------------
+	
 
 	m_pCamera = NULL;
 
@@ -81,10 +78,6 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
 {
 
-	// 이부분 서버때문에 한번 손좀 봤음...
-
-
-
 	if (bUpdateVelocity)
 	{
 		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, xmf3Shift);
@@ -94,6 +87,7 @@ void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
 		m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Shift);
 		m_pCamera->Move(xmf3Shift);
 	}
+	
 }
 
 void CPlayer::Rotate(float x, float y, float z)
