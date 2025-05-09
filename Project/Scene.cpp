@@ -106,6 +106,9 @@ void CScene::GenerateGameObjectsBoundingBox()
 	for (int i = 0; i < m_nGameObjects; ++i) {
 		m_ppGameObjects[i]->CalculateBoundingBox();
 	}
+	for (int i = 0; i < m_nHierarchicalGameObjects; ++i) {
+		m_ppHierarchicalGameObjects[i]->CalculateBoundingBox();
+	}
 }
 
 void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
@@ -150,7 +153,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	CLoadedModelInfo* pShovelModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Shovel.bin", NULL);
 	m_ppHierarchicalGameObjects[2] = new Shovel(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShovelModel);
 	m_ppHierarchicalGameObjects[2]->SetScale(1, 1, 1);
-	m_ppHierarchicalGameObjects[1]->Rotate(-90, 0, 0);
+	m_ppHierarchicalGameObjects[2]->Rotate(-90, 0, 0);
 	m_ppHierarchicalGameObjects[2]->SetPosition(3, 2, 12);
 	if (pShovelModel) delete pShovelModel;
 
