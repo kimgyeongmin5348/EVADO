@@ -170,7 +170,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	CLoadedModelInfo* pOtherPlayerModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Player.bin", NULL);
 	m_ppGameObjects[0] = new OtherPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pOtherPlayerModel);
 	//서버에서 정보 받아서 업데이트 필요 -> 업데이트함수로
-	m_ppGameObjects[0]->SetPosition(0, 0, 0);
+	m_ppGameObjects[0]->SetPosition(3, 0, 22);
 	//if (pOtherPlayerModel) delete pOtherPlayerModel;
 
 	// 인벤토리 UI
