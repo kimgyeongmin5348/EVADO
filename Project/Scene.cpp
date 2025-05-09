@@ -89,7 +89,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 200); //SuperCobra(17), Gunship(2), Player:Mi24(1), Angrybot()
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 300);
 
 	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature); 
 
@@ -113,9 +113,6 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_ppHierarchicalGameObjects[0]->m_pSkinnedAnimationController->SetTrackAnimationSet(2, 2);
 	m_ppHierarchicalGameObjects[0]->m_pSkinnedAnimationController->SetTrackEnable(1, false);
 	m_ppHierarchicalGameObjects[0]->m_pSkinnedAnimationController->SetTrackEnable(2, false);
-
-	//m_ppHierarchicalGameObjects[0]->SetPlayer(m_pPlayer);
-
 	m_ppHierarchicalGameObjects[0]->SetPosition(3, 0, 30);
 	m_ppHierarchicalGameObjects[0]->Rotate(0, 180, 0);
 
@@ -140,16 +137,36 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_ppHierarchicalGameObjects[3]->SetPosition(3, 2, 13);
 	if (pWhistleModel) delete pWhistleModel;
 
-/////*
-//	m_nShaders = 1;
-//	m_ppShaders = new CShader*[m_nShaders];
-//
-//	CEthanObjectsShader *pEthanObjectsShader = new CEthanObjectsShader();
-//	pEthanObjectsShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pEthanModel, m_pTerrain);
-//
-//	m_ppShaders[0] = pEthanObjectsShader;
-////*/
-//	if (pEthanModel) delete pEthanModel;
+	// OtherPlayer
+	m_nGameObjects = 1;
+	m_ppGameObjects = new CGameObject * [m_nGameObjects];
+
+	CLoadedModelInfo* pOtherPlayerModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Player.bin", NULL);
+	m_ppGameObjects[0] = new OtherPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pOtherPlayerModel);
+	//서버에서 정보 받아서 업데이트 필요 -> 업데이트함수로
+	m_ppGameObjects[0]->SetPosition(0, 0, 0);
+	//if (pOtherPlayerModel) delete pOtherPlayerModel;
+
+	// 인벤토리 UI
+	//m_nShaders = 1;
+	//m_ppShaders = new CShader * [m_nShaders];
+
+	//CTextureToScreenShader* pTextureToScreenShader = new CTextureToScreenShader(1);
+	//pTextureToScreenShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+
+	//CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	//pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Inventory.dds", RESOURCE_TEXTURE2D, 0);
+	////pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/FlashLight.dds", RESOURCE_TEXTURE2D, 1);
+	////pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Shovel.dds", RESOURCE_TEXTURE2D, 2);
+	////pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Whistle.dds", RESOURCE_TEXTURE2D, 3);
+
+	//CreateShaderResourceViews(pd3dDevice, pTexture, 0, 15);
+
+	//CScreenRectMeshTextured* pMesh = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, -0.5f, 1.0f, -0.5f, 0.5f);
+	//pTextureToScreenShader->SetMesh(0, pMesh);
+	//pTextureToScreenShader->SetTexture(pTexture);
+
+	//m_ppShaders[0] = pTextureToScreenShader;
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }

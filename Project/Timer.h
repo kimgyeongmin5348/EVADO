@@ -20,7 +20,6 @@ public:
 	float GetTimeElapsed();
 	float GetTotalTime();
 
-
 	//server
 	//float GetTotalElapsedTime();
 
