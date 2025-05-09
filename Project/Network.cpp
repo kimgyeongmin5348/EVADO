@@ -2,7 +2,7 @@
 #include "Player.h"
 
 
-CScene* g_pScene = nullptr;
+//CScene* g_pScene = nullptr;
 ID3D12Device* g_pd3dDevice = nullptr;
 ID3D12GraphicsCommandList* g_pd3dCommandList = nullptr;
 ID3D12RootSignature* g_pd3dGraphicsRootSignature = nullptr;
@@ -271,6 +271,37 @@ void ProcessPacket(char* ptr)
         
         break;
     }
+    case SC_P_ITEM_SPAWN: {
+        sc_packet_item_spawn* pkt = reinterpret_cast<sc_packet_item_spawn*>(ptr);
+        std::cout << "[클라] 아이템 생성 - ID: " << pkt->item_id
+            << " 위치(" << pkt->position.x << ", "
+            << pkt->position.y << ", " << pkt->position.z << ")"
+            << " 타입: " << pkt->item_type << "\n";
+        break;
+    }
+    case SC_P_ITEM_DESPAWN: {
+        sc_packet_item_despawn* pkt = reinterpret_cast<sc_packet_item_despawn*>(ptr);
+        std::cout << "[클라] 아이템 삭제 - ID: " << pkt->item_id << "\n";
+        break;
+    }
+    case SC_P_ITEM_MOVE: {
+        sc_packet_item_move* pkt = reinterpret_cast<sc_packet_item_move*>(ptr);
+        std::cout << "[디버그] 아이템 이동 - "
+            << "ID: " << pkt->item_id << ", "
+            << "위치: (" << pkt->position.x << ", "
+            << pkt->position.y << ", " << pkt->position.z << "), "
+            << "소유자: " << (pkt->holder_id == g_myid ? "본인" : "타인")
+            << " (" << pkt->holder_id << ")\n";
+
+        //if (pkt->holder_id == g_myid) {
+        //    // 자신이 들고 있는 아이템은 별도 처리
+        //    player.UpdateHeldItemPosition(pkt->position);
+        //}
+        //else {
+        //    g_pScene->MoveItem(pkt->item_id, pkt->position);
+        //}
+        //break;
+    }
     default:
         printf("알 수 없는 패킷 타입 [%d]\n", ptr[1]);
     }
@@ -301,7 +332,6 @@ void process_data(char* net_buf, size_t io_byte) {
         }
     }
 }
-
 
 void send_position_to_server(const XMFLOAT3& position)
 {

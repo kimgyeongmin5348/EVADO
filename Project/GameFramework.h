@@ -103,7 +103,7 @@ private:
 	bool	items[4] = { false,false,false,false };
 
 	//server
-	float m_fLastPositionSendTime = 0.0f;  // 위치 전송 시간 추적
+	//float m_fLastPositionSendTime = 0.0f;  // 위치 전송 시간 추적
 
 
 	

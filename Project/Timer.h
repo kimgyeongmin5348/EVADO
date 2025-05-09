@@ -22,7 +22,7 @@ public:
 
 
 	//server
-	float GetTotalElapsedTime();
+	//float GetTotalElapsedTime();
 
 private:
 	double							m_fTimeScale;						

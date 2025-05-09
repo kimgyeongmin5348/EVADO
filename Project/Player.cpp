@@ -95,7 +95,7 @@ void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
 			m_pCamera = new CCamera(); // 임시 생성 (필요시)
 		}
 	}
-
+	
 
 	if (bUpdateVelocity)
 	{
@@ -259,6 +259,7 @@ void CPlayer::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamer
 	DWORD nCameraMode = (pCamera) ? pCamera->GetMode() : 0x00;
 	if (nCameraMode == THIRD_PERSON_CAMERA) CGameObject::Render(pd3dCommandList, pCamera);
 }
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 
@@ -486,5 +487,20 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 			m_pSkinnedAnimationController->SetTrackPosition(3, 0.0f);
 		}
 	}
+
+
+	// server
+
+	static XMFLOAT3 prevPosition = GetPosition();
+	XMFLOAT3 currPosition = GetPosition();
+
+	if (currPosition.x != prevPosition.x ||
+		currPosition.y != prevPosition.y ||
+		currPosition.z != prevPosition.z)
+	{
+		send_position_to_server(currPosition);
+		prevPosition = currPosition;
+	}
+
 }
 
