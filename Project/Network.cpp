@@ -157,7 +157,7 @@ void InitializeNetwork()
     cs_packet_login p;
     p.size = sizeof(p);
     p.type = CS_P_LOGIN;
-   // p.position = player.GetPosition();
+    // p.position = player.GetPosition();
     strcpy_s(p.name, sizeof(p.name), user_name.c_str());
     send_packet(&p);
 
@@ -179,7 +179,11 @@ void ProcessPacket(char* ptr)
 
         g_myid = packet->id;
         //player.SetPosition(packet->position);
+<<<<<<< Updated upstream
       
+=======
+
+>>>>>>> Stashed changes
 
         std::cout << "[클라] 내 플레이어 생성: " << packet->id << std::endl;
         std::cout << "[클라] 내 정보 수신 - ID:" << packet->id
@@ -196,13 +200,20 @@ void ProcessPacket(char* ptr)
         int id = packet->id;
 
         if (id == g_myid) break;
+<<<<<<< Updated upstream
         
         std::cout << "새로운 플레이어" << id << "접속 성공" << "\n";
         
         
+=======
+
+        std::cout << "새로운 플레이어" << id << "접속 성공" << "\n";
+
+
+>>>>>>> Stashed changes
         break;
     }
-    case SC_P_MOVE: 
+    case SC_P_MOVE:
     {
         sc_packet_move* packet = reinterpret_cast<sc_packet_move*>(ptr);
         int other_id = packet->id;
@@ -217,6 +228,7 @@ void ProcessPacket(char* ptr)
             << "Look(" << packet->look.x << ", " << packet->look.y << ", " << packet->look.z << ") "
             << "Right(" << packet->right.x << ", " << packet->right.y << ", " << packet->right.z << ")\n";
 
+<<<<<<< Updated upstream
 
         //if (other_id != g_myid || other_id < MAX_USER) { // 다른 플레이어 위치 갱신
         //    // 다른 플레이어 위치 업데이트 확인
@@ -225,9 +237,10 @@ void ProcessPacket(char* ptr)
         //        << packet->position.y << ", "
         //        << packet->position.z << ")\n";
         //}
+=======
+>>>>>>> Stashed changes
 
 
-        
         break;
     }
 
@@ -237,7 +250,11 @@ void ProcessPacket(char* ptr)
         int other_id = packet->id;
 
         std::cout << "[클라] 플레이어 제거: ID=" << other_id << "\n";
+<<<<<<< Updated upstream
         
+=======
+
+>>>>>>> Stashed changes
 
         break;
     }
@@ -314,12 +331,20 @@ void send_position_to_server(const XMFLOAT3& position, const XMFLOAT3& look, con
     p.position = position;
     p.look = look;
     p.right = right;
+<<<<<<< Updated upstream
     
+=======
+
+>>>>>>> Stashed changes
 
     send_packet(&p);
 
     // 전송 확인 출력
+<<<<<<< Updated upstream
     std::cout << "[클라] 위치 전송: (" 
+=======
+    std::cout << "[클라] 위치 전송: ("
+>>>>>>> Stashed changes
         << position.x << ", " << position.y << ", " << position.z << ") "
         << "Look(" << look.x << ", " << look.y << ", " << look.z << ") "
         << "Right(" << right.x << ", " << right.y << ", " << right.z << ")\n";

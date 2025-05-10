@@ -34,8 +34,8 @@ CPlayer::CPlayer()
 	m_pCameraUpdatedContext = NULL;
 
 	//server
-	m_pCamera = new CCamera(); // 명시적 생성
-	m_pCamera->SetPosition({ 0,0,0 }); // 기본 위치 설정
+	m_pCamera = new CCamera();
+	m_pCamera->SetPosition({ 0,0,0 }); 
 }
 
 CPlayer::~CPlayer()
@@ -402,7 +402,7 @@ void CTerrainPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVeloci
 {
 	if (dwDirection & DIR_DOWN)
 	{
-		fDistance *= 1.5f; // Shift가 눌리면 이동 속도를 1.5배 증가
+		fDistance *= 1.5f; // Shift가 ?�리�??�동 ?�도�?1.5�?증�?
 	}
 
 	if (!isJump) {
@@ -453,8 +453,8 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 			if (currentPos >= 1.5)
 			{
 				isJump = false;
-				m_pSkinnedAnimationController->SetTrackEnable(3, false); // 애니메이션 끝났으니까 꺼!
-				m_pSkinnedAnimationController->SetTrackPosition(3, 0.0f); // 다음에 또 실행할 수 있게 초기화
+				m_pSkinnedAnimationController->SetTrackEnable(3, false); // ?�니메이???�났?�니�?�?
+				m_pSkinnedAnimationController->SetTrackPosition(3, 0.0f); // ?�음?????�행?????�게 초기??
 			}
 
 		}
@@ -474,8 +474,8 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 			if (currentPos >= 1.5)
 			{
 				isSwing = false;
-				m_pSkinnedAnimationController->SetTrackEnable(4, false); // 애니메이션 끝났으니까 꺼!
-				m_pSkinnedAnimationController->SetTrackPosition(4, 0.0f); // 다음에 또 실행할 수 있게 초기화
+				m_pSkinnedAnimationController->SetTrackEnable(4, false); 
+				m_pSkinnedAnimationController->SetTrackPosition(4, 0.0f); 
 			}
 
 		}
