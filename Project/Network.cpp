@@ -11,7 +11,6 @@ void* g_pContext = nullptr;
 std::unordered_map<long long, OtherPlayer*> g_other_players;
 
 std::mutex g_player_mutex; // 멀티스레드 접근 방지
-static CLoadedModelInfo* s_pPlayerModel = nullptr; // 모델 캐싱
 
 
 SOCKET ConnectSocket = INVALID_SOCKET;
@@ -179,11 +178,15 @@ void ProcessPacket(char* ptr)
         sc_packet_user_info* packet = reinterpret_cast<sc_packet_user_info*>(ptr);
 
         g_myid = packet->id;
-        player.SetPosition(packet->position);
+        //player.SetPosition(packet->position);
+      
 
         std::cout << "[클라] 내 플레이어 생성: " << packet->id << std::endl;
-        std::cout << "[클라] 내 정보 수신 - ID:" << packet->id << " 위치(" << packet->position.x << "," << packet->position.y << "," << packet->position.z << ")\n";
-
+        std::cout << "[클라] 내 정보 수신 - ID:" << packet->id
+            << " 위치(" << packet->position.x << "," << packet->position.y << "," << packet->position.z << ")"
+            << " Look(" << packet->look.x << "," << packet->look.y << "," << packet->look.z << ")"
+            << " Right(" << packet->right.x << "," << packet->right.y << "," << packet->right.z << ")"
+            << std::endl;
         break;
     }
 
@@ -193,26 +196,8 @@ void ProcessPacket(char* ptr)
         int id = packet->id;
 
         if (id == g_myid) break;
-
-        std::lock_guard<std::mutex> lock(g_player_mutex);
-
-        if (g_other_players.find(id) == g_other_players.end()) { // 모델 단일 로드 (최초 1회만 실행)
-            if (!s_pPlayerModel) {
-                s_pPlayerModel = CGameObject::LoadGeometryAndAnimationFromFile(g_pd3dDevice, g_pd3dCommandList, g_pd3dGraphicsRootSignature, "Model/Player.bin", nullptr);
-
-                if (!s_pPlayerModel) {
-                    std::cerr << "[크리티컬] 플레이어 모델 로드 실패" << std::endl;
-                    break;
-                }
-            }
-
-            // 새 플레이어 객체 생성
-            OtherPlayer* pNewPlayer = new OtherPlayer(g_pd3dDevice, g_pd3dCommandList, g_pd3dGraphicsRootSignature, s_pPlayerModel);
-            pNewPlayer->SetPosition(packet->position);
-            g_other_players[id] = pNewPlayer;
-            std::cout << "[클라] 새 플레이어 생성: " << id << std::endl;
-
-        }
+        
+        std::cout << "새로운 플레이어" << id << "접속 성공" << "\n";
         
         
         break;
@@ -224,20 +209,14 @@ void ProcessPacket(char* ptr)
 
         if (other_id == g_myid) break;
 
-        std::lock_guard<std::mutex> lock(g_player_mutex);
+        // 다른 플레이어 위치 업데이트 확인
+        std::cout << "[클라] " << other_id << "번 플레이어 위치 갱신: ("
+            << packet->position.x << ", "
+            << packet->position.y << ", "
+            << packet->position.z << ") "
+            << "Look(" << packet->look.x << ", " << packet->look.y << ", " << packet->look.z << ") "
+            << "Right(" << packet->right.x << ", " << packet->right.y << ", " << packet->right.z << ")\n";
 
-        auto it = g_other_players.find(other_id);
-
-        if (it != g_other_players.end()) {
-            OtherPlayer* pPlayer = dynamic_cast<OtherPlayer*>(it->second);
-            if (pPlayer) {
-                pPlayer->SetPosition(packet->position);
-                std::cout << "[클라] 플레이어 이동: " << other_id
-                    << " -> (" << packet->position.x
-                    << "," << packet->position.y << ","
-                    << packet->position.z << ")" << std::endl;
-            }
-        }
 
         //if (other_id != g_myid || other_id < MAX_USER) { // 다른 플레이어 위치 갱신
         //    // 다른 플레이어 위치 업데이트 확인
@@ -257,13 +236,7 @@ void ProcessPacket(char* ptr)
         sc_packet_leave* packet = reinterpret_cast<sc_packet_leave*>(ptr);
         int other_id = packet->id;
 
-        std::lock_guard<std::mutex> lock(g_player_mutex);
-        auto it = g_other_players.find(other_id);
-        if (it != g_other_players.end()) {
-            delete it->second; // 메모리 해제
-            g_other_players.erase(it);
-            std::cout << "[클라] 플레이어 제거: ID=" << other_id << "\n";
-        }
+        std::cout << "[클라] 플레이어 제거: ID=" << other_id << "\n";
         
 
         break;
@@ -332,17 +305,23 @@ void process_data(char* net_buf, size_t io_byte) {
     }
 }
 
-void send_position_to_server(const XMFLOAT3& position)
+void send_position_to_server(const XMFLOAT3& position, const XMFLOAT3& look, const XMFLOAT3& right)
 {
 
     cs_packet_move p;
     p.size = sizeof(p);
     p.type = CS_P_MOVE;
     p.position = position;
+    p.look = look;
+    p.right = right;
+    
 
     send_packet(&p);
 
     // 전송 확인 출력
-    std::cout << "[클라] 위치 전송: (" << position.x << ", " << position.y << ", " << position.z << ")\n";
+    std::cout << "[클라] 위치 전송: (" 
+        << position.x << ", " << position.y << ", " << position.z << ") "
+        << "Look(" << look.x << ", " << look.y << ", " << look.z << ") "
+        << "Right(" << right.x << ", " << right.y << ", " << right.z << ")\n";
 
 }

@@ -495,14 +495,21 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 	// server
 
 	static XMFLOAT3 prevPosition = GetPosition();
-	XMFLOAT3 currPosition = GetPosition();
+	static XMFLOAT3 prevLook = GetLook();
+	static XMFLOAT3 prevRight = GetRight();
 
-	if (currPosition.x != prevPosition.x ||
-		currPosition.y != prevPosition.y ||
-		currPosition.z != prevPosition.z)
+	XMFLOAT3 currPosition = GetPosition();
+	XMFLOAT3 currLook = GetLook();
+	XMFLOAT3 currRight = GetRight();
+
+	if (currPosition.x != prevPosition.x || currPosition.y != prevPosition.y || currPosition.z != prevPosition.z ||
+		currLook.x != prevLook.x || currLook.y != prevLook.y || currLook.z != prevLook.z ||
+		currRight.x != prevRight.x || currRight.y != prevRight.y || currRight.z != prevRight.z)
 	{
-		send_position_to_server(currPosition);
+		send_position_to_server(currPosition, currLook, currRight);
 		prevPosition = currPosition;
+		prevLook = currLook;
+		prevRight = currRight;
 	}
 
 }
