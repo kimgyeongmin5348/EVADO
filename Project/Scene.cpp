@@ -114,7 +114,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_ppHierarchicalGameObjects[0]->m_pSkinnedAnimationController->SetTrackEnable(1, false);
 	m_ppHierarchicalGameObjects[0]->m_pSkinnedAnimationController->SetTrackEnable(2, false);
 	m_ppHierarchicalGameObjects[0]->SetPosition(3, 0, 30);
-	m_ppHierarchicalGameObjects[0]->Rotate(0, 180, 0);
+	m_ppHierarchicalGameObjects[0]->Rotate(0, 0, 0);
 
 	if (pSpiderModel) delete pSpiderModel;
 
@@ -138,15 +138,15 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_ppHierarchicalGameObjects[3]->SetPosition(3, 2, 13);
 	if (pWhistleModel) delete pWhistleModel;
 
-	// OtherPlayer
-	m_nGameObjects = 1;
-	m_ppGameObjects = new CGameObject * [m_nGameObjects];
+	//// OtherPlayer
+	//m_nGameObjects = 1;
+	//m_ppGameObjects = new CGameObject * [m_nGameObjects];
 
-	CLoadedModelInfo* pOtherPlayerModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Player.bin", NULL);
-	m_ppGameObjects[0] = new OtherPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pOtherPlayerModel);
-	//서버에서 정보 받아서 업데이트 필요 -> 업데이트함수로
-	m_ppGameObjects[0]->SetPosition(0, 0, 0);
-	//if (pOtherPlayerModel) delete pOtherPlayerModel;
+	//CLoadedModelInfo* pOtherPlayerModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Player.bin", NULL);
+	//m_ppGameObjects[0] = new OtherPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pOtherPlayerModel);
+	////서버에서 정보 받아서 업데이트 필요 -> 업데이트함수로
+	//m_ppGameObjects[0]->SetPosition(0, 0, 0);
+	////if (pOtherPlayerModel) delete pOtherPlayerModel;
 
 	// 인벤토리 UI
 	m_nShaders = 2;
@@ -164,9 +164,9 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	CScreenRectMeshTextured* pMesh = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, -0.5f + 0.02f, 0.225f, -0.55f, 0.45f);
 	pTextureItemShader->SetMesh(0, pMesh);
-							pMesh = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, -0.25f + 0.02f, 0.225f, -0.55f, 0.45f);
+	pMesh = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, -0.25f + 0.02f, 0.225f, -0.55f, 0.45f);
 	pTextureItemShader->SetMesh(1, pMesh);
-							pMesh = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList,  0.0f + 0.02f, 0.225f, -0.55f, 0.45f);
+	pMesh = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, 0.0f + 0.02f, 0.225f, -0.55f, 0.45f);
 	pTextureItemShader->SetMesh(2, pMesh);
 
 	pTextureItemShader->SetTexture(pTextureItem);
@@ -572,7 +572,7 @@ void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera
 	{
 		if (m_ppHierarchicalGameObjects[i])
 		{
-			//m_ppHierarchicalGameObjects[i]->Animate(m_fElapsedTime);
+			m_ppHierarchicalGameObjects[i]->Animate(m_fElapsedTime);
 			//if (!m_ppHierarchicalGameObjects[i]->m_pSkinnedAnimationController) m_ppHierarchicalGameObjects[i]->UpdateTransform(NULL);
 			m_ppHierarchicalGameObjects[i]->Render(pd3dCommandList, pCamera);
 		}

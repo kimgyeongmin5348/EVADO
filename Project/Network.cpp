@@ -206,7 +206,13 @@ void ProcessPacket(char* ptr)
 
         }
         else if (id < MAX_USER) {  // 다른플레이어 show()
-           
+            //g_pScene->m_nGameObjects = 1;
+            //g_pScene->m_ppGameObjects = new CGameObject * [g_pScene->m_nGameObjects];
+
+            //CLoadedModelInfo* pOtherPlayerModel = CGameObject::LoadGeometryAndAnimationFromFile(g_pd3dDevice, g_pd3dCommandList, g_pScene->m_pd3dGraphicsRootSignature, "Model/Player.bin", NULL);
+            //g_pScene->m_ppGameObjects[0] = new OtherPlayer(g_pd3dDevice, g_pd3dCommandList, g_pScene->m_pd3dGraphicsRootSignature, pOtherPlayerModel);
+            ////서버에서 정보 받아서 업데이트 필요 -> 업데이트함수로
+            //g_pScene->m_ppGameObjects[0]->SetPosition(0, 0, 0);
         }
         else { // NPC 담당
             std::cout << "[클라] NPC 생성: " << id << std::endl;

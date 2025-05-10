@@ -70,8 +70,8 @@ public:
 	void SetPlayer(CPlayer* pPlayer) { m_pPlayer = pPlayer; }
 	CPlayer* GetPlayer() { return(m_pPlayer); }
  
-protected:
 	ID3D12RootSignature					*m_pd3dGraphicsRootSignature = NULL;
+protected:
 
 	static ID3D12DescriptorHeap			*m_pd3dCbvSrvDescriptorHeap;
 
