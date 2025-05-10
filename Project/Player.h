@@ -35,6 +35,8 @@ protected:
 
 	CCamera						*m_pCamera = NULL;
 
+	XMFLOAT3 m_lastPushDirection; // 마지막 충돌 방향 저장
+
 public:
 	bool isSwing = false;
 
@@ -46,6 +48,7 @@ public:
 	XMFLOAT3 GetLookVector() { return(m_xmf3Look); }
 	XMFLOAT3 GetUpVector() { return(m_xmf3Up); }
 	XMFLOAT3 GetRightVector() { return(m_xmf3Right); }
+	XMFLOAT3 GetPushDirection() const { return m_lastPushDirection; }
 
 	void SetFriction(float fFriction) { m_fFriction = fFriction; }
 	void SetGravity(const XMFLOAT3& xmf3Gravity) { m_xmf3Gravity = xmf3Gravity; }
@@ -53,6 +56,7 @@ public:
 	void SetMaxVelocityY(float fMaxVelocity) { m_fMaxVelocityY = fMaxVelocity; }
 	void SetVelocity(const XMFLOAT3& xmf3Velocity) { m_xmf3Velocity = xmf3Velocity; }
 	void SetPosition(const XMFLOAT3& xmf3Position) { Move(XMFLOAT3(xmf3Position.x - m_xmf3Position.x, xmf3Position.y - m_xmf3Position.y, xmf3Position.z - m_xmf3Position.z), false); }
+	void SetPushDirection(const XMFLOAT3& direction) { m_lastPushDirection = direction; }
 
 	void SetScale(XMFLOAT3& xmf3Scale) { m_xmf3Scale = xmf3Scale; }
 
@@ -70,6 +74,11 @@ public:
 	void Rotate(float x, float y, float z);
 
 	virtual void Update(float fTimeElapsed);
+	void UpdateBoundingBox()
+	{
+		XMFLOAT3 center(m_xmf4x4World._41, m_xmf4x4World._42, m_xmf4x4World._43);
+		m_BoundingBox.Center = center;
+	}
 
 	virtual void OnPlayerUpdateCallback(float fTimeElapsed) { }
 	void SetPlayerUpdatedContext(LPVOID pContext) { m_pPlayerUpdatedContext = pContext; }
@@ -104,6 +113,7 @@ public:
 	CTerrainPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, void *pContext=NULL);
 	virtual ~CTerrainPlayer();
 
+
 public:
 	virtual CCamera *ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed);
 
@@ -113,6 +123,7 @@ public:
 	virtual void Move(ULONG nDirection, float fDistance, bool bVelocity = false);
 
 	virtual void Update(float fTimeElapsed);
+
 
 	bool isJump = false;
 };
