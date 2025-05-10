@@ -66,7 +66,7 @@ struct sc_packet_enter {
 	unsigned char	size;
 	char			type;
 	long long		id;
-	char			name[MAX_ID_LENGTH];
+	//char			name[MAX_ID_LENGTH];
 	//char			o_type;
 	XMFLOAT3		position;
 };

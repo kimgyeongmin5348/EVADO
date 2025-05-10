@@ -1,5 +1,4 @@
 #include "Network.h"
-#include "Player.h"
 
 
 CScene* g_pScene = nullptr;
@@ -8,7 +7,13 @@ ID3D12GraphicsCommandList* g_pd3dCommandList = nullptr;
 ID3D12RootSignature* g_pd3dGraphicsRootSignature = nullptr;
 void* g_pContext = nullptr;
 
-std::unordered_map<long long, CPlayer> g_other_players;
+//std::unordered_map<long long, CPlayer> g_other_players;
+std::unordered_map<long long, OtherPlayer*> g_other_players;
+
+std::mutex g_player_mutex; // 멀티스레드 접근 방지
+static CLoadedModelInfo* s_pPlayerModel = nullptr; // 모델 캐싱
+
+
 SOCKET ConnectSocket = INVALID_SOCKET;
 HANDLE g_hIOCP = INVALID_HANDLE_VALUE;
 
@@ -173,22 +178,12 @@ void ProcessPacket(char* ptr)
     {
         sc_packet_user_info* packet = reinterpret_cast<sc_packet_user_info*>(ptr);
 
-        std::cout << "[클라] 내 정보 수신 - ID:" << packet->id << " 위치(" << packet->position.x << "," << packet->position.y << "," << packet->position.z << ")\n";
-
         g_myid = packet->id;
         player.SetPosition(packet->position);
 
-        if (player.GetCamera()) {
-            player.GetCamera()->SetPosition(packet->position);
-        }
-        break;
-    }
+        std::cout << "[클라] 내 플레이어 생성: " << packet->id << std::endl;
+        std::cout << "[클라] 내 정보 수신 - ID:" << packet->id << " 위치(" << packet->position.x << "," << packet->position.y << "," << packet->position.z << ")\n";
 
-    case SC_P_LOGIN_FAIL:  // 로그인 실패 처리
-    {
-        std::cerr << "로그인 실패: 잘못된 비밀번호입니다." << std::endl;
-        closesocket(ConnectSocket);
-        exit(1);
         break;
     }
 
@@ -196,57 +191,62 @@ void ProcessPacket(char* ptr)
     {
         sc_packet_enter* packet = reinterpret_cast<sc_packet_enter*>(ptr);
         int id = packet->id;
-        std::cout << "[클라] 내 플레이어 생성: " << id << std::endl;
 
-        if (id == g_myid) { // 자신의 아바타 생성 및 카메라 위치 조정            
-            std::cout << "[클라] 새 플레이어 생성: " << id
-                << " (" << packet->name << ")" << std::endl;
-           
+        if (id == g_myid) break;
+
+        std::lock_guard<std::mutex> lock(g_player_mutex);
+
+        if (g_other_players.find(id) == g_other_players.end()) { // 모델 단일 로드 (최초 1회만 실행)
+            if (!s_pPlayerModel) {
+                s_pPlayerModel = CGameObject::LoadGeometryAndAnimationFromFile(g_pd3dDevice, g_pd3dCommandList, g_pd3dGraphicsRootSignature, "Model/Player.bin", nullptr);
+
+                if (!s_pPlayerModel) {
+                    std::cerr << "[크리티컬] 플레이어 모델 로드 실패" << std::endl;
+                    break;
+                }
+            }
+
+            // 새 플레이어 객체 생성
+            OtherPlayer* pNewPlayer = new OtherPlayer(g_pd3dDevice, g_pd3dCommandList, g_pd3dGraphicsRootSignature, s_pPlayerModel);
+            pNewPlayer->SetPosition(packet->position);
+            g_other_players[id] = pNewPlayer;
+            std::cout << "[클라] 새 플레이어 생성: " << id << std::endl;
 
         }
-        else if (id < MAX_USER) {  // 다른플레이어 show()
-            g_pScene->m_nGameObjects = 1;
-            g_pScene->m_ppGameObjects = new CGameObject * [g_pScene->m_nGameObjects];
-
-            CLoadedModelInfo* pOtherPlayerModel = CGameObject::LoadGeometryAndAnimationFromFile(g_pd3dDevice, g_pd3dCommandList, g_pScene->m_pd3dGraphicsRootSignature, "Model/Player.bin", NULL);
-            g_pScene->m_ppGameObjects[0] = new OtherPlayer(g_pd3dDevice, g_pd3dCommandList, g_pScene->m_pd3dGraphicsRootSignature, pOtherPlayerModel);
-            //서버에서 정보 받아서 업데이트 필요 -> 업데이트함수로
-            g_pScene->m_ppGameObjects[0]->SetPosition(0, 0, 0);
-
-
-        }
-        else { // NPC 담당
-            std::cout << "[클라] NPC 생성: " << id << std::endl;
-
-        }
-
+        
+        
         break;
     }
     case SC_P_MOVE: 
     {
         sc_packet_move* packet = reinterpret_cast<sc_packet_move*>(ptr);
         int other_id = packet->id;
-        if (other_id == g_myid) { // 자기 위치 갱신
-            std::cout << "[클라] 내 위치 이동 - ID: " << other_id << " (" 
-                << packet->position.x << ", " 
-                << packet->position.y << ", " 
-                << packet->position.z << ")\n";
 
+        if (other_id == g_myid) break;
 
+        std::lock_guard<std::mutex> lock(g_player_mutex);
+
+        auto it = g_other_players.find(other_id);
+
+        if (it != g_other_players.end()) {
+            OtherPlayer* pPlayer = dynamic_cast<OtherPlayer*>(it->second);
+            if (pPlayer) {
+                pPlayer->SetPosition(packet->position);
+                std::cout << "[클라] 플레이어 이동: " << other_id
+                    << " -> (" << packet->position.x
+                    << "," << packet->position.y << ","
+                    << packet->position.z << ")" << std::endl;
+            }
         }
-        else if (other_id < MAX_USER) { // 다른 플레이어 위치 갱신
-            // 다른 플레이어 위치 업데이트 확인
-            std::cout << "[클라] " << other_id << "번 플레이어 위치 갱신: ("
-                << packet->position.x << ", "
-                << packet->position.y << ", "
-                << packet->position.z << ")\n";
 
-          
+        //if (other_id != g_myid || other_id < MAX_USER) { // 다른 플레이어 위치 갱신
+        //    // 다른 플레이어 위치 업데이트 확인
+        //    std::cout << "[클라] " << other_id << "번 플레이어 위치 갱신: ("
+        //        << packet->position.x << ", "
+        //        << packet->position.y << ", "
+        //        << packet->position.z << ")\n";
+        //}
 
-        }
-        else { //NPC 위치 갱신
-            std::cout << "[클라] NPC 이동: " << other_id << std::endl;
-        }
 
         
         break;
@@ -257,24 +257,15 @@ void ProcessPacket(char* ptr)
         sc_packet_leave* packet = reinterpret_cast<sc_packet_leave*>(ptr);
         int other_id = packet->id;
 
-        if (other_id == g_myid) {
-            std::cout << "[클라] 내 플레이어 제거: " << other_id << std::endl;
-
-            //예시
-            // avatar.hide();
-
+        std::lock_guard<std::mutex> lock(g_player_mutex);
+        auto it = g_other_players.find(other_id);
+        if (it != g_other_players.end()) {
+            delete it->second; // 메모리 해제
+            g_other_players.erase(it);
+            std::cout << "[클라] 플레이어 제거: ID=" << other_id << "\n";
         }
-        else if (other_id < MAX_USER) {
-            std::cout << "[클라] 플레이어 퇴장: " << other_id << std::endl;
-
-            //예시
-            g_other_players.erase(other_id);
-        }
-        else {
-            std::cout << "[클라] NPC 제거: " << other_id << std::endl;
-        }
-
         
+
         break;
     }
     case SC_P_ITEM_SPAWN: {
@@ -285,11 +276,13 @@ void ProcessPacket(char* ptr)
             << " 타입: " << pkt->item_type << "\n";
         break;
     }
+
     case SC_P_ITEM_DESPAWN: {
         sc_packet_item_despawn* pkt = reinterpret_cast<sc_packet_item_despawn*>(ptr);
         std::cout << "[클라] 아이템 삭제 - ID: " << pkt->item_id << "\n";
         break;
     }
+
     case SC_P_ITEM_MOVE: {
         sc_packet_item_move* pkt = reinterpret_cast<sc_packet_item_move*>(ptr);
         std::cout << "[디버그] 아이템 이동 - "
