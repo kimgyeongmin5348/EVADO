@@ -618,17 +618,6 @@ void CGameFramework::FrameAdvance()
 
     AnimateObjects();
 
-	// server ----------------------------------------------------------------------------
-	//float fCurrentTime = m_GameTimer.GetTotalElapsedTime();
-	//if (fCurrentTime - m_fLastPositionSendTime > 0.5f) {
-	//	if (m_pPlayer) {
-	//		XMFLOAT3 vPosition = m_pPlayer->GetPosition();
-	//		send_position_to_server(vPosition);
-	//	}
-	//	m_fLastPositionSendTime = fCurrentTime;
-	//}
-	// -----------------------------------------------------------------------------------
-
 	HRESULT hResult = m_pd3dCommandAllocator->Reset();
 	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 

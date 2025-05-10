@@ -19,14 +19,10 @@ D3D12_GPU_DESCRIPTOR_HANDLE	CScene::m_d3dSrvGPUDescriptorNextHandle;
 
 CScene::CScene()
 {
-	/*InitializeCriticalSection(&m_csRemotePlayers);*/
 }
 
 CScene::~CScene()
 {
-	//DeleteCriticalSection(&m_csRemotePlayers);
-	//// m_remotePlayers 메모리 해제 추가
-	//for (auto& [id, pPlayer] : m_remotePlayers) delete pPlayer;
 }
 
 void CScene::BuildDefaultLightsAndMaterials()
@@ -137,15 +133,15 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_ppHierarchicalGameObjects[3]->SetPosition(3, 2, 13);
 	if (pWhistleModel) delete pWhistleModel;
 
-	// OtherPlayer
-	m_nGameObjects = 1;
-	m_ppGameObjects = new CGameObject * [m_nGameObjects];
+	//// OtherPlayer
+	//m_nGameObjects = 1;
+	//m_ppGameObjects = new CGameObject * [m_nGameObjects];
 
-	CLoadedModelInfo* pOtherPlayerModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Player.bin", NULL);
-	m_ppGameObjects[0] = new OtherPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pOtherPlayerModel);
-	//서버에서 정보 받아서 업데이트 필요 -> 업데이트함수로
-	m_ppGameObjects[0]->SetPosition(0, 0, 0);
-	//if (pOtherPlayerModel) delete pOtherPlayerModel;
+	//CLoadedModelInfo* pOtherPlayerModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Player.bin", NULL);
+	//m_ppGameObjects[0] = new OtherPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pOtherPlayerModel);
+	////서버에서 정보 받아서 업데이트 필요 -> 업데이트함수로
+	//m_ppGameObjects[0]->SetPosition(0, 0, 0);
+	////if (pOtherPlayerModel) delete pOtherPlayerModel;
 
 	// 인벤토리 UI
 	//m_nShaders = 1;

@@ -3,6 +3,7 @@
 #include "Object.h"
 #include "Player.h"
 #include "Scene.h"
+#include "OtherPlayer.h" 
 
 // 클라이언트에서 서버로 가야할것 -----------
 // 
@@ -32,7 +33,8 @@ struct OverlappedEx {
 
 extern HANDLE g_hIOCP;
 extern SOCKET ConnectSocket;
-extern std::unordered_map<long long, CPlayer> g_other_players;
+extern std::unordered_map<long long, CPlayer> g_other_players_player;
+extern std::unordered_map<long long, OtherPlayer*> g_other_players;
 extern long long g_myid;
 extern std::string user_name;
 
