@@ -319,7 +319,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 				break;
 			case VK_RETURN:
 				m_ppScenes[m_nScene]->ReleaseObjects();
-				m_nCurrentScene = m_nScene + 1;
+				m_nCurrentScene = 1;
 				BuildObjects();
 				isStartScene = false;
 				break;

@@ -137,7 +137,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_ppOtherPlayers = new OtherPlayer * [m_nOtherPlayers];
 	CLoadedModelInfo* pOtherPlayerModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Player.bin", NULL);
 	m_ppOtherPlayers[0] = new OtherPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pOtherPlayerModel);
-	m_ppOtherPlayers[0]->SetPosition(0, 0, 0);
+	m_ppOtherPlayers[0]->SetPosition(-1000, -1000, -1000);
 	if (pOtherPlayerModel) delete pOtherPlayerModel;
 	//// OtherPlayer
 	//m_nGameObjects = 1;
@@ -580,10 +580,8 @@ void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera
 
 	for (int i = 0; i < m_nOtherPlayers; ++i) 
 	{
-		//if (m_ppOtherPlayers[i]->isConnedted)
-		//{
+		if (m_ppOtherPlayers[i]->isConnedted)
 			m_ppOtherPlayers[i]->Render(pd3dCommandList, pCamera);
-		//}
 	}
 }
 
