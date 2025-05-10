@@ -151,6 +151,11 @@ public:
 			m_ppOtherPlayers[i]->isConnedted = true;
 		}
 	}
+
+	void SetOtherPlayerPosition(int clinetnum, XMFLOAT3 position)
+	{
+		m_ppOtherPlayers[clinetnum]->SetPosition(position);
+	}
 };
 
 class CMainScene : public CScene

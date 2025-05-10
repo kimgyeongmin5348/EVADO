@@ -44,7 +44,14 @@ public:
 
 	void ItemToHand(int objectIndex);
 
-
+	void OnOtherClientConnected()
+	{
+		m_ppScenes[m_nScene]->OnOtherClientConnedted();
+	}
+	void SetOtherPlayerPosition(int clinetnum, XMFLOAT3 position)
+	{
+		m_ppScenes[m_nScene]->SetOtherPlayerPosition(clinetnum, position);
+	}
 private:
 	HINSTANCE m_hInstance;
 	HWND m_hWnd;

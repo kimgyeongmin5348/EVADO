@@ -217,6 +217,7 @@ void ProcessPacket(char* ptr)
         //}
         
         // 씬에 OtherPlayer가 딱 나타난다
+        gGameFramework.OnOtherClientConnected();
 
         break;
     }
@@ -243,7 +244,7 @@ void ProcessPacket(char* ptr)
         }
 
         // OtherPlayer의 위치를 반영한다
-        gGameFramework;
+        //gGameFramework.SetOtherPlayerPosition(0, packet->position);
 
         //if (other_id != g_myid || other_id < MAX_USER) { // 다른 플레이어 위치 갱신
         //    // 다른 플레이어 위치 업데이트 확인

@@ -5,7 +5,6 @@
 #include "Scene.h"
 #include "OtherPlayer.h" 
 
-
 // 클라이언트에서 서버로 가야할것 -----------
 // 
 // 플레이어의 좌표(x,y,z)
