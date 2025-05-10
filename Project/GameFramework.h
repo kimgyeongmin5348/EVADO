@@ -100,7 +100,7 @@ private:
 
 	_TCHAR						m_pszFrameRate[70];
 
-	bool	items[4] = { false,false,false,false };
+	bool flashlightToggle = false;
 
 	//server
 	//float m_fLastPositionSendTime = 0.0f;  // 위치 전송 시간 추적

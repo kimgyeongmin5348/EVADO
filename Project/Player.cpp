@@ -171,7 +171,10 @@ void CPlayer::Update(float fTimeElapsed)
 	if (m_pPlayerUpdatedContext) OnPlayerUpdateCallback(fTimeElapsed);
 
 	DWORD nCurrentCameraMode = m_pCamera->GetMode();
-	if (nCurrentCameraMode == THIRD_PERSON_CAMERA) m_pCamera->Update(m_xmf3Position, fTimeElapsed);
+	if (nCurrentCameraMode == THIRD_PERSON_CAMERA) { 
+		m_pCamera->Update(m_xmf3Position, fTimeElapsed); 
+		m_pCamera->SetLookAt(m_xmf3Position); // 플레이어가 회전 시 카메라도 회전
+	}
 	if (m_pCameraUpdatedContext) OnCameraUpdateCallback(fTimeElapsed);
 	if (nCurrentCameraMode == THIRD_PERSON_CAMERA) m_pCamera->SetLookAt(m_xmf3Position);
 	m_pCamera->RegenerateViewMatrix();
@@ -269,16 +272,20 @@ CTerrainPlayer::CTerrainPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandLi
 	CLoadedModelInfo *pPlayerModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Player.bin", NULL);
 	SetChild(pPlayerModel->m_pModelRootObject, true);
 
-	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 5, pPlayerModel);
-	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-	m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1);
-	m_pSkinnedAnimationController->SetTrackAnimationSet(2, 2);
-	m_pSkinnedAnimationController->SetTrackAnimationSet(3, 3);
-	m_pSkinnedAnimationController->SetTrackAnimationSet(4, 4);
-	m_pSkinnedAnimationController->SetTrackEnable(1, false);
-	m_pSkinnedAnimationController->SetTrackEnable(2, false);
-	m_pSkinnedAnimationController->SetTrackEnable(3, false);
-	m_pSkinnedAnimationController->SetTrackEnable(4, false);
+	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 7, pPlayerModel);
+	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0); // 기본
+	m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1); // 걷기
+	m_pSkinnedAnimationController->SetTrackAnimationSet(2, 2); // 뛰기
+	m_pSkinnedAnimationController->SetTrackAnimationSet(3, 3); // 휘두르기
+	m_pSkinnedAnimationController->SetTrackAnimationSet(4, 4); // 점프
+	m_pSkinnedAnimationController->SetTrackAnimationSet(5, 5); // 웅크리기
+	m_pSkinnedAnimationController->SetTrackAnimationSet(6, 6); // 웅크리고 걷기
+	m_pSkinnedAnimationController->SetTrackEnable(1, false); 
+	m_pSkinnedAnimationController->SetTrackEnable(2, false); 
+	m_pSkinnedAnimationController->SetTrackEnable(3, false); 
+	m_pSkinnedAnimationController->SetTrackEnable(4, false); 
+	m_pSkinnedAnimationController->SetTrackEnable(5, false); 
+	m_pSkinnedAnimationController->SetTrackEnable(6, false); 
 
 	m_pSkinnedAnimationController->SetCallbackKeys(1, 2);
 #ifdef _WITH_SOUND_RESOURCE
@@ -322,7 +329,7 @@ CCamera *CTerrainPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 			SetMaxVelocityY(800.0f);
 			m_pCamera = OnChangeCamera(FIRST_PERSON_CAMERA, nCurrentCameraMode);
 			m_pCamera->SetTimeLag(0.0f);
-			m_pCamera->SetOffset(XMFLOAT3(0.0f, 1.5f, 0.0f));
+			m_pCamera->SetOffset(XMFLOAT3(0.0f, 1.5f, -0.15f));
 			m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
 			m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 			m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
@@ -412,6 +419,9 @@ void CTerrainPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVeloci
 			m_pSkinnedAnimationController->SetTrackEnable(1, false);
 			m_pSkinnedAnimationController->SetTrackEnable(2, true);
 			m_pSkinnedAnimationController->SetTrackEnable(3, false);
+			m_pSkinnedAnimationController->SetTrackEnable(4, false);
+			m_pSkinnedAnimationController->SetTrackEnable(5, false);
+			m_pSkinnedAnimationController->SetTrackEnable(6, false);
 		}
 		else if (dwDirection & (DIR_FORWARD | DIR_BACKWARD | DIR_LEFT | DIR_RIGHT))
 		{
@@ -419,13 +429,28 @@ void CTerrainPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVeloci
 			m_pSkinnedAnimationController->SetTrackEnable(1, true);
 			m_pSkinnedAnimationController->SetTrackEnable(2, false);
 			m_pSkinnedAnimationController->SetTrackEnable(3, false);
+			m_pSkinnedAnimationController->SetTrackEnable(4, false);
+			m_pSkinnedAnimationController->SetTrackEnable(5, false);
+			m_pSkinnedAnimationController->SetTrackEnable(6, false);
 		}
+			
+		if ((dwDirection & DIR_CROUCH) && (dwDirection & (DIR_FORWARD | DIR_BACKWARD | DIR_LEFT | DIR_RIGHT)))
+		{
+			isCrouch = false;
+			m_pSkinnedAnimationController->SetTrackEnable(0, false);
+			m_pSkinnedAnimationController->SetTrackEnable(1, false);
+			m_pSkinnedAnimationController->SetTrackEnable(2, false);
+			m_pSkinnedAnimationController->SetTrackEnable(3, false);
+			m_pSkinnedAnimationController->SetTrackEnable(4, false);
+			m_pSkinnedAnimationController->SetTrackEnable(5, false);
+			m_pSkinnedAnimationController->SetTrackEnable(6, true);
+		}
+		else if (dwDirection & DIR_CROUCH) isCrouch = true;
+		else isCrouch = false;
 	}
-	if (dwDirection & DIR_UP)
-	{
-		isJump = true;
-	}
-	
+
+	if (dwDirection & DIR_UP) isJump = true;
+
 	CPlayer::Move(dwDirection, fDistance, bUpdateVelocity);
 }
 
@@ -443,6 +468,9 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 			m_pSkinnedAnimationController->SetTrackEnable(1, false);
 			m_pSkinnedAnimationController->SetTrackEnable(2, false);
 			m_pSkinnedAnimationController->SetTrackEnable(3, true);
+			m_pSkinnedAnimationController->SetTrackEnable(4, false);
+			m_pSkinnedAnimationController->SetTrackEnable(5, false);
+			m_pSkinnedAnimationController->SetTrackEnable(6, false);
 
 			m_pSkinnedAnimationController->SetTrackSpeed(3, 2.0f);
 
@@ -458,12 +486,14 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 			}
 
 		}
-		else if (isSwing) {
+		if (isSwing) {
 			m_pSkinnedAnimationController->SetTrackEnable(0, false);
 			m_pSkinnedAnimationController->SetTrackEnable(1, false);
 			m_pSkinnedAnimationController->SetTrackEnable(2, false);
 			m_pSkinnedAnimationController->SetTrackEnable(3, false);
 			m_pSkinnedAnimationController->SetTrackEnable(4, true);
+			m_pSkinnedAnimationController->SetTrackEnable(5, false);
+			m_pSkinnedAnimationController->SetTrackEnable(6, false);
 
 			m_pSkinnedAnimationController->SetTrackSpeed(4, 2.0f);
 
@@ -479,15 +509,32 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 			}
 
 		}
+		if (isCrouch) {
+			m_pSkinnedAnimationController->SetTrackEnable(0, false);
+			m_pSkinnedAnimationController->SetTrackEnable(1, false);
+			m_pSkinnedAnimationController->SetTrackEnable(2, false);
+			m_pSkinnedAnimationController->SetTrackEnable(3, false);
+			m_pSkinnedAnimationController->SetTrackEnable(4, false);
+			m_pSkinnedAnimationController->SetTrackEnable(5, true);
+			m_pSkinnedAnimationController->SetTrackEnable(6, false);
+
+		}
 		else if (::IsZero(fLength))
 		{
 			m_pSkinnedAnimationController->SetTrackEnable(0, true);
 			m_pSkinnedAnimationController->SetTrackEnable(1, false);
 			m_pSkinnedAnimationController->SetTrackEnable(2, false);
 			m_pSkinnedAnimationController->SetTrackEnable(3, false);
+			m_pSkinnedAnimationController->SetTrackEnable(4, false);
+			m_pSkinnedAnimationController->SetTrackEnable(5, false);
+			m_pSkinnedAnimationController->SetTrackEnable(6, false);
+
 			m_pSkinnedAnimationController->SetTrackPosition(1, 0.0f);
 			m_pSkinnedAnimationController->SetTrackPosition(2, 0.0f);
 			m_pSkinnedAnimationController->SetTrackPosition(3, 0.0f);
+			m_pSkinnedAnimationController->SetTrackPosition(4, 0.0f);
+			m_pSkinnedAnimationController->SetTrackPosition(5, 0.0f);
+			m_pSkinnedAnimationController->SetTrackPosition(6, 0.0f);
 		}
 	}
 

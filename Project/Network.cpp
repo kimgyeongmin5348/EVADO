@@ -339,10 +339,10 @@ void send_position_to_server(const XMFLOAT3& position)
     p.size = sizeof(p);
     p.type = CS_P_MOVE;
     p.position = position;
-
+ 
     send_packet(&p);
 
     // 전송 확인 출력
-    std::cout << "[클라] 위치 전송: (" << position.x << ", " << position.y << ", " << position.z << ")\n";
+    std::cout << "[클라] 위치 전송: (" << p.position.x << ", " << p.position.y << ", " << p.position.z << ")\n";
 
 }
