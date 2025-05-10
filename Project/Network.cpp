@@ -1,11 +1,14 @@
+#include "stdafx.h"
 #include "Network.h"
-
+#include "GameFramework.h"
 
 CScene* g_pScene = nullptr;
 ID3D12Device* g_pd3dDevice = nullptr;
 ID3D12GraphicsCommandList* g_pd3dCommandList = nullptr;
 ID3D12RootSignature* g_pd3dGraphicsRootSignature = nullptr;
 void* g_pContext = nullptr;
+
+extern CGameFramework gGameFramework;
 
 //std::unordered_map<long long, CPlayer> g_other_players;
 std::unordered_map<long long, OtherPlayer*> g_other_players;
@@ -194,30 +197,30 @@ void ProcessPacket(char* ptr)
 
         if (id == g_myid) break;
 
-        std::lock_guard<std::mutex> lock(g_player_mutex);
+        //std::lock_guard<std::mutex> lock(g_player_mutex);
 
-        if (g_other_players.find(id) == g_other_players.end()) { // 모델 단일 로드 (최초 1회만 실행)
-            if (!s_pPlayerModel) {
-                s_pPlayerModel = CGameObject::LoadGeometryAndAnimationFromFile(g_pd3dDevice, g_pd3dCommandList, g_pd3dGraphicsRootSignature, "Model/Player.bin", nullptr);
+        //if (g_other_players.find(id) == g_other_players.end()) { // 모델 단일 로드 (최초 1회만 실행)
+        //    if (!s_pPlayerModel) {
+        //        s_pPlayerModel = CGameObject::LoadGeometryAndAnimationFromFile(g_pd3dDevice, g_pd3dCommandList, g_pd3dGraphicsRootSignature, "Model/Player.bin", nullptr);
 
-                if (!s_pPlayerModel) {
-                    std::cerr << "[크리티컬] 플레이어 모델 로드 실패" << std::endl;
-                    break;
-                }
-            }
+        //        if (!s_pPlayerModel) {
+        //            std::cerr << "[크리티컬] 플레이어 모델 로드 실패" << std::endl;
+        //            break;
+        //        }
+        //    }
 
-            // 새 플레이어 객체 생성
-            OtherPlayer* pNewPlayer = new OtherPlayer(g_pd3dDevice, g_pd3dCommandList, g_pd3dGraphicsRootSignature, s_pPlayerModel);
-            pNewPlayer->SetPosition(packet->position);
-            g_other_players[id] = pNewPlayer;
-            std::cout << "[클라] 새 플레이어 생성: " << id << std::endl;
-
-        }
+        //    // 새 플레이어 객체 생성
+        //    OtherPlayer* pNewPlayer = new OtherPlayer(g_pd3dDevice, g_pd3dCommandList, g_pd3dGraphicsRootSignature, s_pPlayerModel);
+        //    pNewPlayer->SetPosition(packet->position);
+        //    g_other_players[id] = pNewPlayer;
+        //    std::cout << "[클라] 새 플레이어 생성: " << id << std::endl;
+        //}
         
-        
+        // 씬에 OtherPlayer가 딱 나타난다
+
         break;
     }
-    case SC_P_MOVE: 
+    case SC_P_MOVE: // 상대 플레이어 (움직이면) 좌표 받기
     {
         sc_packet_move* packet = reinterpret_cast<sc_packet_move*>(ptr);
         int other_id = packet->id;
@@ -238,6 +241,9 @@ void ProcessPacket(char* ptr)
                     << packet->position.z << ")" << std::endl;
             }
         }
+
+        // OtherPlayer의 위치를 반영한다
+        gGameFramework;
 
         //if (other_id != g_myid || other_id < MAX_USER) { // 다른 플레이어 위치 갱신
         //    // 다른 플레이어 위치 업데이트 확인

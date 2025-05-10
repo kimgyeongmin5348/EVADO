@@ -1,9 +1,10 @@
 #pragma once
 #include "Common.h"
 #include "Object.h"
-#include "Player.h"
+//#include "Player.h"
 #include "Scene.h"
 #include "OtherPlayer.h" 
+
 
 // 클라이언트에서 서버로 가야할것 -----------
 // 
