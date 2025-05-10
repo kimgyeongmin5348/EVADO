@@ -289,16 +289,20 @@ CTerrainPlayer::CTerrainPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandLi
 	CLoadedModelInfo *pPlayerModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Player.bin", NULL);
 	SetChild(pPlayerModel->m_pModelRootObject, true);
 
-	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 5, pPlayerModel);
-	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-	m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1);
-	m_pSkinnedAnimationController->SetTrackAnimationSet(2, 2);
-	m_pSkinnedAnimationController->SetTrackAnimationSet(3, 3);
-	m_pSkinnedAnimationController->SetTrackAnimationSet(4, 4);
-	m_pSkinnedAnimationController->SetTrackEnable(1, false);
-	m_pSkinnedAnimationController->SetTrackEnable(2, false);
-	m_pSkinnedAnimationController->SetTrackEnable(3, false);
-	m_pSkinnedAnimationController->SetTrackEnable(4, false);
+	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 7, pPlayerModel);
+	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0); // 기본
+	m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1); // 걷기
+	m_pSkinnedAnimationController->SetTrackAnimationSet(2, 2); // 뛰기
+	m_pSkinnedAnimationController->SetTrackAnimationSet(3, 3); // 휘두르기
+	m_pSkinnedAnimationController->SetTrackAnimationSet(4, 4); // 점프
+	m_pSkinnedAnimationController->SetTrackAnimationSet(5, 5); // 웅크리기
+	m_pSkinnedAnimationController->SetTrackAnimationSet(6, 6); // 웅크리고 걷기
+	m_pSkinnedAnimationController->SetTrackEnable(1, false); 
+	m_pSkinnedAnimationController->SetTrackEnable(2, false); 
+	m_pSkinnedAnimationController->SetTrackEnable(3, false); 
+	m_pSkinnedAnimationController->SetTrackEnable(4, false); 
+	m_pSkinnedAnimationController->SetTrackEnable(5, false); 
+	m_pSkinnedAnimationController->SetTrackEnable(6, false); 
 
 	m_pSkinnedAnimationController->SetCallbackKeys(1, 2);
 #ifdef _WITH_SOUND_RESOURCE
@@ -440,12 +444,26 @@ void CTerrainPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVeloci
 			m_pSkinnedAnimationController->SetTrackEnable(2, false);
 			m_pSkinnedAnimationController->SetTrackEnable(3, false);
 		}
+			
+		if ((dwDirection & DIR_CROUCH) && (dwDirection & (DIR_FORWARD | DIR_BACKWARD | DIR_LEFT | DIR_RIGHT)))
+		{
+			isCrouch = false;
+			m_pSkinnedAnimationController->SetTrackEnable(0, false);
+			m_pSkinnedAnimationController->SetTrackEnable(1, false);
+			m_pSkinnedAnimationController->SetTrackEnable(2, false);
+			m_pSkinnedAnimationController->SetTrackEnable(3, false);
+			m_pSkinnedAnimationController->SetTrackEnable(4, false);
+			m_pSkinnedAnimationController->SetTrackEnable(5, false);
+			m_pSkinnedAnimationController->SetTrackEnable(6, true);
+		}
+		else if (dwDirection & DIR_CROUCH) isCrouch = true;
+		else isCrouch = false;
 	}
 	if (dwDirection & DIR_UP)
 	{
 		isJump = true;
 	}
-	
+
 	CPlayer::Move(dwDirection, fDistance, bUpdateVelocity);
 }
 
@@ -497,6 +515,16 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 				m_pSkinnedAnimationController->SetTrackEnable(4, false); // 애니메이션 끝났으니까 꺼!
 				m_pSkinnedAnimationController->SetTrackPosition(4, 0.0f); // 다음에 또 실행할 수 있게 초기화
 			}
+
+		}
+		else if (isCrouch) {
+			m_pSkinnedAnimationController->SetTrackEnable(0, false);
+			m_pSkinnedAnimationController->SetTrackEnable(1, false);
+			m_pSkinnedAnimationController->SetTrackEnable(2, false);
+			m_pSkinnedAnimationController->SetTrackEnable(3, false);
+			m_pSkinnedAnimationController->SetTrackEnable(4, false);
+			m_pSkinnedAnimationController->SetTrackEnable(5, true);
+			m_pSkinnedAnimationController->SetTrackEnable(6, false);
 
 		}
 		else if (::IsZero(fLength))

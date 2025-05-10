@@ -420,8 +420,6 @@ void CGameFramework::ItemToHand(int objectIndex)
 		else pItem->SetPosition(0.05f, -0.05f, 0.1f);
 
 		m_pPlayer->UpdateTransform(nullptr);
-
-		std::cout << "아이템 [" << objectIndex << "] 들기" << std::endl;
 	}
 	else {
 		// 놓기
@@ -433,8 +431,6 @@ void CGameFramework::ItemToHand(int objectIndex)
 		}
 		pItem->m_pParent = nullptr;
 		pItem->m_pSibling = nullptr;
-
-		std::cout << "아이템 [" << objectIndex << "] 놓기" << std::endl;
 	}
 }
 
@@ -557,6 +553,7 @@ void CGameFramework::ProcessInput()
 		if (pKeysBuffer['D'] & 0xF0) dwDirection |= DIR_RIGHT;
 		if (pKeysBuffer[VK_SPACE] & 0xF0) dwDirection |= DIR_UP;
 		if (pKeysBuffer[VK_SHIFT] & 0xF0) dwDirection |= DIR_DOWN;
+		if (pKeysBuffer[VK_CONTROL] & 0xF0) dwDirection |= DIR_CROUCH;
 
 		if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
 		{

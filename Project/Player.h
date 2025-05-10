@@ -37,6 +37,7 @@ protected:
 
 public:
 	bool	isSwing = false;
+	bool	isCrouch = false;
 	bool	items[4] = { false,false,false,false };
 
 public:
