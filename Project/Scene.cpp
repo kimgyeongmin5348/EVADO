@@ -87,16 +87,17 @@ void CScene::BuildDefaultLightsAndMaterials()
 
 void CScene::InitializeCollisionSystem()
 {
-	BoundingBox worldBounds(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(100.0f, 100.0f, 10.0f));
+	BoundingBox worldBounds(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(100.0f, 100.0f, 100.0f));
 	m_CollisionManager.Build(worldBounds, 1, 5);
 
 	for (int i = 0; i < m_nGameObjects; ++i) {
 		m_CollisionManager.InsertObject(m_ppGameObjects[i]);
 	}
 
-	//for (int i = 0; i < m_nHierarchicalGameObjects; ++i) {
-	//	m_CollisionManager.InsertObject(m_ppHierarchicalGameObjects[i]);
-	//}
+	for (int i = 0; i < m_nHierarchicalGameObjects; ++i) {
+		m_CollisionManager.InsertObject(m_ppHierarchicalGameObjects[i]);
+	}
+
 	m_CollisionManager.PrintTree();
 }
 
@@ -149,6 +150,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_ppHierarchicalGameObjects[1] = new FlashLight(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFlashlightModel);
 	m_ppHierarchicalGameObjects[1]->SetScale(3, 3, 3);
 	m_ppHierarchicalGameObjects[1]->SetPosition(3, 2, 10);
+	m_ppHierarchicalGameObjects[1]->CalculateBoundingBox();
 	if (pFlashlightModel) delete pFlashlightModel;
 
 	CLoadedModelInfo* pShovelModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Shovel.bin", NULL);
@@ -156,12 +158,14 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_ppHierarchicalGameObjects[2]->SetScale(1, 1, 1);
 	m_ppHierarchicalGameObjects[2]->Rotate(-90, 0, 0);
 	m_ppHierarchicalGameObjects[2]->SetPosition(3, 2, 12);
+	m_ppHierarchicalGameObjects[2]->CalculateBoundingBox();
 	if (pShovelModel) delete pShovelModel;
 
 	CLoadedModelInfo* pWhistleModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Whistle.bin", NULL);
 	m_ppHierarchicalGameObjects[3] = new Whistle(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pWhistleModel);
 	m_ppHierarchicalGameObjects[3]->SetScale(1, 1, 1);
 	m_ppHierarchicalGameObjects[3]->SetPosition(3, 2, 13);
+	m_ppHierarchicalGameObjects[3]->CalculateBoundingBox();
 	if (pWhistleModel) delete pWhistleModel;
 
 	// OtherPlayer

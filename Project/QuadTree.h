@@ -97,6 +97,10 @@ private:
 
     void InsertObject(QuadTreeNode* node, CGameObject* object, int depth)
     {
+        cout << object->GetChild()->GetFrameName() << ": " << endl;
+        cout << "    " << object->GetBoundingBox().Center.x << ", " << object->GetBoundingBox().Center.y << ", " << object->GetBoundingBox().Center.z << endl;
+        cout << "    " << object->GetBoundingBox().Extents.x << ", " << object->GetBoundingBox().Extents.y << ", " << object->GetBoundingBox().Extents.z << endl;
+
         if (node->isLeaf)
         {
             if (node->objects.size() < maxObjectsPerNode || depth >= maxDepth)
@@ -117,7 +121,7 @@ private:
         {
             for (int i = 0; i < 4; i++)
             {
-                if (node->children[i]->bounds.Intersects(object->GetBoundingBox())) // CGameObject에서 BoundingBox 반환 가정
+                if ( node->children[i]->bounds.Intersects(object->GetBoundingBox()) )
                     InsertObject(node->children[i], object, maxDepth);
             }
         }
@@ -129,7 +133,7 @@ private:
         {
             if (node->children[i]->bounds.Intersects(object->GetBoundingBox()))
             {
-                InsertObject(node->children[i], object, maxDepth); // depth는 maxDepth로 설정
+                InsertObject(node->children[i], object, maxDepth);
                 break;
             }
         }
