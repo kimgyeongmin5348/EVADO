@@ -10,8 +10,7 @@ void* g_pContext = nullptr;
 //std::unordered_map<long long, CPlayer> g_other_players;
 std::unordered_map<long long, OtherPlayer*> g_other_players;
 
-std::mutex g_player_mutex; // ¸ÖÆ¼½º·¹µå Á¢±Ù ¹æÁö
-static CLoadedModelInfo* s_pPlayerModel = nullptr; // ¸ğµ¨ Ä³½Ì
+std::mutex g_player_mutex; // ë©€í‹°ìŠ¤ë ˆë“œ ì ‘ê·¼ ë°©ì§€
 
 
 SOCKET ConnectSocket = INVALID_SOCKET;
@@ -39,20 +38,20 @@ DWORD WINAPI WorkerThread(LPVOID lpParam) {
 
         if (!result || bytesTransferred == 0) {
             int error_code = result ? WSAGetLastError() : WSAECONNRESET;
-            std::cerr << "[Å¬¶ó] ¿¬°á Á¾·á. ¿À·ù ÄÚµå: " << error_code << std::endl;
+            std::cerr << "[í´ë¼] ì—°ê²° ì¢…ë£Œ. ì˜¤ë¥˜ ì½”ë“œ: " << error_code << std::endl;
 
-            // 1. ¼ÒÄÏ Á¤¸®
+            // 1. ì†Œì¼“ ì •ë¦¬
             if (ConnectSocket != INVALID_SOCKET) {
                 closesocket(ConnectSocket);
                 ConnectSocket = INVALID_SOCKET;
             }
 
-            // 2. ´Ù¸¥ ÇÃ·¹ÀÌ¾î µ¥ÀÌÅÍ ÃÊ±âÈ­
+            // 2. ë‹¤ë¥¸ í”Œë ˆì´ì–´ ë°ì´í„° ì´ˆê¸°í™”
             g_other_players.clear();
             g_myid = 0;
 
-            // 3. ¼­¹ö¿¡ ¿¬°á Á¾·á ¾Ë¸² (¿É¼Ç)
-            //PostQuitMessage(0); // GUI ¾ÖÇÃ¸®ÄÉÀÌ¼ÇÀÎ °æ¿ì
+            // 3. ì„œë²„ì— ì—°ê²° ì¢…ë£Œ ì•Œë¦¼ (ì˜µì…˜)
+            //PostQuitMessage(0); // GUI ì• í”Œë¦¬ì¼€ì´ì…˜ì¸ ê²½ìš°
 
             delete overlapped;
             continue;
@@ -101,7 +100,7 @@ void send_packet(void* packet) {
     int result = WSASend(ConnectSocket, &overlapped->wsaBuf, 1, nullptr, 0, reinterpret_cast<LPWSAOVERLAPPED>(overlapped), nullptr);
 
     if (result == SOCKET_ERROR && WSAGetLastError() != WSA_IO_PENDING) {
-        std::cerr << "WSASend ¿À·ù: " << WSAGetLastError() << std::endl;
+        std::cerr << "WSASend ì˜¤ë¥˜: " << WSAGetLastError() << std::endl;
         delete overlapped;
     }
 
@@ -112,57 +111,57 @@ void InitializeNetwork()
 {
     WSAStartup(MAKEWORD(2, 2), &wsaData);
 
-    // 1. IOCP ÇÚµé »ı¼º
+    // 1. IOCP í•¸ë“¤ ìƒì„±
     g_hIOCP = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, NUM_WORKER_THREADS);
 
-    // 2. ¿öÄ¿ ½º·¹µå »ı¼º
+    // 2. ì›Œì»¤ ìŠ¤ë ˆë“œ ìƒì„±
     for (int i = 0; i < NUM_WORKER_THREADS; ++i) {
         CreateThread(NULL, 0, WorkerThread, NULL, 0, NULL);
     }
 
-    // 3. Overlapped ¼ÒÄÏ »ı¼º
+    // 3. Overlapped ì†Œì¼“ ìƒì„±
     ConnectSocket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
 
-    // 4. ³íºí·ÎÅ· ¼ÒÄÏ ¼³Á¤
+    // 4. ë…¼ë¸”ë¡œí‚¹ ì†Œì¼“ ì„¤ì •
     u_long nonBlockingMode = 1;
     ioctlsocket(ConnectSocket, FIONBIO, &nonBlockingMode);
 
-    // 5. ºñµ¿±â ¿¬°á ¼³Á¤
+    // 5. ë¹„ë™ê¸° ì—°ê²° ì„¤ì •
     sockaddr_in serverAddr{};
     serverAddr.sin_family = AF_INET;
     inet_pton(AF_INET, "127.0.0.1", &serverAddr.sin_addr);
     serverAddr.sin_port = htons(SERVER_PORT);
 
-    // 6. ºñµ¿±â ¿¬°á ½ÃÀÛ
+    // 6. ë¹„ë™ê¸° ì—°ê²° ì‹œì‘
     int connectResult = WSAConnect(ConnectSocket, (sockaddr*)&serverAddr, sizeof(serverAddr), NULL, NULL, NULL, NULL);
 
     if (connectResult == SOCKET_ERROR) {
         int err = WSAGetLastError();
         if (err != WSAEWOULDBLOCK) {
-            std::cerr << "¿¬°á ½ÇÆĞ: " << err << std::endl;
+            std::cerr << "ì—°ê²° ì‹¤íŒ¨: " << err << std::endl;
             closesocket(ConnectSocket);
             WSACleanup();
             exit(1);
         }
     }
 
-    // 7. IOCP¿¡ ¼ÒÄÏ µî·Ï
+    // 7. IOCPì— ì†Œì¼“ ë“±ë¡
     CreateIoCompletionPort((HANDLE)ConnectSocket, g_hIOCP, 0, 0);
 
-    // 8. ÃÊ±â ¼ö½Å ÀÛ¾÷ ½ÃÀÛ
+    // 8. ì´ˆê¸° ìˆ˜ì‹  ì‘ì—… ì‹œì‘
     PostRecv();
 
-    std::cout << "¼­¹ö¿¡ ¼º°øÀûÀ¸·Î ¿¬°áµÇ¾ú½À´Ï´Ù." << std::endl;
+    std::cout << "ì„œë²„ì— ì„±ê³µì ìœ¼ë¡œ ì—°ê²°ë˜ì—ˆìŠµë‹ˆë‹¤." << std::endl;
 
-    // 9. ·Î±×ÀÎ ÆĞÅ¶ Àü¼Û
+    // 9. ë¡œê·¸ì¸ íŒ¨í‚· ì „ì†¡
     cs_packet_login p;
     p.size = sizeof(p);
     p.type = CS_P_LOGIN;
-   // p.position = player.GetPosition();
+    // p.position = player.GetPosition();
     strcpy_s(p.name, sizeof(p.name), user_name.c_str());
     send_packet(&p);
 
-    std::cout << "[Å¬¶ó] ·Î±×ÀÎ ÆĞÅ¶ Àü¼Û: ÀÌ¸§=" << p.name << "\n";
+    std::cout << "[í´ë¼] ë¡œê·¸ì¸ íŒ¨í‚· ì „ì†¡: ì´ë¦„=" << p.name << "\n";
 }
 
 void ProcessPacket(char* ptr)
@@ -170,130 +169,94 @@ void ProcessPacket(char* ptr)
 
     const unsigned char packet_type = ptr[1];
 
-    std::cout << "[Å¬¶ó] ÆĞÅ¶ Ã³¸® ½ÃÀÛ - Å¸ÀÔ: " << (int)packet_type << "\n";
+    std::cout << "[í´ë¼] íŒ¨í‚· ì²˜ë¦¬ ì‹œì‘ - íƒ€ì…: " << (int)packet_type << "\n";
 
     switch (packet_type)
     {
-    case SC_P_USER_INFO: // Å¬¶óÀÌ¾ğÆ®ÀÇ Á¤º¸¸¦ °¡Áö°í ÀÖ´Â ÆĞÅ¶ Å¸ÀÔ
+    case SC_P_USER_INFO: // í´ë¼ì´ì–¸íŠ¸ì˜ ì •ë³´ë¥¼ ê°€ì§€ê³  ìˆëŠ” íŒ¨í‚· íƒ€ì…
     {
         sc_packet_user_info* packet = reinterpret_cast<sc_packet_user_info*>(ptr);
 
         g_myid = packet->id;
-        player.SetPosition(packet->position);
+        //player.SetPosition(packet->position);
 
-        std::cout << "[Å¬¶ó] ³» ÇÃ·¹ÀÌ¾î »ı¼º: " << packet->id << std::endl;
-        std::cout << "[Å¬¶ó] ³» Á¤º¸ ¼ö½Å - ID:" << packet->id << " À§Ä¡(" << packet->position.x << "," << packet->position.y << "," << packet->position.z << ")\n";
 
+        std::cout << "[í´ë¼] ë‚´ í”Œë ˆì´ì–´ ìƒì„±: " << packet->id << std::endl;
+        std::cout << "[í´ë¼] ë‚´ ì •ë³´ ìˆ˜ì‹  - ID:" << packet->id
+            << " ìœ„ì¹˜(" << packet->position.x << "," << packet->position.y << "," << packet->position.z << ")"
+            << " Look(" << packet->look.x << "," << packet->look.y << "," << packet->look.z << ")"
+            << " Right(" << packet->right.x << "," << packet->right.y << "," << packet->right.z << ")"
+            << std::endl;
         break;
     }
 
-    case SC_P_ENTER: // »õ·Î µé¾î¿Â ÇÃ·¹ÀÌ¾îÀÇ Á¤º¸¸¦ Æ÷ÇÔÇÏ°í ÀÖ´Â ÆĞÅ¶ Å¸ÀÔ
+    case SC_P_ENTER: // ìƒˆë¡œ ë“¤ì–´ì˜¨ í”Œë ˆì´ì–´ì˜ ì •ë³´ë¥¼ í¬í•¨í•˜ê³  ìˆëŠ” íŒ¨í‚· íƒ€ì…
     {
         sc_packet_enter* packet = reinterpret_cast<sc_packet_enter*>(ptr);
         int id = packet->id;
 
         if (id == g_myid) break;
 
-        std::lock_guard<std::mutex> lock(g_player_mutex);
-
-        if (g_other_players.find(id) == g_other_players.end()) { // ¸ğµ¨ ´ÜÀÏ ·Îµå (ÃÖÃÊ 1È¸¸¸ ½ÇÇà)
-            if (!s_pPlayerModel) {
-                s_pPlayerModel = CGameObject::LoadGeometryAndAnimationFromFile(g_pd3dDevice, g_pd3dCommandList, g_pd3dGraphicsRootSignature, "Model/Player.bin", nullptr);
-
-                if (!s_pPlayerModel) {
-                    std::cerr << "[Å©¸®Æ¼ÄÃ] ÇÃ·¹ÀÌ¾î ¸ğµ¨ ·Îµå ½ÇÆĞ" << std::endl;
-                    break;
-                }
-            }
-
-            // »õ ÇÃ·¹ÀÌ¾î °´Ã¼ »ı¼º
-            OtherPlayer* pNewPlayer = new OtherPlayer(g_pd3dDevice, g_pd3dCommandList, g_pd3dGraphicsRootSignature, s_pPlayerModel);
-            pNewPlayer->SetPosition(packet->position);
-            g_other_players[id] = pNewPlayer;
-            std::cout << "[Å¬¶ó] »õ ÇÃ·¹ÀÌ¾î »ı¼º: " << id << std::endl;
-
-        }
+        
+        std::cout << "ìƒˆë¡œìš´ í”Œë ˆì´ì–´" << id << "ì ‘ì† ì„±ê³µ" << "\n";
         
         
+
         break;
     }
-    case SC_P_MOVE: 
+    case SC_P_MOVE:
     {
         sc_packet_move* packet = reinterpret_cast<sc_packet_move*>(ptr);
         int other_id = packet->id;
 
         if (other_id == g_myid) break;
 
-        std::lock_guard<std::mutex> lock(g_player_mutex);
+        // ë‹¤ë¥¸ í”Œë ˆì´ì–´ ìœ„ì¹˜ ì—…ë°ì´íŠ¸ í™•ì¸
+        std::cout << "[í´ë¼] " << other_id << "ë²ˆ í”Œë ˆì´ì–´ ìœ„ì¹˜ ê°±ì‹ : ("
+            << packet->position.x << ", "
+            << packet->position.y << ", "
+            << packet->position.z << ") "
+            << "Look(" << packet->look.x << ", " << packet->look.y << ", " << packet->look.z << ") "
+            << "Right(" << packet->right.x << ", " << packet->right.y << ", " << packet->right.z << ")\n";
 
-        auto it = g_other_players.find(other_id);
-
-        if (it != g_other_players.end()) {
-            OtherPlayer* pPlayer = dynamic_cast<OtherPlayer*>(it->second);
-            if (pPlayer) {
-                pPlayer->SetPosition(packet->position);
-                std::cout << "[Å¬¶ó] ÇÃ·¹ÀÌ¾î ÀÌµ¿: " << other_id
-                    << " -> (" << packet->position.x
-                    << "," << packet->position.y << ","
-                    << packet->position.z << ")" << std::endl;
-            }
-        }
-
-        //if (other_id != g_myid || other_id < MAX_USER) { // ´Ù¸¥ ÇÃ·¹ÀÌ¾î À§Ä¡ °»½Å
-        //    // ´Ù¸¥ ÇÃ·¹ÀÌ¾î À§Ä¡ ¾÷µ¥ÀÌÆ® È®ÀÎ
-        //    std::cout << "[Å¬¶ó] " << other_id << "¹ø ÇÃ·¹ÀÌ¾î À§Ä¡ °»½Å: ("
-        //        << packet->position.x << ", "
-        //        << packet->position.y << ", "
-        //        << packet->position.z << ")\n";
-        //}
-
-
-        
         break;
     }
 
-    case SC_P_LEAVE: // ¼­¹ö°¡ Å¬¶ó¿¡°Ô ´Ù¸¥ ÇÃ·¹ÀÌ¾î°¡ °ÔÀÓÀ» ¶°³µÀ½À» ¾Ë·ÁÁÖ´Â ÆĞÅ¶ Å¸ÀÔ
+    case SC_P_LEAVE: // ì„œë²„ê°€ í´ë¼ì—ê²Œ ë‹¤ë¥¸ í”Œë ˆì´ì–´ê°€ ê²Œì„ì„ ë– ë‚¬ìŒì„ ì•Œë ¤ì£¼ëŠ” íŒ¨í‚· íƒ€ì…
     {
         sc_packet_leave* packet = reinterpret_cast<sc_packet_leave*>(ptr);
         int other_id = packet->id;
 
-        std::lock_guard<std::mutex> lock(g_player_mutex);
-        auto it = g_other_players.find(other_id);
-        if (it != g_other_players.end()) {
-            delete it->second; // ¸Ş¸ğ¸® ÇØÁ¦
-            g_other_players.erase(it);
-            std::cout << "[Å¬¶ó] ÇÃ·¹ÀÌ¾î Á¦°Å: ID=" << other_id << "\n";
-        }
-        
+        std::cout << "[í´ë¼] í”Œë ˆì´ì–´ ì œê±°: ID=" << other_id << "\n";
 
         break;
     }
     case SC_P_ITEM_SPAWN: {
         sc_packet_item_spawn* pkt = reinterpret_cast<sc_packet_item_spawn*>(ptr);
-        std::cout << "[Å¬¶ó] ¾ÆÀÌÅÛ »ı¼º - ID: " << pkt->item_id
-            << " À§Ä¡(" << pkt->position.x << ", "
+        std::cout << "[í´ë¼] ì•„ì´í…œ ìƒì„± - ID: " << pkt->item_id
+            << " ìœ„ì¹˜(" << pkt->position.x << ", "
             << pkt->position.y << ", " << pkt->position.z << ")"
-            << " Å¸ÀÔ: " << pkt->item_type << "\n";
+            << " íƒ€ì…: " << pkt->item_type << "\n";
         break;
     }
 
     case SC_P_ITEM_DESPAWN: {
         sc_packet_item_despawn* pkt = reinterpret_cast<sc_packet_item_despawn*>(ptr);
-        std::cout << "[Å¬¶ó] ¾ÆÀÌÅÛ »èÁ¦ - ID: " << pkt->item_id << "\n";
+        std::cout << "[í´ë¼] ì•„ì´í…œ ì‚­ì œ - ID: " << pkt->item_id << "\n";
         break;
     }
 
     case SC_P_ITEM_MOVE: {
         sc_packet_item_move* pkt = reinterpret_cast<sc_packet_item_move*>(ptr);
-        std::cout << "[µğ¹ö±×] ¾ÆÀÌÅÛ ÀÌµ¿ - "
+        std::cout << "[ë””ë²„ê·¸] ì•„ì´í…œ ì´ë™ - "
             << "ID: " << pkt->item_id << ", "
-            << "À§Ä¡: (" << pkt->position.x << ", "
+            << "ìœ„ì¹˜: (" << pkt->position.x << ", "
             << pkt->position.y << ", " << pkt->position.z << "), "
-            << "¼ÒÀ¯ÀÚ: " << (pkt->holder_id == g_myid ? "º»ÀÎ" : "Å¸ÀÎ")
+            << "ì†Œìœ ì: " << (pkt->holder_id == g_myid ? "ë³¸ì¸" : "íƒ€ì¸")
             << " (" << pkt->holder_id << ")\n";
 
         //if (pkt->holder_id == g_myid) {
-        //    // ÀÚ½ÅÀÌ µé°í ÀÖ´Â ¾ÆÀÌÅÛÀº º°µµ Ã³¸®
+        //    // ìì‹ ì´ ë“¤ê³  ìˆëŠ” ì•„ì´í…œì€ ë³„ë„ ì²˜ë¦¬
         //    player.UpdateHeldItemPosition(pkt->position);
         //}
         //else {
@@ -302,11 +265,11 @@ void ProcessPacket(char* ptr)
         //break;
     }
     default:
-        printf("¾Ë ¼ö ¾ø´Â ÆĞÅ¶ Å¸ÀÔ [%d]\n", ptr[1]);
+        printf("ì•Œ ìˆ˜ ì—†ëŠ” íŒ¨í‚· íƒ€ì… [%d]\n", ptr[1]);
     }
 }
 
-// process_data() ÇÔ¼ö °³¼±
+// process_data() í•¨ìˆ˜ ê°œì„ 
 void process_data(char* net_buf, size_t io_byte) {
 
     char* ptr = net_buf;
@@ -332,17 +295,25 @@ void process_data(char* net_buf, size_t io_byte) {
     }
 }
 
-void send_position_to_server(const XMFLOAT3& position)
+void send_position_to_server(const XMFLOAT3& position, const XMFLOAT3& look, const XMFLOAT3& right)
 {
 
     cs_packet_move p;
     p.size = sizeof(p);
     p.type = CS_P_MOVE;
     p.position = position;
- 
+    p.look = look;
+    p.right = right;
     send_packet(&p);
 
-    // Àü¼Û È®ÀÎ Ãâ·Â
-    std::cout << "[Å¬¶ó] À§Ä¡ Àü¼Û: (" << p.position.x << ", " << p.position.y << ", " << p.position.z << ")\n";
+    // ì „ì†¡ í™•ì¸ ì¶œë ¥
+    std::cout << "[í´ë¼] ìœ„ì¹˜ ì „ì†¡: ("
+        << position.x << ", " << position.y << ", " << position.z << ") "
+        << "Look(" << look.x << ", " << look.y << ", " << look.z << ") "
+        << "Right(" << right.x << ", " << right.y << ", " << right.z << ")\n";
+
+    send_packet(&p);
+
+   
 
 }
