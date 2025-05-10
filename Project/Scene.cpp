@@ -87,8 +87,8 @@ void CScene::BuildDefaultLightsAndMaterials()
 
 void CScene::InitializeCollisionSystem()
 {
-	BoundingBox worldBounds(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1000.0f, 1000.0f, 100.0f));
-	m_CollisionManager.Build(worldBounds, 5, 5);
+	BoundingBox worldBounds(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(100.0f, 100.0f, 10.0f));
+	m_CollisionManager.Build(worldBounds, 1, 5);
 
 	for (int i = 0; i < m_nGameObjects; ++i) {
 		m_CollisionManager.InsertObject(m_ppGameObjects[i]);
@@ -97,6 +97,7 @@ void CScene::InitializeCollisionSystem()
 	//for (int i = 0; i < m_nHierarchicalGameObjects; ++i) {
 	//	m_CollisionManager.InsertObject(m_ppHierarchicalGameObjects[i]);
 	//}
+	m_CollisionManager.PrintTree();
 }
 
 void CScene::GenerateGameObjectsBoundingBox()
@@ -174,25 +175,25 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	//if (pOtherPlayerModel) delete pOtherPlayerModel;
 
 	// 인벤토리 UI
-	//m_nShaders = 1;
-	//m_ppShaders = new CShader * [m_nShaders];
+	m_nShaders = 1;
+	m_ppShaders = new CShader * [m_nShaders];
 
-	//CTextureToScreenShader* pTextureToScreenShader = new CTextureToScreenShader(1);
-	//pTextureToScreenShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	CTextureToScreenShader* pTextureToScreenShader = new CTextureToScreenShader(1);
+	pTextureToScreenShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
-	//CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	//pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Inventory.dds", RESOURCE_TEXTURE2D, 0);
+	CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Inventory.dds", RESOURCE_TEXTURE2D, 0);
 	////pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/FlashLight.dds", RESOURCE_TEXTURE2D, 1);
 	////pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Shovel.dds", RESOURCE_TEXTURE2D, 2);
 	////pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Whistle.dds", RESOURCE_TEXTURE2D, 3);
 
-	//CreateShaderResourceViews(pd3dDevice, pTexture, 0, 15);
+	CreateShaderResourceViews(pd3dDevice, pTexture, 0, 15);
 
-	//CScreenRectMeshTextured* pMesh = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, -0.5f, 1.0f, -0.5f, 0.5f);
-	//pTextureToScreenShader->SetMesh(0, pMesh);
-	//pTextureToScreenShader->SetTexture(pTexture);
+	CScreenRectMeshTextured* pMesh = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, -0.5f, 1.0f, -0.5f, 0.5f);
+	pTextureToScreenShader->SetMesh(0, pMesh);
+	pTextureToScreenShader->SetTexture(pTexture);
 
-	//m_ppShaders[0] = pTextureToScreenShader;
+	m_ppShaders[0] = pTextureToScreenShader;
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }

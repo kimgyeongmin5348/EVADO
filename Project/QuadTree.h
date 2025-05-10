@@ -42,6 +42,18 @@ public:
         InsertObject(root, object, 0);
     }
 
+    void PrintTree()
+    {
+        if (!root)
+        {
+            std::cout << "QuadTree is empty.\n";
+            return;
+        }
+        std::cout << "=== QuadTree Structure ===\n";
+        PrintNode(root, 0);
+        std::cout << "==========================\n";
+    }
+
     QuadTreeNode* FindNode(QuadTreeNode* node, const BoundingBox& aabb)
     {
         if (!node || !node->bounds.Intersects(aabb))
@@ -129,6 +141,33 @@ private:
         for (int i = 0; i < 4; i++)
             DeleteNode(node->children[i]);
         delete node;
+    }
+
+    void PrintNode(QuadTreeNode* node, int depth)
+    {
+        if (!node) return;
+
+        for (int i = 0; i < depth; i++) std::cout << "  ";
+
+        std::cout << "Node (Depth " << depth << "):\n";
+        for (int i = 0; i < depth + 1; i++) std::cout << "  ";
+        std::cout << "Bounds: Center(" << node->bounds.Center.x << ", " << node->bounds.Center.y << ", " << node->bounds.Center.z << ") "
+            << "Extents(" << node->bounds.Extents.x << ", " << node->bounds.Extents.y << ", " << node->bounds.Extents.z << ")\n";
+        for (int i = 0; i < depth + 1; i++) std::cout << "  ";
+        std::cout << "IsLeaf: " << (node->isLeaf ? "Yes" : "No") << ", Objects: " << node->objects.size() << "\n";
+
+        if (!node->isLeaf)
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                if (node->children[i])
+                {
+                    for (int j = 0; j < depth + 1; j++) std::cout << "  ";
+                    std::cout << "Child " << i << ":\n";
+                    PrintNode(node->children[i], depth + 1);
+                }
+            }
+        }
     }
 };
 

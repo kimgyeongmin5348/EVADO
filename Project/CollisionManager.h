@@ -17,7 +17,15 @@ public:
         m_pQuadTree->Build(worldBounds, maxDepth, maxObjectsPerNode);
     }
 
-    void InsertObject(CGameObject* object) { m_pQuadTree->Insert(object); }
+    void InsertObject(CGameObject* object) 
+    { 
+        m_pQuadTree->Insert(object); 
+    }
+
+    void PrintTree()
+    {
+        m_pQuadTree->PrintTree();
+    }
 
     void Update(CGameObject* player)
     {
