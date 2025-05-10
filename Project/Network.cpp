@@ -2,7 +2,7 @@
 #include "Player.h"
 
 
-//CScene* g_pScene = nullptr;
+CScene* g_pScene = nullptr;
 ID3D12Device* g_pd3dDevice = nullptr;
 ID3D12GraphicsCommandList* g_pd3dCommandList = nullptr;
 ID3D12RootSignature* g_pd3dGraphicsRootSignature = nullptr;
@@ -18,7 +18,8 @@ CPlayer player;
 CGameObject object;
 long long g_myid = 0;
 
-
+char recv_buffer[MAX_BUFFER];
+int  saved_data = 0;
 
 void PostRecv();
 
@@ -200,13 +201,19 @@ void ProcessPacket(char* ptr)
         if (id == g_myid) { // 자신의 아바타 생성 및 카메라 위치 조정            
             std::cout << "[클라] 새 플레이어 생성: " << id
                 << " (" << packet->name << ")" << std::endl;
-
-            // 밑에 이거 맞는지 모르겠음..
-            //g_pScene->AddRemotePlayer(packet->id, packet->position, g_pd3dDevice, g_pd3dCommandList, g_pd3dGraphicsRootSignature, g_pContext);
+           
 
         }
         else if (id < MAX_USER) {  // 다른플레이어 show()
-           
+            g_pScene->m_nGameObjects = 1;
+            g_pScene->m_ppGameObjects = new CGameObject * [g_pScene->m_nGameObjects];
+
+            CLoadedModelInfo* pOtherPlayerModel = CGameObject::LoadGeometryAndAnimationFromFile(g_pd3dDevice, g_pd3dCommandList, g_pScene->m_pd3dGraphicsRootSignature, "Model/Player.bin", NULL);
+            g_pScene->m_ppGameObjects[0] = new OtherPlayer(g_pd3dDevice, g_pd3dCommandList, g_pScene->m_pd3dGraphicsRootSignature, pOtherPlayerModel);
+            //서버에서 정보 받아서 업데이트 필요 -> 업데이트함수로
+            g_pScene->m_ppGameObjects[0]->SetPosition(0, 0, 0);
+
+
         }
         else { // NPC 담당
             std::cout << "[클라] NPC 생성: " << id << std::endl;
@@ -234,8 +241,7 @@ void ProcessPacket(char* ptr)
                 << packet->position.y << ", "
                 << packet->position.z << ")\n";
 
-            // 다른플레이어 보이게 하는부분 넣어야 할듯?
-            //g_pScene->UpdateRemotePlayer(packet->id, packet->position);
+          
 
         }
         else { //NPC 위치 갱신

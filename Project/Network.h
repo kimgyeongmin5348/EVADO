@@ -42,7 +42,6 @@ extern ID3D12GraphicsCommandList* g_pd3dCommandList;
 extern ID3D12RootSignature* g_pd3dGraphicsRootSignature;
 extern void* g_pContext;
 
-
 void ProcessPacket(char* ptr);
 void process_data(char* net_buf, size_t io_byte);
 void send_packet(void* packet);
