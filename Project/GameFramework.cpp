@@ -291,15 +291,19 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 	{
 		case WM_LBUTTONDOWN:
 		case WM_RBUTTONDOWN:
-			m_pPlayer->isSwing = true;
+			if (m_pPlayer->items[1]) {
+				flashlightToggle = !flashlightToggle;
+				m_pScene->BuildDefaultLightsAndMaterials(flashlightToggle);
+			}
+			if (m_pPlayer->items[2]) m_pPlayer->isSwing = true;
 			break;
 		case WM_LBUTTONUP:
 		case WM_RBUTTONUP:
-			//::ReleaseCapture();
 			break;
 		case WM_MOUSEMOVE:
 			::SetCapture(hWnd);
 			::GetCursorPos(&m_ptOldCursorPos);
+			//::ReleaseCapture();
 			break;
 		default:
 			break;
@@ -311,45 +315,40 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 	if (m_pScene) m_pScene->OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
 	switch (nMessageID)
 	{
-		case WM_KEYUP:
-			switch (wParam)
-			{
-			case VK_ESCAPE:
-				::PostQuitMessage(0);
-				break;
-			case VK_RETURN:
-				m_ppScenes[m_nScene]->ReleaseObjects();
-				m_nCurrentScene = m_nScene + 1;
-				BuildObjects();
-				break;
-			case VK_F1:
-			case VK_F2:
-			case VK_F3:
-				m_pCamera = m_pPlayer->ChangeCamera((DWORD)(wParam - VK_F1 + 1), m_GameTimer.GetTimeElapsed());
-				break;
-			case VK_F9:
-				ChangeSwapChainState();
-				break;		
-			case 'F':
-				for (int i = 1; i < 4; ++i)
-					std::cout << m_pScene->m_ppHierarchicalGameObjects[i]->GetPosition().y << endl;
-				break;
-				case '1':
-				case '2':
-				case '3':
-				{
-					int itemIndex = wParam - '0';
-					if (itemIndex < m_pScene->m_nHierarchicalGameObjects) {
-						ItemToHand(itemIndex);
-						items[itemIndex] = !items[itemIndex];
-					}
-					break;
-				}
-
+	case WM_KEYUP:
+		switch (wParam)
+		{
+		case VK_ESCAPE:
+			::PostQuitMessage(0);
+			break;
+		case VK_RETURN:
+			m_ppScenes[m_nScene]->ReleaseObjects();
+			m_nCurrentScene = m_nScene + 1;
+			BuildObjects();
+			break;
+		case VK_F1:
+		case VK_F2:
+		case VK_F3:
+			m_pCamera = m_pPlayer->ChangeCamera((DWORD)(wParam - VK_F1 + 1), m_GameTimer.GetTimeElapsed());
+			break;
+		case VK_F9:
+			ChangeSwapChainState();
+			break;
+		case '1':
+		case '2':
+		case '3':
+		{
+			int itemIndex = wParam - '0';
+			if (itemIndex < m_pScene->m_nHierarchicalGameObjects) {
+				ItemToHand(itemIndex);
+				m_pPlayer->items[itemIndex] = !m_pPlayer->items[itemIndex];
 			}
 			break;
-		default:
-			break;
+		}
+		}
+		break;
+	default:
+		break;
 	}
 }
 
@@ -418,8 +417,6 @@ void CGameFramework::ItemToHand(int objectIndex)
 		else pItem->SetPosition(0.05f, -0.05f, 0.1f);
 
 		m_pPlayer->UpdateTransform(nullptr);
-
-		std::cout << "아이템 [" << objectIndex << "] 들기" << std::endl;
 	}
 	else {
 		// 놓기
@@ -431,8 +428,6 @@ void CGameFramework::ItemToHand(int objectIndex)
 		}
 		pItem->m_pParent = nullptr;
 		pItem->m_pSibling = nullptr;
-
-		std::cout << "아이템 [" << objectIndex << "] 놓기" << std::endl;
 	}
 }
 
@@ -555,6 +550,7 @@ void CGameFramework::ProcessInput()
 		if (pKeysBuffer['D'] & 0xF0) dwDirection |= DIR_RIGHT;
 		if (pKeysBuffer[VK_SPACE] & 0xF0) dwDirection |= DIR_UP;
 		if (pKeysBuffer[VK_SHIFT] & 0xF0) dwDirection |= DIR_DOWN;
+		if (pKeysBuffer[VK_CONTROL] & 0xF0) dwDirection |= DIR_CROUCH;
 
 		if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
 		{
@@ -580,6 +576,19 @@ void CGameFramework::AnimateObjects()
 	m_pPlayer->Animate(fTimeElapsed);
 
 	if (m_nCurrentScene == 0) m_pPlayer->SetPosition(XMFLOAT3(0, 0, 0));
+	if (m_nCurrentScene == 1) {
+		for (int i = 0; i < 4; ++i)
+		{
+			if (!m_pPlayer->items[i]) // 손에 들리지 않은 상태일 때만
+			{	
+				if (m_pScene->m_ppHierarchicalGameObjects[i]) {
+					XMFLOAT3 pos = m_pScene->m_ppHierarchicalGameObjects[i]->GetPosition();
+					if (pos.y > 0.0f) pos.y -= 0.1;
+					m_pScene->m_ppHierarchicalGameObjects[i]->SetPosition(pos);
+				}
+			}
+		}
+	}
 }
 
 void CGameFramework::WaitForGpuComplete()

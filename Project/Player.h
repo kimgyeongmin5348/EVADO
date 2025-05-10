@@ -37,7 +37,9 @@ protected:
 	CCamera						*m_pCamera = NULL;
 
 public:
-	bool isSwing = false;
+	bool	isSwing = false;
+	bool	isCrouch = false;
+	bool	items[4] = { false,false,false,false };
 
 public:
 	CPlayer();
@@ -116,6 +118,7 @@ public:
 	virtual void Update(float fTimeElapsed);
 
 	bool isJump = false;
+
 };
 
 
