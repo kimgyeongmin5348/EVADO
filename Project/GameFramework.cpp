@@ -291,11 +291,11 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 	{
 		case WM_LBUTTONDOWN:
 		case WM_RBUTTONDOWN:
-			if (items[1]) {
+			if (m_pPlayer->items[1]) {
 				flashlightToggle = !flashlightToggle;
 				m_pScene->BuildDefaultLightsAndMaterials(flashlightToggle);
 			}
-			if (items[2]) m_pPlayer->isSwing = true;
+			if (m_pPlayer->items[2]) m_pPlayer->isSwing = true;
 			break;
 		case WM_LBUTTONUP:
 		case WM_RBUTTONUP:
@@ -343,7 +343,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 					int itemIndex = wParam - '0';
 					if (itemIndex < m_pScene->m_nHierarchicalGameObjects) {
 						ItemToHand(itemIndex);
-						items[itemIndex] = !items[itemIndex];
+						m_pPlayer->items[itemIndex] = !m_pPlayer->items[itemIndex];
 					}
 					break;
 				}
@@ -585,7 +585,7 @@ void CGameFramework::AnimateObjects()
 	if (m_nCurrentScene == 1) {
 		for (int i = 0; i < 4; ++i)
 		{
-			if (!items[i]) // 손에 들리지 않은 상태일 때만
+			if (!m_pPlayer->items[i]) // 손에 들리지 않은 상태일 때만
 			{	
 				if (m_pScene->m_ppHierarchicalGameObjects[i]) {
 					XMFLOAT3 pos = m_pScene->m_ppHierarchicalGameObjects[i]->GetPosition();

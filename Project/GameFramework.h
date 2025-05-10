@@ -100,7 +100,6 @@ private:
 
 	_TCHAR						m_pszFrameRate[70];
 
-	bool	items[4] = { false,false,false,false };
 	bool flashlightToggle = false;
 
 	//server

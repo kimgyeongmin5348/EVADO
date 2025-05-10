@@ -63,7 +63,6 @@ public:
 	bool ProcessInput(UCHAR *pKeysBuffer);
     void AnimateObjects(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera=NULL);
-
 	void ReleaseUploadBuffers();
 
 	CPlayer								*m_pPlayer = NULL;
@@ -118,6 +117,7 @@ public:
 
 	int									m_nShaders = 0;
 	CShader								**m_ppShaders = NULL;
+	int m_nInventoryMeshes = 0;			// ÇöÀç ½½·Ô ¼ö
 
 	CSkyBox								*m_pSkyBox = NULL;
 	CHeightMapTerrain					*m_pTerrain = NULL;
