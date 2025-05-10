@@ -152,7 +152,7 @@ public:
 		}
 	}
 
-	void SetOtherPlayerPosition(int clinetnum, XMFLOAT3 position)
+	void UpdateOtherPlayerPosition(int clinetnum, XMFLOAT3 position)
 	{
 		m_ppOtherPlayers[clinetnum]->SetPosition(position);
 	}

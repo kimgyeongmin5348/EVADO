@@ -236,15 +236,16 @@ void ProcessPacket(char* ptr)
             OtherPlayer* pPlayer = dynamic_cast<OtherPlayer*>(it->second);
             if (pPlayer) {
                 pPlayer->SetPosition(packet->position);
-                std::cout << "[클라] 플레이어 이동: " << other_id
-                    << " -> (" << packet->position.x
-                    << "," << packet->position.y << ","
-                    << packet->position.z << ")" << std::endl;
+                //std::cout << "[클라] 플레이어 이동: " << other_id
+                //    << " -> (" << packet->position.x
+                //    << "," << packet->position.y << ","
+                //    << packet->position.z << ")" << std::endl;
             }
         }
 
         // OtherPlayer의 위치를 반영한다
-        //gGameFramework.SetOtherPlayerPosition(0, packet->position);
+        if (!gGameFramework.isLoading && !gGameFramework.isStartScene)
+            gGameFramework.UpdateOtherPlayerPosition(0, packet->position);
 
         //if (other_id != g_myid || other_id < MAX_USER) { // 다른 플레이어 위치 갱신
         //    // 다른 플레이어 위치 업데이트 확인
@@ -254,8 +255,6 @@ void ProcessPacket(char* ptr)
         //        << packet->position.z << ")\n";
         //}
 
-
-        
         break;
     }
 
@@ -350,6 +349,6 @@ void send_position_to_server(const XMFLOAT3& position)
     send_packet(&p);
 
     // 전송 확인 출력
-    std::cout << "[클라] 위치 전송: (" << position.x << ", " << position.y << ", " << position.z << ")\n";
+    //std::cout << "[클라] 위치 전송: (" << position.x << ", " << position.y << ", " << position.z << ")\n";
 
 }

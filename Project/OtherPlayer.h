@@ -16,6 +16,4 @@ public:
 	bool isJump = false;
 
 	bool isConnedted = false;
-
-	XMFLOAT3 m_xmf3Position;
 };
