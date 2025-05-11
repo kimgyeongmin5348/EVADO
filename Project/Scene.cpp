@@ -584,7 +584,7 @@ void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera
 	for (int i = 0; i < m_nOtherPlayers; ++i) 
 	{
 		//if (m_ppOtherPlayers[i]->isConnedted)
-			m_ppOtherPlayers[i]->Render(pd3dCommandList, pCamera);
+		m_ppOtherPlayers[i]->Render(pd3dCommandList, pCamera);
 	}
 
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
