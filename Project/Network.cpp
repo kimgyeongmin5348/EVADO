@@ -1,4 +1,4 @@
-#include "Network.h"
+﻿#include "Network.h"
 
 
 CScene* g_pScene = nullptr;
@@ -161,7 +161,7 @@ void InitializeNetwork()
     strcpy_s(p.name, sizeof(p.name), user_name.c_str());
     send_packet(&p);
 
-    std::cout << "[클라] 로그인 패킷 전송: 이름=" << p.name << "\n";
+    std::cout << "[클라] 로그인 패킷 전송: 이름=" << p.name << std::endl;
 }
 
 void ProcessPacket(char* ptr)
@@ -169,7 +169,7 @@ void ProcessPacket(char* ptr)
 
     const unsigned char packet_type = ptr[1];
 
-    std::cout << "[클라] 패킷 처리 시작 - 타입: " << (int)packet_type << "\n";
+    std::cout << "[클라] 패킷 처리 시작 - 타입: " << (int)packet_type << std::endl;
 
     switch (packet_type)
     {
@@ -197,10 +197,10 @@ void ProcessPacket(char* ptr)
 
         if (id == g_myid) break;
 
-        
+
         std::cout << "새로운 플레이어" << id << "접속 성공" << "\n";
-        
-        
+
+
 
         break;
     }
@@ -217,7 +217,7 @@ void ProcessPacket(char* ptr)
             << packet->position.y << ", "
             << packet->position.z << ") "
             << "Look(" << packet->look.x << ", " << packet->look.y << ", " << packet->look.z << ") "
-            << "Right(" << packet->right.x << ", " << packet->right.y << ", " << packet->right.z << ")\n";
+            << "Right(" << packet->right.x << ", " << packet->right.y << ", " << packet->right.z << ")" << std::endl;
 
         break;
     }
@@ -227,7 +227,7 @@ void ProcessPacket(char* ptr)
         sc_packet_leave* packet = reinterpret_cast<sc_packet_leave*>(ptr);
         int other_id = packet->id;
 
-        std::cout << "[클라] 플레이어 제거: ID=" << other_id << "\n";
+        std::cout << "[클라] 플레이어 제거: ID=" << other_id << std::endl;
 
         break;
     }
@@ -236,24 +236,24 @@ void ProcessPacket(char* ptr)
         std::cout << "[클라] 아이템 생성 - ID: " << pkt->item_id
             << " 위치(" << pkt->position.x << ", "
             << pkt->position.y << ", " << pkt->position.z << ")"
-            << " 타입: " << pkt->item_type << "\n";
+            << " 타입: " << pkt->item_type << std::endl;
         break;
     }
 
     case SC_P_ITEM_DESPAWN: {
         sc_packet_item_despawn* pkt = reinterpret_cast<sc_packet_item_despawn*>(ptr);
-        std::cout << "[클라] 아이템 삭제 - ID: " << pkt->item_id << "\n";
+        std::cout << "[클라] 아이템 삭제 - ID: " << pkt->item_id << std::endl;
         break;
     }
 
     case SC_P_ITEM_MOVE: {
         sc_packet_item_move* pkt = reinterpret_cast<sc_packet_item_move*>(ptr);
-        std::cout << "[디버그] 아이템 이동 - "
-            << "ID: " << pkt->item_id << ", "
-            << "위치: (" << pkt->position.x << ", "
-            << pkt->position.y << ", " << pkt->position.z << "), "
-            << "소유자: " << (pkt->holder_id == g_myid ? "본인" : "타인")
-            << " (" << pkt->holder_id << ")\n";
+        std::cout << "[디버그] 아이템 이동 - " << "ID: " << pkt->item_id << ", " << "위치: (" << pkt->position.x << ", " << pkt->position.y << ", " << pkt->position.z << "), ";
+        if (pkt->holder_id == g_myid)
+            std::cout << "소유자: 본인" << " (" << pkt->holder_id << ")" << std::endl;
+
+        else
+            std::cout << "소유자: 타인" << " (" << pkt->holder_id << ")" << std::endl;
 
         //if (pkt->holder_id == g_myid) {
         //    // 자신이 들고 있는 아이템은 별도 처리
@@ -265,7 +265,7 @@ void ProcessPacket(char* ptr)
         //break;
     }
     default:
-        printf("알 수 없는 패킷 타입 [%d]\n", ptr[1]);
+        std::cout << "알 수 없는 패킷 타입 [" << ptr[1] << "]" << std::endl;
     }
 }
 
