@@ -486,7 +486,7 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 			}
 
 		}
-		if (isSwing) {
+		else if (isSwing) {
 			m_pSkinnedAnimationController->SetTrackEnable(0, false);
 			m_pSkinnedAnimationController->SetTrackEnable(1, false);
 			m_pSkinnedAnimationController->SetTrackEnable(2, false);
@@ -509,7 +509,7 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 			}
 
 		}
-		if (isCrouch) {
+		else if (isCrouch) {
 			m_pSkinnedAnimationController->SetTrackEnable(0, false);
 			m_pSkinnedAnimationController->SetTrackEnable(1, false);
 			m_pSkinnedAnimationController->SetTrackEnable(2, false);
