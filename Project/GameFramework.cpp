@@ -323,8 +323,9 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			break;
 		case VK_RETURN:
 			m_ppScenes[m_nScene]->ReleaseObjects();
-			m_nCurrentScene = m_nScene + 1;
+			m_nCurrentScene = 1;
 			BuildObjects();
+      isStartScene = false;
 			break;
 		case VK_F1:
 		case VK_F2:
@@ -466,6 +467,8 @@ void CGameFramework::OnDestroy()
 
 void CGameFramework::BuildObjects()
 {
+	isLoading = true;
+
 	m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 
 	m_nScenes = 2; // 총 Scene 개수
@@ -474,14 +477,12 @@ void CGameFramework::BuildObjects()
 	if (m_nCurrentScene == 0) {
 		m_ppScenes[0] = new CStartScene();
 		m_ppScenes[0]->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
-
 		CTerrainPlayer* pPlayer = new CTerrainPlayer(m_pd3dDevice, m_pd3dCommandList, m_ppScenes[0]->GetGraphicsRootSignature(),NULL);
 		m_ppScenes[0]->SetPlayer(pPlayer);
 	}
 	else if (m_nCurrentScene == 1) {
 		m_ppScenes[1] = new CScene();
 		m_ppScenes[1]->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
-
 		CTerrainPlayer* pPlayer = new CTerrainPlayer(m_pd3dDevice, m_pd3dCommandList, m_ppScenes[1]->GetGraphicsRootSignature(), m_ppScenes[1]->m_pTerrain);
 		m_ppScenes[1]->SetPlayer(pPlayer);
 		m_pPlayer->SetPosition(XMFLOAT3(0,0,0));
@@ -502,7 +503,6 @@ void CGameFramework::BuildObjects()
 	if (m_nCurrentScene == 1)
 	{ 
 		m_pScene->m_ppHierarchicalGameObjects[0]->SetPlayer(m_pPlayer);
-
 	}
 
 	m_pd3dCommandList->Close();
@@ -515,6 +515,7 @@ void CGameFramework::BuildObjects()
 	if (m_pPlayer) m_pPlayer->ReleaseUploadBuffers();
 
 	m_GameTimer.Reset();
+	isLoading = false;
 }
 
 void CGameFramework::ReleaseObjects()

@@ -134,17 +134,23 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_ppHierarchicalGameObjects[3]->SetPosition(3, 2, 13);
 	if (pWhistleModel) delete pWhistleModel;
 
+	m_nOtherPlayers = 1;
+	m_ppOtherPlayers = new OtherPlayer * [m_nOtherPlayers];
+	CLoadedModelInfo* pOtherPlayerModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Player.bin", NULL);
+	m_ppOtherPlayers[0] = new OtherPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pOtherPlayerModel);
+	m_ppOtherPlayers[0]->SetPosition(-1000, -1000, -1000);
+	if (pOtherPlayerModel) delete pOtherPlayerModel;
 	//// OtherPlayer
 	//m_nGameObjects = 1;
 	//m_ppGameObjects = new CGameObject * [m_nGameObjects];
 
 	//CLoadedModelInfo* pOtherPlayerModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Player.bin", NULL);
 	//m_ppGameObjects[0] = new OtherPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pOtherPlayerModel);
-	////¼­¹ö¿¡¼­ Á¤º¸ ¹Þ¾Æ¼­ ¾÷µ¥ÀÌÆ® ÇÊ¿ä -> ¾÷µ¥ÀÌÆ®ÇÔ¼ö·Î
+	////ì„œë²„ì—ì„œ ì •ë³´ ë°›ì•„ì„œ ì—…ë°ì´íŠ¸ í•„ìš” -> ì—…ë°ì´íŠ¸í•¨ìˆ˜ë¡œ
 	//m_ppGameObjects[0]->SetPosition(0, 0, 0);
 	////if (pOtherPlayerModel) delete pOtherPlayerModel;
 
-	// ÀÎº¥Åä¸® UI
+	// ì¸ë²¤í† ë¦¬ UI
 	m_nShaders = 2;
 	m_ppShaders = new CShader * [m_nShaders];
 
@@ -427,7 +433,7 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 
 void CScene::CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
 {
-	UINT ncbElementBytes = ((sizeof(LIGHTS) + 255) & ~255); //256ÀÇ ¹è¼ö
+	UINT ncbElementBytes = ((sizeof(LIGHTS) + 255) & ~255); //256ì˜ ë°°ìˆ˜
 	m_pd3dcbLights = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 
 	m_pd3dcbLights->Map(0, NULL, (void **)&m_pcbMappedLights);
@@ -563,7 +569,8 @@ void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera
 	if (m_pMap) m_pMap->Render(pd3dCommandList, pCamera);
 
 	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Render(pd3dCommandList, pCamera);
-
+	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
+  
 	for (int i = 0; i < m_nHierarchicalGameObjects; i++)
 	{
 		if (m_ppHierarchicalGameObjects[i])
@@ -573,7 +580,12 @@ void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera
 			m_ppHierarchicalGameObjects[i]->Render(pd3dCommandList, pCamera);
 		}
 	}
-	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
+  
+	for (int i = 0; i < m_nOtherPlayers; ++i) 
+	{
+		if (m_ppOtherPlayers[i]->isConnedted)
+			m_ppOtherPlayers[i]->Render(pd3dCommandList, pCamera);
+	}
 }
 
 void CStartScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -601,6 +613,7 @@ void CStartScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	pTextureToScreenShader->SetTexture(pTexture);
 
 	m_ppShaders[0] = pTextureToScreenShader;
+
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
