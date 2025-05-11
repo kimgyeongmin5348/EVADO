@@ -914,6 +914,7 @@ void CGameObject::Move(XMFLOAT3 xmf3Offset)
 	m_xmf4x4ToParent._42 += xmf3Offset.y;
 	m_xmf4x4ToParent._43 += xmf3Offset.z;
 
+	CalculateBoundingBox();
 	UpdateTransform(NULL);
 }
 

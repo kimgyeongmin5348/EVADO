@@ -10,6 +10,15 @@
 #include "Object.h"
 #include "Camera.h"
 
+struct BoundingCylinder
+{
+	XMFLOAT3 Center;
+	float Radius;
+	float Height;
+
+	BoundingCylinder() : Radius(0.0f), Height(0.0f) {}
+};
+
 class CPlayer : public CGameObject
 {
 protected:
@@ -36,6 +45,7 @@ protected:
 	CCamera						*m_pCamera = NULL;
 
 	XMFLOAT3 m_lastPushDirection; // 마지막 충돌 방향 저장
+	BoundingCylinder m_BoundingCylinder;
 
 public:
 	bool isSwing = false;
@@ -74,10 +84,11 @@ public:
 	void Rotate(float x, float y, float z);
 
 	virtual void Update(float fTimeElapsed);
-	void UpdateBoundingBox()
+	virtual void CalculateBoundingBox() override;
+	void ConvertCylinderToAABB(const BoundingCylinder& cylinder, BoundingBox& outBox)
 	{
-		XMFLOAT3 center(m_xmf4x4World._41, m_xmf4x4World._42, m_xmf4x4World._43);
-		m_BoundingBox.Center = center;
+		outBox.Center = cylinder.Center;
+		outBox.Extents = XMFLOAT3(cylinder.Radius, cylinder.Height * 0.5f, cylinder.Radius);
 	}
 
 	virtual void OnPlayerUpdateCallback(float fTimeElapsed) { }

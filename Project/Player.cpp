@@ -80,23 +80,6 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 
 void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
 {
-
-	// 이부분 서버때문에 한번 손좀 봤음...
-
-	//server
-
-	//if (!bUpdateVelocity) {
-	//	if (nullptr != m_pCamera) { // NULL 체크 추가
-	//		m_pCamera->Move(xmf3Shift);
-	//	}
-	//	else {
-	//		// 에러 로깅 또는 카메라 생성
-	//		std::cerr << "[WARN] 카메라가 초기화되지 않았습니다!" << std::endl;
-	//		m_pCamera = new CCamera(); // 임시 생성 (필요시)
-	//	}
-	//}
-
-
 	if (bUpdateVelocity)
 	{
 		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, xmf3Shift);
@@ -106,6 +89,7 @@ void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
 		m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Shift);
 		m_pCamera->Move(xmf3Shift);
 	}
+	CalculateBoundingBox();
 }
 
 void CPlayer::Rotate(float x, float y, float z)
@@ -199,8 +183,59 @@ void CPlayer::Update(float fTimeElapsed)
 	if (fDeceleration > fLength) fDeceleration = fLength;
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
 
-	UpdateBoundingBox();
+	CalculateBoundingBox();
  }
+
+void CPlayer::CalculateBoundingBox()
+{
+	std::vector<CGameObject*> nodesToProcess = { this };
+	bool isFirst = true;
+	BoundingBox mergedBox;
+
+	while (!nodesToProcess.empty())
+	{
+		CGameObject* current = nodesToProcess.back();
+		nodesToProcess.pop_back();
+
+		if (current->m_pMesh)
+		{
+			BoundingBox localBox = current->m_pMesh->GetBoundingBox();
+			BoundingBox transformedBox;
+
+			localBox.Transform(transformedBox, XMLoadFloat4x4(&current->m_xmf4x4World));
+
+			if (isFirst)
+			{
+				mergedBox = transformedBox;
+				isFirst = false;
+			}
+			else
+			{
+				BoundingBox::CreateMerged(mergedBox, mergedBox, transformedBox);
+			}
+		}
+
+		if (current->m_pChild)
+		{
+			CGameObject* child = current->m_pChild;
+			nodesToProcess.push_back(child);
+
+			while (child->m_pSibling)
+			{
+				child = child->m_pSibling;
+				nodesToProcess.push_back(child);
+			}
+		}
+	}
+
+	float diameter = std::max(mergedBox.Extents.x, mergedBox.Extents.z) * 2.0f;
+	m_BoundingCylinder.Radius = diameter * 0.5f;
+	m_BoundingCylinder.Height = mergedBox.Extents.y * 2.0f;
+	m_BoundingCylinder.Center = mergedBox.Center;
+
+	// 3. 원통을 감싸는 AABB로 변환
+	ConvertCylinderToAABB(m_BoundingCylinder, m_BoundingBox);
+}
 
 CCamera *CPlayer::OnChangeCamera(DWORD nNewCameraMode, DWORD nCurrentCameraMode)
 {
