@@ -221,35 +221,19 @@ void ProcessPacket(char* ptr)
         int other_id = packet->id;
 
         if (other_id == g_myid) break;
-<<<<<<< Updated upstream
-        
-        std::lock_guard<std::mutex> lock(g_player_mutex);
-
-        auto it = g_other_players.find(other_id);
-
-        if (it != g_other_players.end()) {
-            OtherPlayer* pPlayer = dynamic_cast<OtherPlayer*>(it->second);
-            if (pPlayer) {
-                pPlayer->SetPosition(packet->position);
-            }
-        }
-=======
-            
->>>>>>> Stashed changes
 
         // OtherPlayer의 위치를 반영한다
         if (!gGameFramework.isLoading && !gGameFramework.isStartScene)
             gGameFramework.UpdateOtherPlayerPosition(0, packet->position);
 
-<<<<<<< Updated upstream
-=======
+
         std::cout << "[Client] New Player Information Recv "
             << " Position(" << packet->position.x << "," << packet->position.y << "," << packet->position.z << ")"
             << " Look(" << packet->look.x << "," << packet->look.y << "," << packet->look.z << ")"
             << " Right(" << packet->right.x << "," << packet->right.y << "," << packet->right.z << ")"
             << "Animation : " << static_cast<int>(packet->animState)
             << std::endl;
->>>>>>> Stashed changes
+
         break;
     }
 
@@ -264,19 +248,12 @@ void ProcessPacket(char* ptr)
     }
     case SC_P_ITEM_SPAWN: {
         sc_packet_item_spawn* pkt = reinterpret_cast<sc_packet_item_spawn*>(ptr);
-<<<<<<< Updated upstream
 
-        std::cout << "[클라] 아이템 생성 - ID: " << pkt->item_id
-            << " 위치(" << pkt->position.x << ", "
-            << pkt->position.y << ", " << pkt->position.z << ")"
-            << " 타입: " << pkt->item_type << std::endl;
-
-=======
         std::cout << "[Client] Item Create - ID: " << pkt->item_id
             << " Postion(" << pkt->position.x << ", "
             << pkt->position.y << ", " << pkt->position.z << ")"
             << " Type: " << pkt->item_type << std::endl;
->>>>>>> Stashed changes
+
         break;
     }
 
@@ -288,7 +265,6 @@ void ProcessPacket(char* ptr)
 
     case SC_P_ITEM_MOVE: {
         sc_packet_item_move* pkt = reinterpret_cast<sc_packet_item_move*>(ptr);
-
 
 
 
@@ -336,13 +312,4 @@ void send_position_to_server(const XMFLOAT3& position, const XMFLOAT3& look, con
     p.animState = animState;
     send_packet(&p);
 
-<<<<<<< Updated upstream
-    // 전송 확인 출력
-    std::cout << "[클라] 위치 전송: ("
-        << position.x << ", " << position.y << ", " << position.z << ") "
-        << "Look(" << look.x << ", " << look.y << ", " << look.z << ") "
-        << "Right(" << right.x << ", " << right.y << ", " << right.z << ")\n";
-
-=======
->>>>>>> Stashed changes
 }
