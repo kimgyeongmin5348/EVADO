@@ -409,7 +409,7 @@ void CTerrainPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVeloci
 {
 	if (dwDirection & DIR_DOWN)
 	{
-		fDistance *= 1.5f; // Shiftê°€ ?Œë¦¬ë©??´ë™ ?ë„ë¥?1.5ë°?ì¦ê?
+		fDistance *= 1.5f;
 	}
 
 	if (!isJump) {

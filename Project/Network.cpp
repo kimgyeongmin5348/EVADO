@@ -223,16 +223,18 @@ void ProcessPacket(char* ptr)
         if (other_id == g_myid) break;
 
         // OtherPlayer의 위치를 반영한다
-        if (!gGameFramework.isLoading && !gGameFramework.isStartScene)
+        if (!gGameFramework.isLoading && !gGameFramework.isStartScene) {
+            packet->position.x += 3.8;
             gGameFramework.UpdateOtherPlayerPosition(0, packet->position);
+        }
 
 
-        std::cout << "[Client] New Player Information Recv "
-            << " Position(" << packet->position.x << "," << packet->position.y << "," << packet->position.z << ")"
-            << " Look(" << packet->look.x << "," << packet->look.y << "," << packet->look.z << ")"
-            << " Right(" << packet->right.x << "," << packet->right.y << "," << packet->right.z << ")"
-            << "Animation : " << static_cast<int>(packet->animState)
-            << std::endl;
+        //std::cout << "[Client] New Player Information Recv "
+        //    << " Position(" << packet->position.x << "," << packet->position.y << "," << packet->position.z << ")"
+        //    << " Look(" << packet->look.x << "," << packet->look.y << "," << packet->look.z << ")"
+        //    << " Right(" << packet->right.x << "," << packet->right.y << "," << packet->right.z << ")"
+        //    << "Animation : " << static_cast<int>(packet->animState)
+        //    << std::endl;
 
         break;
     }
