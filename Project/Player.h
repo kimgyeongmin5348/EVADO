@@ -37,7 +37,9 @@ protected:
 	CCamera						*m_pCamera = NULL;
 
 public:
-	bool isSwing = false;
+	bool	isSwing = false;
+	bool	isCrouch = false;
+	bool	items[4] = { false,false,false,false };
 
 public:
 	CPlayer();
@@ -116,17 +118,7 @@ public:
 	virtual void Update(float fTimeElapsed);
 
 	bool isJump = false;
+
 };
 
-// server
-//class CRemotePlayer : public CPlayer {
-//public:
-//	void Initialize(ID3D12Device* pd3dDevice,
-//		ID3D12GraphicsCommandList* pd3dCommandList,
-//		ID3D12RootSignature* pd3dGraphicsRootSignature) {
-//		CLoadedModelInfo* pModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Player.bin", nullptr);
-//		SetChild(pModel->m_pModelRootObject, true);
-//		// 로컬 플레이어와 동일한 모델 로드
-//	}
-//};
 
