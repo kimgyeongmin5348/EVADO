@@ -68,6 +68,10 @@ public:
 
 	CPlayer								*m_pPlayer = NULL;
 
+	std::vector<OtherPlayer*>				m_vPlayers;
+	int										m_nOtherPlayers = 0;
+	OtherPlayer**							m_ppOtherPlayers;
+
 	void SetPlayer(CPlayer* pPlayer) { m_pPlayer = pPlayer; }
 	CPlayer* GetPlayer() { return(m_pPlayer); }
  
@@ -139,6 +143,19 @@ public:
 	void AddRemotePlayer(long long id, const XMFLOAT3& pos, ID3D12Device* device, ID3D12GraphicsCommandList* cmd, ID3D12RootSignature* root, void* context);
 	void RemoveRemotePlayer(long long id);
 	void UpdateRemotePlayer(long long id, const XMFLOAT3& pos);
+
+	void OnOtherClientConnedted()
+	{
+		for (int i = 0; i < m_nOtherPlayers; ++i)
+		{
+			m_ppOtherPlayers[i]->isConnedted = true;
+		}
+	}
+
+	void UpdateOtherPlayerPosition(int clinetnum, XMFLOAT3 position)
+	{
+		m_ppOtherPlayers[clinetnum]->SetPosition(position);
+	}
 };
 
 class CMainScene : public CScene

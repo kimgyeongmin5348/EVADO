@@ -58,8 +58,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	InitializeNetwork();
 	//----------------------------------------------------------------
 
-	
-
 	hAccelTable = ::LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_LABPROJECT0798));
 
 	while (1)

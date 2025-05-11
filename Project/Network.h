@@ -1,7 +1,7 @@
 #pragma once
 #include "Common.h"
 #include "Object.h"
-#include "Player.h"
+//#include "Player.h"
 #include "Scene.h"
 #include "OtherPlayer.h" 
 

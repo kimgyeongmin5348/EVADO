@@ -44,6 +44,17 @@ public:
 
 	void ItemToHand(int objectIndex);
 
+	void OnOtherClientConnected()
+	{
+		m_ppScenes[m_nCurrentScene]->OnOtherClientConnedted();
+	}
+	void UpdateOtherPlayerPosition(int clinetnum, XMFLOAT3 position)
+	{
+		m_ppScenes[m_nCurrentScene]->UpdateOtherPlayerPosition(clinetnum, position);
+	}
+
+	bool isLoading = false;
+	bool isStartScene = true;
 
 private:
 	HINSTANCE m_hInstance;
@@ -89,14 +100,10 @@ private:
 
 	int m_nCurrentScene = 0;
 	int m_nScene = 0;
-
 	int m_nScenes = 0;
 	CScene** m_ppScenes = NULL;
 
-
-
 	POINT m_ptOldCursorPos;
-
 
 	_TCHAR						m_pszFrameRate[70];
 
@@ -104,10 +111,6 @@ private:
 
 	//server
 	//float m_fLastPositionSendTime = 0.0f;  // 위치 전송 시간 추적
-
-
-	
-
 };
 
 
