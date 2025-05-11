@@ -273,12 +273,12 @@ void ProcessPacket(char* ptr)
         sc_packet_item_move* pkt = reinterpret_cast<sc_packet_item_move*>(ptr);
 
 
-        std::cout << "[디버그] 아이템 이동 - " << "ID: " << pkt->item_id << ", " << "위치: (" << pkt->position.x << ", " << pkt->position.y << ", " << pkt->position.z << "), ";
-        if (pkt->holder_id == g_myid)
-            std::cout << "소유자: 본인" << " (" << pkt->holder_id << ")" << std::endl;
+        //std::cout << "[디버그] 아이템 이동 - " << "ID: " << pkt->item_id << ", " << "위치: (" << pkt->position.x << ", " << pkt->position.y << ", " << pkt->position.z << "), ";
+        //if (pkt->holder_id == g_myid)
+        //    std::cout << "소유자: 본인" << " (" << pkt->holder_id << ")" << std::endl;
 
-        else
-            std::cout << "소유자: 타인" << " (" << pkt->holder_id << ")" << std::endl;
+        //else
+        //    std::cout << "소유자: 타인" << " (" << pkt->holder_id << ")" << std::endl;
 
 
     }
@@ -325,9 +325,9 @@ void send_position_to_server(const XMFLOAT3& position, const XMFLOAT3& look, con
     send_packet(&p);
 
     // 전송 확인 출력
-    std::cout << "[클라] 위치 전송: ("
-        << position.x << ", " << position.y << ", " << position.z << ") "
-        << "Look(" << look.x << ", " << look.y << ", " << look.z << ") "
-        << "Right(" << right.x << ", " << right.y << ", " << right.z << ")\n";
+    //std::cout << "[클라] 위치 전송: ("
+    //    << position.x << ", " << position.y << ", " << position.z << ") "
+    //    << "Look(" << look.x << ", " << look.y << ", " << look.z << ") "
+    //    << "Right(" << right.x << ", " << right.y << ", " << right.z << ")\n";
 
 }
