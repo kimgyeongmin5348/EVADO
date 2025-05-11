@@ -87,8 +87,8 @@ void CScene::BuildDefaultLightsAndMaterials()
 
 void CScene::InitializeCollisionSystem()
 {
-	BoundingBox worldBounds(XMFLOAT3(-18.0f, 0.0f, 74.0f), XMFLOAT3(100.0f, 100.0f, 100.0f));
-	m_CollisionManager.Build(worldBounds, 15);
+	BoundingBox worldBounds(XMFLOAT3(-18.5f, -0.5f, 74.5f), XMFLOAT3(150.0f, 100.0f, 170.0f));
+	m_CollisionManager.Build(worldBounds, 5);
 
 	for (int i = 0; i < m_nGameObjects; ++i) {
 		m_CollisionManager.InsertObject(m_ppGameObjects[i]);
@@ -105,7 +105,7 @@ void CScene::InitializeCollisionSystem()
 		m_CollisionManager.InsertObject(obj);
 	}
 
-	m_CollisionManager.PrintTree();
+	//m_CollisionManager.PrintTree();
 }
 
 void CScene::GenerateGameObjectsBoundingBox()
