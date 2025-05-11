@@ -8,7 +8,6 @@ struct QuadTreeNode
     std::vector<CGameObject*> objects;
     QuadTreeNode* children[4];
     int depth;
-    static const int max_depth = 5;
     bool isLeaf;
 
     QuadTreeNode(const BoundingBox& bounds) : bounds(bounds), isLeaf(true), depth(0)
@@ -24,21 +23,27 @@ public:
     QuadTreeNode* root;
     int maxObjectsPerNode;
     float minNodeSize; // 최소 노드 크기 (무한 분할 방지)
+    int maxDepth;
 
-    CQuadTree(float minSize = 10.0f) : root(nullptr), maxObjectsPerNode(0), minNodeSize(minSize) {}
+    CQuadTree(float minSize = 10.0f) : root(nullptr), maxObjectsPerNode(10), minNodeSize(minSize), maxDepth(0) {}
     ~CQuadTree()
     {
         DeleteNode(root);
     }
 
-    void Build(const BoundingBox& worldBounds, int maxObjects)
+    void Build(const BoundingBox& worldBounds, int maxObjects, int maxDepth)
     {
-        maxObjectsPerNode = maxObjects;
+        maxObjectsPerNode = maxObjects > 0 ? maxObjects : 10;
+        this->maxDepth = maxDepth > 0 ? maxDepth : 4; // 기본값 4
+        if (root) DeleteNode(root);
         root = new QuadTreeNode(worldBounds);
+        root->depth = 0;
+        PreBuild(root, 0);
     }
 
     void Insert(CGameObject* object)
     {
+        if (!root || !object) return;
         InsertObject(root, object);
     }
 
@@ -64,20 +69,23 @@ public:
 
         for (int i = 0; i < 4; i++)
         {
-            QuadTreeNode* result = FindNode(node->children[i], aabb);
-            if (result)
-                return result;
+            if (node->children[i]) {
+                QuadTreeNode* result = FindNode(node->children[i], aabb);
+                if (result)
+                    return result;
+            }
         }
         return node;
     }
 
 private:
-    void Subdivide(QuadTreeNode* node)
+    void PreBuild(QuadTreeNode* node, int depth)
     {
-        // 최소 크기 확인 (무한 분할 방지)
-        if (!node || node->depth >= QuadTreeNode::max_depth ||
-            node->bounds.Extents.x < minNodeSize || node->bounds.Extents.z < minNodeSize)
+        if (!node || depth >= maxDepth)
+        {
+            node->isLeaf = true;
             return;
+        }
 
         XMFLOAT3 center = node->bounds.Center;
         XMFLOAT3 extents = node->bounds.Extents;
@@ -93,54 +101,39 @@ private:
         for (int i = 0; i < 4; i++)
         {
             node->children[i] = new QuadTreeNode(childBounds[i]);
-            node->children[i]->depth = node->depth + 1;
+            node->children[i]->depth = depth + 1;
+            node->isLeaf = false;
+            PreBuild(node->children[i], depth + 1);
         }
-        node->isLeaf = false;
     }
 
     void InsertObject(QuadTreeNode* node, CGameObject* object)
     {
+        if (!node || !object) return;
+
+        const BoundingBox& objBounds = object->GetBoundingBox();
+
         if (node->isLeaf)
         {
-            if (node->objects.size() < maxObjectsPerNode ||
-                node->depth >= QuadTreeNode::max_depth ||
-                (node->bounds.Extents.x < minNodeSize && node->bounds.Extents.z < minNodeSize))
+            if (node->bounds.Intersects(objBounds))
             {
-                node->objects.push_back(object);
-                object->m_pNode = node;
-            }
-            else
-            {
-                Subdivide(node);
-                std::vector<CGameObject*> objectsToRedistribute = node->objects;
-                objectsToRedistribute.push_back(object);
-                node->objects.clear();
-
-                for (CGameObject* obj : objectsToRedistribute)
+                if (std::find(node->objects.begin(), node->objects.end(), object) == node->objects.end())
                 {
-                    Redistribute(node, obj);
+                    node->objects.push_back(object);
+                    object->m_pNode = node;
                 }
             }
         }
         else
         {
-            Redistribute(node, object);
-        }
-    }
-
-    void Redistribute(QuadTreeNode* node, CGameObject* object)
-    {
-        const BoundingBox& objBounds = object->GetBoundingBox();
-        for (int i = 0; i < 4; ++i)
-        {
-            if (node->children[i]->bounds.Contains(objBounds))
+            for (int i = 0; i < 4; i++)
             {
-                InsertObject(node->children[i], object);
-                return;
+                if (node->children[i])
+                {
+                    InsertObject(node->children[i], object);
+                }
             }
         }
-        node->objects.push_back(object);
-        object->m_pNode = node;
     }
 
     void DeleteNode(QuadTreeNode* node)

@@ -13,9 +13,9 @@ public:
     CCollisionManager() { m_pQuadTree = new CQuadTree(); }
     ~CCollisionManager() { delete m_pQuadTree; }
 
-    void Build(const BoundingBox& worldBounds, int maxObjectsPerNode)
+    void Build(const BoundingBox& worldBounds, int maxObjectsPerNode, int maxDepth)
     {   
-        m_pQuadTree->Build(worldBounds, maxObjectsPerNode);
+        m_pQuadTree->Build(worldBounds, maxObjectsPerNode, maxDepth);
     }
 
     void InsertObject(CGameObject* object) 
@@ -33,6 +33,7 @@ public:
         // 플레이어가 속한 노드 탐색
         QuadTreeNode* playerNode = m_pQuadTree->FindNode(m_pQuadTree->root, player->GetBoundingBox());
         if (!playerNode) return;
+
         if (frameCounter % 60 == 0) // 60 프레임마다 출력
             cout << playerNode->bounds.Center.x << ", " << playerNode->bounds.Center.z << endl;
 
@@ -51,20 +52,16 @@ public:
     }
 
 private:
-    void CollectNearbyObjects(QuadTreeNode* node, const BoundingBox& aabb, std::vector<CGameObject*>& result)
+    void CollectNearbyObjects(QuadTreeNode* node, const BoundingBox& aabb, std::vector<CGameObject*>& collisions)
     {
         if (!node || !node->bounds.Intersects(aabb))
             return;
 
-        if (node->isLeaf)
+        for (CGameObject* obj : node->objects)
         {
-            result.insert(result.end(), node->objects.begin(), node->objects.end());
-        }
-        else
-        {
-            for (int i = 0; i < 4; i++)
+            if (obj && aabb.Intersects(obj->GetBoundingBox()))
             {
-                CollectNearbyObjects(node->children[i], aabb, result);
+                collisions.push_back(obj);
             }
         }
     }
