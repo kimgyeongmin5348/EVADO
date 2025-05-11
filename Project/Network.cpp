@@ -155,7 +155,7 @@ void InitializeNetwork()
     // 8. 초기 수신 작업 시작
     PostRecv();
 
-    std::cout << "Connect Successfully." << std::endl;
+    std::cout << "서버에 성공적으로 연결되었습니다." << std::endl;
 
     // 9. 로그인 패킷 전송
     cs_packet_login p;
@@ -165,7 +165,7 @@ void InitializeNetwork()
     strcpy_s(p.name, sizeof(p.name), user_name.c_str());
     send_packet(&p);
 
-    std::cout << "[Send : Login Packet] : name = " << p.name << std::endl;
+    std::cout << "[클라] 로그인 패킷 전송: 이름=" << p.name << std::endl;
 }
 
 void ProcessPacket(char* ptr)
@@ -173,7 +173,7 @@ void ProcessPacket(char* ptr)
 
     const unsigned char packet_type = ptr[1];
 
-    std::cout << "Start ProcessPacket - Type : " << (int)packet_type << std::endl;
+    std::cout << "[Client] Packet - Type : " << (int)packet_type << std::endl;
 
     switch (packet_type)
     {
@@ -185,12 +185,13 @@ void ProcessPacket(char* ptr)
         //player.SetPosition(packet->position);
 
 
-        //std::cout << "[클라] 내 플레이어 생성: " << packet->id << std::endl;
-        //std::cout << "[클라] 내 정보 수신 - ID:" << packet->id
-        //    << " 위치(" << packet->position.x << "," << packet->position.y << "," << packet->position.z << ")"
-        //    << " Look(" << packet->look.x << "," << packet->look.y << "," << packet->look.z << ")"
-        //    << " Right(" << packet->right.x << "," << packet->right.y << "," << packet->right.z << ")"
-        //    << std::endl;
+        std::cout << "[Client] My Player : " << packet->id << std::endl;
+        std::cout << "[Client] My Player Information ID:" << packet->id
+            << " Positino(" << packet->position.x << "," << packet->position.y << "," << packet->position.z << ")"
+            << " Look(" << packet->look.x << "," << packet->look.y << "," << packet->look.z << ")"
+            << " Right(" << packet->right.x << "," << packet->right.y << "," << packet->right.z << ")"
+            << "Animation : " << static_cast<int>(packet ->animState)
+            << std::endl;
         break;
     }
 
@@ -201,8 +202,13 @@ void ProcessPacket(char* ptr)
 
         if (id == g_myid) break;
 
-        std::cout << "OtherPlayer : " << id << "Connected" << "\n";
-        
+        std::cout << "[Client] New Player " << id << "Connect " << "\n";
+        std::cout << "[Client] New Player Information Recv "
+            << " Position(" << packet->position.x << "," << packet->position.y << "," << packet->position.z << ")"
+            << " Look(" << packet->look.x << "," << packet->look.y << "," << packet->look.z << ")"
+            << " Right(" << packet->right.x << "," << packet->right.y << "," << packet->right.z << ")"
+            << "Animation : " << static_cast<int>(packet->animState)
+            << std::endl;
         
         // 씬에 OtherPlayer가 딱 나타난다
         gGameFramework.OnOtherClientConnected();
@@ -220,13 +226,14 @@ void ProcessPacket(char* ptr)
         if (!gGameFramework.isLoading && !gGameFramework.isStartScene)
             gGameFramework.UpdateOtherPlayerPosition(0, packet->position);
 
-        if (other_id != g_myid || other_id < MAX_USER) { // 다른 플레이어 위치 갱신
-            // 다른 플레이어 위치 업데이트 확인
-            std::cout << "[OtherPlayer] " << other_id << "Position: ("
-                << packet->position.x << ", "
-                << packet->position.y << ", "
-                << packet->position.z << ")\n";
-        }
+
+        std::cout << "[Client] New Player Information Recv "
+            << " Position(" << packet->position.x << "," << packet->position.y << "," << packet->position.z << ")"
+            << " Look(" << packet->look.x << "," << packet->look.y << "," << packet->look.z << ")"
+            << " Right(" << packet->right.x << "," << packet->right.y << "," << packet->right.z << ")"
+            << "Animation : " << static_cast<int>(packet->animState)
+            << std::endl;
+
         break;
     }
 
@@ -235,22 +242,24 @@ void ProcessPacket(char* ptr)
         sc_packet_leave* packet = reinterpret_cast<sc_packet_leave*>(ptr);
         int other_id = packet->id;
 
-        std::cout << "[OtherPlayer] DisConnected : ID = " << other_id << std::endl;
+        std::cout << "[Client] 플레이어 제거: ID=" << other_id << std::endl;
 
         break;
     }
     case SC_P_ITEM_SPAWN: {
         sc_packet_item_spawn* pkt = reinterpret_cast<sc_packet_item_spawn*>(ptr);
-        std::cout << "[Item] Spawn Items : ID = " << pkt->item_id
-            << " (" << pkt->position.x << ", "
+
+        std::cout << "[Client] Item Create - ID: " << pkt->item_id
+            << " Postion(" << pkt->position.x << ", "
             << pkt->position.y << ", " << pkt->position.z << ")"
             << " Type: " << pkt->item_type << std::endl;
+
         break;
     }
 
     case SC_P_ITEM_DESPAWN: {
         sc_packet_item_despawn* pkt = reinterpret_cast<sc_packet_item_despawn*>(ptr);
-        std::cout << "[Item] Despawn Items : ID = " << pkt->item_id << std::endl;
+        std::cout << "[Client] Item delete - ID: " << pkt->item_id << std::endl;
         break;
     }
 
@@ -258,17 +267,10 @@ void ProcessPacket(char* ptr)
         sc_packet_item_move* pkt = reinterpret_cast<sc_packet_item_move*>(ptr);
 
 
-        //std::cout << "[디버그] 아이템 이동 - " << "ID: " << pkt->item_id << ", " << "위치: (" << pkt->position.x << ", " << pkt->position.y << ", " << pkt->position.z << "), ";
-        //if (pkt->holder_id == g_myid)
-        //    std::cout << "소유자: 본인" << " (" << pkt->holder_id << ")" << std::endl;
-
-        //else
-        //    std::cout << "소유자: 타인" << " (" << pkt->holder_id << ")" << std::endl;
-
 
     }
     default:
-        std::cout << "Unknown Packet Type [" << ptr[1] << "]" << std::endl;
+        std::cout << "알 수 없는 패킷 타입 [" << ptr[1] << "]" << std::endl;
     }
 }
 
@@ -298,7 +300,7 @@ void process_data(char* net_buf, size_t io_byte) {
     }
 }
 
-void send_position_to_server(const XMFLOAT3& position, const XMFLOAT3& look, const XMFLOAT3& right)
+void send_position_to_server(const XMFLOAT3& position, const XMFLOAT3& look, const XMFLOAT3& right, const uint8_t& animState)
 {
 
     cs_packet_move p;
@@ -307,12 +309,7 @@ void send_position_to_server(const XMFLOAT3& position, const XMFLOAT3& look, con
     p.position = position;
     p.look = look;
     p.right = right;
+    p.animState = animState;
     send_packet(&p);
-
-    // 전송 확인 출력
-    //std::cout << "[클라] 위치 전송: ("
-    //    << position.x << ", " << position.y << ", " << position.z << ") "
-    //    << "Look(" << look.x << ", " << look.y << ", " << look.z << ") "
-    //    << "Right(" << right.x << ", " << right.y << ", " << right.z << ")\n";
 
 }
