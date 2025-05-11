@@ -4,6 +4,7 @@
 //#include "Player.h"
 #include "Scene.h"
 #include "OtherPlayer.h" 
+#include "Object_Items.h"
 
 // 클라이언트에서 서버로 가야할것 -----------
 // 
@@ -20,6 +21,7 @@
 // 
 // ----------------------------------------
 
+class Item;
 
 enum IO_OPERATION { IO_RECV, IO_SEND, IO_CONNECT };
 
@@ -33,10 +35,12 @@ struct OverlappedEx {
 
 extern HANDLE g_hIOCP;
 extern SOCKET ConnectSocket;
-extern std::unordered_map<long long, CPlayer> g_other_players_player;
 extern std::unordered_map<long long, OtherPlayer*> g_other_players;
 extern long long g_myid;
 extern std::string user_name;
+
+extern std::unordered_map<long long, Item*> g_items; // 아이템 ID로 관리
+extern std::mutex g_item_mutex;
 
 //extern CScene* g_pScene;
 extern ID3D12Device* g_pd3dDevice;

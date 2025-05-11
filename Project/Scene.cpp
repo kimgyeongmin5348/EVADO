@@ -1,7 +1,6 @@
 //-----------------------------------------------------------------------------
 // File: CScene.cpp
 //-----------------------------------------------------------------------------
-
 #include "stdafx.h"
 #include "Scene.h"
 
@@ -587,7 +586,48 @@ void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera
 		//if (m_ppOtherPlayers[i]->isConnedted)
 		m_ppOtherPlayers[i]->Render(pd3dCommandList, pCamera);
 	}
+
+
 }
+
+// 아이템 생성 server
+void CScene::AddItem(long long id, ITEM_TYPE type, const XMFLOAT3& position) {
+	CLoadedModelInfo* pModel = nullptr;
+	Item* pNewItem = nullptr;
+
+	switch (type)
+	{
+	case ITEM_TYPE_SHOVEL:
+		pModel = CGameObject::LoadGeometryAndAnimationFromFile(g_pd3dDevice, g_pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Shovel.bin", NULL);
+		pNewItem = new Shovel(g_pd3dDevice, g_pd3dCommandList, m_pd3dGraphicsRootSignature, pModel);
+		break;
+	case ITEM_TYPE_HANDMAP:
+		pModel = CGameObject::LoadGeometryAndAnimationFromFile(g_pd3dDevice, g_pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Flashlight.bin", NULL);
+		pNewItem = new FlashLight(g_pd3dDevice, g_pd3dCommandList, m_pd3dGraphicsRootSignature, pModel);
+		break;
+	case ITEM_TYPE_FLASHLIGHT:
+		pModel = CGameObject::LoadGeometryAndAnimationFromFile(g_pd3dDevice, g_pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Flashlight.bin", NULL);
+		pNewItem = new FlashLight(g_pd3dDevice, g_pd3dCommandList, m_pd3dGraphicsRootSignature, pModel);
+		break;
+
+	case ITEM_TYPE_WHISTLE:
+		pModel = CGameObject::LoadGeometryAndAnimationFromFile(g_pd3dDevice, g_pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Whistle.bin", NULL);
+		pNewItem = new Whistle(g_pd3dDevice, g_pd3dCommandList, m_pd3dGraphicsRootSignature, pModel);
+		break;
+	default:
+		std::cerr << "[Error] Unknown item type: " << static_cast<int>(type) << std::endl;
+		return;
+	}
+	if (pModel && pNewItem) {
+		pNewItem->SetPosition(position);
+		pNewItem->SetScale(1.0f, 1.0f, 1.0f); // 기본 스케일 설정
+
+		std::lock_guard<std::mutex> lock(g_item_mutex);
+		g_items[id] = pNewItem;
+		delete pModel; // 모델 데이터는 복제되었으므로 삭제
+	}
+}
+
 
 void CStartScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
