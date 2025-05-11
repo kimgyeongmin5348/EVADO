@@ -51,15 +51,26 @@ public:
         }
     }
 
+    bool IsColliding(const BoundingBox& box1, const BoundingBox& box2)
+    {
+        // X축 충돌 검사
+        if (fabs(box1.Center.x - box2.Center.x) > (box1.Extents.x + box2.Extents.x))
+            return false;
+
+        // Z축 충돌 검사
+        if (fabs(box1.Center.z - box2.Center.z) > (box1.Extents.z + box2.Extents.z))
+            return false;
+
+        return true;
+    }
+
 private:
     void CollectNearbyObjects(QuadTreeNode* node, const BoundingBox& aabb, std::vector<CGameObject*>& collisions)
     {
-        if (!node || !node->bounds.Intersects(aabb))
-            return;
-
+        if (!node) return;
         for (CGameObject* obj : node->objects)
         {
-            if (obj && aabb.Intersects(obj->GetBoundingBox()))
+            if (obj)
             {
                 collisions.push_back(obj);
             }
@@ -68,13 +79,10 @@ private:
 
     void HandleCollision(CPlayer* player, CGameObject* b)
     {
-        if (!b || !b->GetChild())
-            return;
-
         std::string ObjectFrameName = b->GetFrameName();
 
-        if (frameCounter % 60 == 0)
-            cout << "ObjectFrameName: " << ObjectFrameName << endl;
+        //if (frameCounter % 60 == 0)
+        //    cout << "ObjectFrameName: " << ObjectFrameName << endl;
 
         if (std::string::npos != ObjectFrameName.find("Map_wall_window") || std::string::npos != ObjectFrameName.find("Map_wall_plain"))
         {
