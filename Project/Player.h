@@ -107,6 +107,9 @@ public:
 	CTerrainPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, void *pContext=NULL);
 	virtual ~CTerrainPlayer();
 
+	//server
+	AnimationState m_currentAnim = AnimationState::IDLE;
+
 public:
 	virtual CCamera *ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed);
 
@@ -118,6 +121,7 @@ public:
 	virtual void Update(float fTimeElapsed);
 
 	bool isJump = false;
+
 
 };
 

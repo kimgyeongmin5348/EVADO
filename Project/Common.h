@@ -41,16 +41,26 @@ constexpr char MOVE_RIGHT = 4;
 #pragma pack (push, 1)
 
 
+enum class AnimationState : uint8_t {
+	IDLE,         // 0
+	WALK,         // 1
+	RUN,          // 2 
+	SWING,        // 3
+	JUMP,         // 4
+	CROUCH,       // 5
+	CROUCH_WALK   // 6
+};
+
 
 
 struct sc_packet_user_info {
 	unsigned char	size;
 	char			type;
 	long long		id;
-	//char			name[MAX_ID_LENGTH];  //교수님 코드엔 이게 없음 한번 없에고 해보자...
 	XMFLOAT3		position;
 	XMFLOAT3		look;
 	XMFLOAT3		right;
+	uint8_t			animState;
 	//short			hp;
 };
 
@@ -61,17 +71,17 @@ struct sc_packet_move {
 	XMFLOAT3		position;
 	XMFLOAT3		look;
 	XMFLOAT3		right;
+	uint8_t			animState;
 };
 
 struct sc_packet_enter {
 	unsigned char	size;
 	char			type;
 	long long		id;
-	//char			name[MAX_ID_LENGTH];
-	//char			o_type;
 	XMFLOAT3		position;
 	XMFLOAT3		look;
 	XMFLOAT3		right;
+	uint8_t			animState;
 };
 
 struct sc_packet_leave {
@@ -99,6 +109,7 @@ struct cs_packet_move {
 	XMFLOAT3		position;
 	XMFLOAT3		look;
 	XMFLOAT3		right;
+	uint8_t			animState;
 };
 
 // 아이템

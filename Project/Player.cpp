@@ -541,6 +541,7 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 
 	// server
 
+	// position, look, right ------------------------------------
 	static XMFLOAT3 prevPosition = GetPosition();
 	static XMFLOAT3 prevLook = GetLook();
 	static XMFLOAT3 prevRight = GetRight();
@@ -548,15 +549,29 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 	XMFLOAT3 currPosition = GetPosition();
 	XMFLOAT3 currLook = GetLook();
 	XMFLOAT3 currRight = GetRight();
+	// -----------------------------------------------------------
+	
+	// animation ------------------------------------------------
+	uint8_t currentAnimState = 0; // Á¤Áö
+	if (isJump) currentAnimState = 1;
+	else if (isSwing) currentAnimState = 2;
+	else if (isCrouch) currentAnimState = 3;
+	//else if (::IsZero(fLength)) currentAnimState = 0; 
+	else currentAnimState = 4;
+
+	static uint8_t prevAnimState = currentAnimState;
+	// -----------------------------------------------------------
 
 	if (currPosition.x != prevPosition.x || currPosition.y != prevPosition.y || currPosition.z != prevPosition.z ||
 		currLook.x != prevLook.x || currLook.y != prevLook.y || currLook.z != prevLook.z ||
-		currRight.x != prevRight.x || currRight.y != prevRight.y || currRight.z != prevRight.z)
+		currRight.x != prevRight.x || currRight.y != prevRight.y || currRight.z != prevRight.z ||
+		currentAnimState != prevAnimState)
 	{
-		send_position_to_server(currPosition, currLook, currRight);
+		send_position_to_server(currPosition, currLook, currRight, currentAnimState);
 		prevPosition = currPosition;
 		prevLook = currLook;
 		prevRight = currRight;
+		prevAnimState = currentAnimState;
 	}
 
 }
