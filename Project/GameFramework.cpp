@@ -325,7 +325,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			m_ppScenes[m_nScene]->ReleaseObjects();
 			m_nCurrentScene = 1;
 			BuildObjects();
-      isStartScene = false;
+			isStartScene = false;
 			break;
 		case VK_F1:
 		case VK_F2:
