@@ -173,7 +173,7 @@ void Map::SetMapObjects()
 		pNewObject->SetScale(instance.scale);
 		pNewObject->Rotate(instance.rotation);
 
-		//std::cout << "Object: " << instance.objectName
+		//std::cout << "Object: " << instance.objectName << endl;
 		//	<< " | Model Index: " << instance.modelIndex
 		//	<< " | Mesh Pointer: " << pNewObject->m_pMesh << std::endl;
 

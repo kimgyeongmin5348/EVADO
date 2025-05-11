@@ -33,8 +33,8 @@ public:
         // 플레이어가 속한 노드 탐색
         QuadTreeNode* playerNode = m_pQuadTree->FindNode(m_pQuadTree->root, player->GetBoundingBox());
         if (!playerNode) return;
-        if (frameCounter % 60 == 0) // 60 프레임마다 출력
-            cout << playerNode->bounds.Center.x << endl;
+        //if (frameCounter % 60 == 0) // 60 프레임마다 출력
+        //    cout << playerNode->bounds.Center.x << endl;
 
         // 근처 오브젝트 수집
         CollectNearbyObjects(playerNode, player->GetBoundingBox(), m_collisions);
@@ -76,6 +76,9 @@ private:
         std::string nameB = b->GetChild()->GetFrameName();
         std::string nameB2 = b->GetFrameName();
 
+        if (frameCounter % 60 == 0)
+            cout << "Child(): " << nameB << "Self: " << nameB2 << endl;
+
         if (std::string::npos != nameB.find("wall") || std::string::npos != nameB2.find("wall"))
         {
             // 플레이어와 벽의 경계 상자 가져오기
@@ -108,7 +111,7 @@ private:
             // 벽이 밀어낼 방향 과 거리 찾기
             XMFLOAT3 pushDirection(0, 0, 0);
             float pushDistance{ 0.0f };
-            float pushMargin{ 0.1f };
+            float pushMargin{ 0.0f };
             float maxExtent = std::max(wallExtents.x, wallExtents.z);
             if (maxExtent == wallExtents.x)
             {
@@ -140,7 +143,7 @@ private:
                 {
                     // 왼쪽으로 밀어야 함
                     cout << "왼쪽으로 밀어야 함" << endl;
-                    pushDirection = XMFLOAT3(1, 0, 0);
+                    pushDirection = XMFLOAT3(-1, 0, 0);
                     pushDistance = wallVertices[0].x - playerVertices[1].x + pushMargin;
                 }
             }
@@ -153,6 +156,7 @@ private:
             );
 
             XMFLOAT3 shift = pushVector;
+            player->SetVelocity(XMFLOAT3(0, 0, 0));
             player->Move(shift, false);
             player->CalculateBoundingBox();
             playerBox = player->GetBoundingBox();
