@@ -33,10 +33,11 @@ public:
         // 플레이어가 속한 노드 탐색
         QuadTreeNode* playerNode = m_pQuadTree->FindNode(m_pQuadTree->root, player->GetBoundingBox());
         if (!playerNode) return;
-        //if (frameCounter % 60 == 0) // 60 프레임마다 출력
-        //    cout << playerNode->bounds.Center.x << endl;
+        if (frameCounter % 60 == 0) // 60 프레임마다 출력
+            cout << playerNode->bounds.Center.x << endl;
 
         // 근처 오브젝트 수집
+        m_collisions.clear();
         CollectNearbyObjects(playerNode, player->GetBoundingBox(), m_collisions);
 
         // 충돌 검사 및 처리
@@ -73,13 +74,12 @@ private:
         if (!b || !b->GetChild())
             return;
 
-        std::string nameB = b->GetChild()->GetFrameName();
-        std::string nameB2 = b->GetFrameName();
+        std::string ObjectFrameName = b->GetFrameName();
 
         if (frameCounter % 60 == 0)
-            cout << "Child(): " << nameB << "Self: " << nameB2 << endl;
+            cout << "ObjectFrameName: " << ObjectFrameName << endl;
 
-        if (std::string::npos != nameB.find("wall") || std::string::npos != nameB2.find("wall"))
+        if (std::string::npos != ObjectFrameName.find("Map_wall_window") || std::string::npos != ObjectFrameName.find("Map_wall_plain"))
         {
             // 플레이어와 벽의 경계 상자 가져오기
             BoundingBox playerBox = player->GetBoundingBox();
@@ -119,7 +119,7 @@ private:
                 {
                     // 위로 밀어야 함
                     cout << "위로 밀어야 함" << endl;
-                    pushDirection = XMFLOAT3(0, 0, 1);
+                    pushDirection = XMFLOAT3(0, 0, -1);
                     pushDistance = playerVertices[2].z - wallVertices[1].z + pushMargin;
                 }
                 else
@@ -143,8 +143,8 @@ private:
                 {
                     // 왼쪽으로 밀어야 함
                     cout << "왼쪽으로 밀어야 함" << endl;
-                    pushDirection = XMFLOAT3(-1, 0, 0);
-                    pushDistance = wallVertices[0].x - playerVertices[1].x + pushMargin;
+                    pushDirection = XMFLOAT3(1, 0, 0);
+                    pushDistance = wallVertices[1].x - playerVertices[0].x + pushMargin;
                 }
             }
 
@@ -160,42 +160,6 @@ private:
             player->Move(shift, false);
             player->CalculateBoundingBox();
             playerBox = player->GetBoundingBox();
-
-// 현재 플레이어와 벽의 중심 및 크기
-            //XMFLOAT3 playerCenter = playerBox.Center;
-            //XMFLOAT3 playerExtents = playerBox.Extents;
-            //XMFLOAT3 wallCenter = wallBox.Center;
-            //XMFLOAT3 wallExtents = wallBox.Extents;
-            //XMFLOAT3 wallMin(wallCenter.x - wallExtents.x, wallCenter.y - wallExtents.y, wallCenter.z - wallExtents.z);
-            //XMFLOAT3 wallMax(wallCenter.x + wallExtents.x, wallCenter.y + wallExtents.y, wallCenter.z + wallExtents.z);
-
-            //XMFLOAT3 adjustedCenter = playerCenter;
-
-            //float margin = 0.5;
-
-            //// x축 제한: 플레이어 Center가 벽 안으로 들어오면 벽 외곽으로 조정
-            //if (playerCenter.x < wallMin.x)
-            //    adjustedCenter.x = wallMin.x + margin; // 왼쪽 외곽으로 이동
-            //else if (playerCenter.x > wallMax.x)
-            //    adjustedCenter.x = wallMax.x - margin; // 오른쪽 외곽으로 이동
-            //// z축 제한: 플레이어 Center가 벽 안으로 들어오면 벽 외곽으로 조정
-            //else if (playerCenter.z < wallMin.z)
-            //    adjustedCenter.z = wallMin.z + margin; // 앞쪽 외곽으로 이동
-            //else if (playerCenter.z > wallMax.z)
-            //    adjustedCenter.z = wallMax.z - margin; // 뒤쪽 외곽으로 이동
-            //else
-            //    return;
-
-            //// y축 유지 (필요 시 조정)
-            //adjustedCenter.y = playerCenter.y;
-
-            //if (adjustedCenter.x != playerCenter.x || adjustedCenter.z != playerCenter.z)
-            //{
-            //    player->SetPosition(adjustedCenter);
-            //    player->CalculateBoundingBox();
-
-            //    playerBox = player->GetBoundingBox();
-            //}
         }
     }
 };
