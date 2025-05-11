@@ -215,6 +215,7 @@ void ProcessPacket(char* ptr)
 
         break;
     }
+
     case SC_P_MOVE: // 상대 플레이어 (움직이면) 좌표 받기
     {
         sc_packet_move* packet = reinterpret_cast<sc_packet_move*>(ptr);
@@ -246,7 +247,9 @@ void ProcessPacket(char* ptr)
 
         break;
     }
-    case SC_P_ITEM_SPAWN: {
+
+    case SC_P_ITEM_SPAWN: 
+    {
         sc_packet_item_spawn* pkt = reinterpret_cast<sc_packet_item_spawn*>(ptr);
 
         std::cout << "[Client] Item Create - ID: " << pkt->item_id
@@ -257,18 +260,47 @@ void ProcessPacket(char* ptr)
         break;
     }
 
-    case SC_P_ITEM_DESPAWN: {
+    case SC_P_ITEM_DESPAWN: 
+    {
         sc_packet_item_despawn* pkt = reinterpret_cast<sc_packet_item_despawn*>(ptr);
         std::cout << "[Client] Item delete - ID: " << pkt->item_id << std::endl;
         break;
     }
 
-    case SC_P_ITEM_MOVE: {
+    case SC_P_ITEM_MOVE: 
+    {
         sc_packet_item_move* pkt = reinterpret_cast<sc_packet_item_move*>(ptr);
 
 
-
+        break;
     }
+
+    case SC_P_MONSTER_SPAWN:
+    {
+        sc_packet_monster_spawn* pkt = reinterpret_cast<sc_packet_monster_spawn*>(ptr);
+        std::cout << "[Client] Monster Spawn - ID: " << pkt->monsterID
+            << " Position(" << pkt->position.x << ", " << pkt->position.z << ")"
+            << " State: " << static_cast<int>(pkt->state) << std::endl;
+
+        // 몬스터 생성
+        // 예시 -> gGameFramework.OnMonsterSpawned(pkt->monsterID, pkt->position);
+        break;
+    }
+
+    case SC_P_MONSTER_MOVE:
+    {
+        sc_packet_monster_move* pkt = reinterpret_cast<sc_packet_monster_move*>(ptr);
+
+        std::cout << "[Client] Monster Move - ID: " << pkt->monsterID
+            << " New Position(" << pkt->position.x << ", " << pkt->position.z << ")"
+            << " State: " << static_cast<int>(pkt->state) << std::endl;
+
+        //몬스터 위치 업데이트 로직
+        // 예시 ->  gGameFramework.UpdateMonsterPosition(pkt->monsterID, pkt->position, pkt->state);
+        break;
+    }
+    
+
     default:
         std::cout << "알 수 없는 패킷 타입 [" << ptr[1] << "]" << std::endl;
     }

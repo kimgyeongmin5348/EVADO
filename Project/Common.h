@@ -38,6 +38,10 @@ constexpr char MOVE_DOWN = 2;
 constexpr char MOVE_LEFT = 3;
 constexpr char MOVE_RIGHT = 4;
 
+constexpr char SC_P_MONSTER_SPAWN = 14;
+constexpr char SC_P_MONSTER_MOVE = 15;
+constexpr char SC_P_MONSTER_DIE = 16;
+
 #pragma pack (push, 1)
 
 
@@ -50,8 +54,6 @@ enum class AnimationState : uint8_t {
 	CROUCH,       // 5
 	CROUCH_WALK   // 6
 };
-
-
 
 struct sc_packet_user_info {
 	unsigned char	size;
@@ -157,6 +159,31 @@ struct sc_packet_item_move {
 	long long		holder_id; // 소유자 ID (0 = 지면에 있음)
 };
 
+// Monster
+enum class MonsterAnimationState : uint8_t
+{
+	IDLE,
+	WALK,
+	ATTACK
+};
+
+struct sc_packet_monster_spawn
+{
+	unsigned char		size;
+	char				type;
+	int64_t				monsterID;
+	XMFLOAT3			position;
+	uint8_t				state;
+};
+
+struct sc_packet_monster_move
+{
+	unsigned char		size;
+	char				type;
+	int64_t				monsterID;
+	XMFLOAT3			position;
+	uint8_t				state;
+};
 
 #pragma pack (pop)
 
