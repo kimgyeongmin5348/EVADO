@@ -1,4 +1,3 @@
-
 #include "stdafx.h"
 #include "Network.h"
 #include "GameFramework.h"
@@ -11,11 +10,11 @@ void* g_pContext = nullptr;
 
 extern CGameFramework gGameFramework;
 
-//std::unordered_map<long long, CPlayer> g_other_players;
 std::unordered_map<long long, OtherPlayer*> g_other_players;
-
 std::mutex g_player_mutex; // 멀티스레드 접근 방지
 
+std::unordered_map<long long, Item*> g_items;
+std::mutex g_item_mutex;
 
 SOCKET ConnectSocket = INVALID_SOCKET;
 HANDLE g_hIOCP = INVALID_HANDLE_VALUE;
@@ -251,6 +250,9 @@ void ProcessPacket(char* ptr)
     case SC_P_ITEM_SPAWN: 
     {
         sc_packet_item_spawn* pkt = reinterpret_cast<sc_packet_item_spawn*>(ptr);
+
+        // 에시
+        // gGameFramework.AddItemToScene(pkt->item_id, static_cast<ITEM_TYPE>(pkt->item_type), pkt->position);
 
         std::cout << "[Client] Item Create - ID: " << pkt->item_id
             << " Postion(" << pkt->position.x << ", "

@@ -53,6 +53,14 @@ public:
 		m_ppScenes[m_nCurrentScene]->UpdateOtherPlayerPosition(clinetnum, position);
 	}
 
+	//해볼려고 했음...
+	void AddItemToScene(long long id, ITEM_TYPE type, const XMFLOAT3& position)
+	{
+		if (m_ppScenes && m_ppScenes[m_nCurrentScene]) {
+			m_ppScenes[m_nCurrentScene]->AddItem(id, type, position);
+		}
+	}
+
 	bool isLoading = false;
 	bool isStartScene = true;
 
