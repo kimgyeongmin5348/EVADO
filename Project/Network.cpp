@@ -197,7 +197,7 @@ void ProcessPacket(char* ptr)
 
         if (id == g_myid) break;
 
-        
+
         std::cout << "새로운 플레이어" << id << "접속 성공" << "\n";
         
         
@@ -248,21 +248,8 @@ void ProcessPacket(char* ptr)
 
     case SC_P_ITEM_MOVE: {
         sc_packet_item_move* pkt = reinterpret_cast<sc_packet_item_move*>(ptr);
-        std::cout << "[디버그] 아이템 이동 - "
-            << "ID: " << pkt->item_id << ", "
-            << "위치: (" << pkt->position.x << ", "
-            << pkt->position.y << ", " << pkt->position.z << "), "
-            << "소유자: " << (pkt->holder_id == g_myid ? "본인" : "타인")
-            << " (" << pkt->holder_id << ")\n";
 
-        //if (pkt->holder_id == g_myid) {
-        //    // 자신이 들고 있는 아이템은 별도 처리
-        //    player.UpdateHeldItemPosition(pkt->position);
-        //}
-        //else {
-        //    g_pScene->MoveItem(pkt->item_id, pkt->position);
-        //}
-        //break;
+
     }
     default:
         printf("알 수 없는 패킷 타입 [%d]\n", ptr[1]);
@@ -311,9 +298,5 @@ void send_position_to_server(const XMFLOAT3& position, const XMFLOAT3& look, con
         << position.x << ", " << position.y << ", " << position.z << ") "
         << "Look(" << look.x << ", " << look.y << ", " << look.z << ") "
         << "Right(" << right.x << ", " << right.y << ", " << right.z << ")\n";
-
-    send_packet(&p);
-
-   
 
 }
