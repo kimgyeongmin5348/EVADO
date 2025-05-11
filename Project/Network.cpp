@@ -200,24 +200,9 @@ void ProcessPacket(char* ptr)
         int id = packet->id;
 
         if (id == g_myid) break;
-        //std::lock_guard<std::mutex> lock(g_player_mutex);
 
-        //if (g_other_players.find(id) == g_other_players.end()) { // 모델 단일 로드 (최초 1회만 실행)
-        //    if (!s_pPlayerModel) {
-        //        s_pPlayerModel = CGameObject::LoadGeometryAndAnimationFromFile(g_pd3dDevice, g_pd3dCommandList, g_pd3dGraphicsRootSignature, "Model/Player.bin", nullptr);
-
-        //        if (!s_pPlayerModel) {
-        //            std::cerr << "[크리티컬] 플레이어 모델 로드 실패" << std::endl;
-        //            break;
-        //        }
-        //    }
-
-        //    // 새 플레이어 객체 생성
-        //    OtherPlayer* pNewPlayer = new OtherPlayer(g_pd3dDevice, g_pd3dCommandList, g_pd3dGraphicsRootSignature, s_pPlayerModel);
-        //    pNewPlayer->SetPosition(packet->position);
-        //    g_other_players[id] = pNewPlayer;
-        //    std::cout << "[클라] 새 플레이어 생성: " << id << std::endl;
-        //}
+        std::cout << "새로운 플레이어" << id << "접속 성공" << "\n";
+        
         
         // 씬에 OtherPlayer가 딱 나타난다
         gGameFramework.OnOtherClientConnected();
@@ -286,6 +271,8 @@ void ProcessPacket(char* ptr)
 
     case SC_P_ITEM_MOVE: {
         sc_packet_item_move* pkt = reinterpret_cast<sc_packet_item_move*>(ptr);
+
+
         std::cout << "[디버그] 아이템 이동 - " << "ID: " << pkt->item_id << ", " << "위치: (" << pkt->position.x << ", " << pkt->position.y << ", " << pkt->position.z << "), ";
         if (pkt->holder_id == g_myid)
             std::cout << "소유자: 본인" << " (" << pkt->holder_id << ")" << std::endl;
@@ -293,14 +280,7 @@ void ProcessPacket(char* ptr)
         else
             std::cout << "소유자: 타인" << " (" << pkt->holder_id << ")" << std::endl;
 
-        //if (pkt->holder_id == g_myid) {
-        //    // 자신이 들고 있는 아이템은 별도 처리
-        //    player.UpdateHeldItemPosition(pkt->position);
-        //}
-        //else {
-        //    g_pScene->MoveItem(pkt->item_id, pkt->position);
-        //}
-        //break;
+
     }
     default:
         std::cout << "알 수 없는 패킷 타입 [" << ptr[1] << "]" << std::endl;
@@ -350,8 +330,4 @@ void send_position_to_server(const XMFLOAT3& position, const XMFLOAT3& look, con
         << "Look(" << look.x << ", " << look.y << ", " << look.z << ") "
         << "Right(" << right.x << ", " << right.y << ", " << right.z << ")\n";
 
-    send_packet(&p);
-  
-    // 전송 확인 출력
-    //std::cout << "[클라] 위치 전송: (" << position.x << ", " << position.y << ", " << position.z << ")\n";
 }

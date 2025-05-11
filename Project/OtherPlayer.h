@@ -15,5 +15,12 @@ public:
 
 	bool isJump = false;
 
+
+	XMFLOAT3 m_xmf3Position;
+	XMFLOAT3 m_xmf3Look;
+	XMFLOAT3 m_xmf3Right;
+
+
 	bool isConnedted = false;
+
 };
