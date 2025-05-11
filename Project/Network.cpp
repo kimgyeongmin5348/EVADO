@@ -224,10 +224,6 @@ void ProcessPacket(char* ptr)
             OtherPlayer* pPlayer = dynamic_cast<OtherPlayer*>(it->second);
             if (pPlayer) {
                 pPlayer->SetPosition(packet->position);
-                //std::cout << "[클라] 플레이어 이동: " << other_id
-                //    << " -> (" << packet->position.x
-                //    << "," << packet->position.y << ","
-                //    << packet->position.z << ")" << std::endl;
             }
         }
 
@@ -235,13 +231,6 @@ void ProcessPacket(char* ptr)
         if (!gGameFramework.isLoading && !gGameFramework.isStartScene)
             gGameFramework.UpdateOtherPlayerPosition(0, packet->position);
 
-        //if (other_id != g_myid || other_id < MAX_USER) { // 다른 플레이어 위치 갱신
-        //    // 다른 플레이어 위치 업데이트 확인
-        //    std::cout << "[클라] " << other_id << "번 플레이어 위치 갱신: ("
-        //        << packet->position.x << ", "
-        //        << packet->position.y << ", "
-        //        << packet->position.z << ")\n";
-        //}
         break;
     }
 
@@ -256,10 +245,12 @@ void ProcessPacket(char* ptr)
     }
     case SC_P_ITEM_SPAWN: {
         sc_packet_item_spawn* pkt = reinterpret_cast<sc_packet_item_spawn*>(ptr);
+
         std::cout << "[클라] 아이템 생성 - ID: " << pkt->item_id
             << " 위치(" << pkt->position.x << ", "
             << pkt->position.y << ", " << pkt->position.z << ")"
             << " 타입: " << pkt->item_type << std::endl;
+
         break;
     }
 
@@ -273,12 +264,6 @@ void ProcessPacket(char* ptr)
         sc_packet_item_move* pkt = reinterpret_cast<sc_packet_item_move*>(ptr);
 
 
-        std::cout << "[디버그] 아이템 이동 - " << "ID: " << pkt->item_id << ", " << "위치: (" << pkt->position.x << ", " << pkt->position.y << ", " << pkt->position.z << "), ";
-        if (pkt->holder_id == g_myid)
-            std::cout << "소유자: 본인" << " (" << pkt->holder_id << ")" << std::endl;
-
-        else
-            std::cout << "소유자: 타인" << " (" << pkt->holder_id << ")" << std::endl;
 
 
     }
