@@ -14,10 +14,15 @@ OtherPlayer::OtherPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 	m_pSkinnedAnimationController->SetTrackAnimationSet(2, 2); // run
 	m_pSkinnedAnimationController->SetTrackAnimationSet(3, 3); // jump
 	m_pSkinnedAnimationController->SetTrackAnimationSet(4, 4); // swing
+	m_pSkinnedAnimationController->SetTrackAnimationSet(5, 5); // 웅크리기
+	m_pSkinnedAnimationController->SetTrackAnimationSet(6, 6); // 웅크리고 걷기
+
 	m_pSkinnedAnimationController->SetTrackEnable(1, false);
 	m_pSkinnedAnimationController->SetTrackEnable(2, false);
 	m_pSkinnedAnimationController->SetTrackEnable(3, false);
 	m_pSkinnedAnimationController->SetTrackEnable(4, false);
+	m_pSkinnedAnimationController->SetTrackEnable(5, false);
+	m_pSkinnedAnimationController->SetTrackEnable(6, false);
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
@@ -33,14 +38,44 @@ OtherPlayer::~OtherPlayer()
 //	UpdateTransform();
 //}
 
-void OtherPlayer::Update(float fTimeElapsed)
+void OtherPlayer::Animate(int animation, float fTimeElapsed)
 {
-	// 위치 및 회전 업데이트
-	//XMMATRIX xmTranslate = XMMatrixTranslation(
-	//	m_xmf3Position.x,
-	//	m_xmf3Position.y,
-	//	m_xmf3Position.z
-	//);
+	for (int i = 0; i < 7; ++i) m_pSkinnedAnimationController->SetTrackEnable(i, false);
+	m_pSkinnedAnimationController->SetTrackEnable(animation, true);
 
-	// 애니메이션
+	if (animation == 0) {
+		m_pSkinnedAnimationController->SetTrackPosition(1, 0.0f);
+		m_pSkinnedAnimationController->SetTrackPosition(2, 0.0f);
+		m_pSkinnedAnimationController->SetTrackPosition(3, 0.0f);
+		m_pSkinnedAnimationController->SetTrackPosition(4, 0.0f);
+		m_pSkinnedAnimationController->SetTrackPosition(5, 0.0f);
+		m_pSkinnedAnimationController->SetTrackPosition(6, 0.0f);
+	}
+	else if (animation == 3) {
+		m_pSkinnedAnimationController->SetTrackSpeed(animation, 2.0f);
+		float currentPos = m_pSkinnedAnimationController->m_pAnimationTracks[3].m_fPosition;
+		int animSetIndex = m_pSkinnedAnimationController->m_pAnimationTracks[3].m_nAnimationSet;
+		float length = m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[animSetIndex]->m_fLength;
+
+		if (currentPos >= 1.5)
+		{
+			m_pSkinnedAnimationController->SetTrackEnable(animation, false);
+			m_pSkinnedAnimationController->SetTrackPosition(animation, 0.0f);
+		}
+	}
+	else if (animation == 4) {
+		m_pSkinnedAnimationController->SetTrackSpeed(4, 2.0f);
+		float currentPos = m_pSkinnedAnimationController->m_pAnimationTracks[4].m_fPosition;
+		int animSetIndex = m_pSkinnedAnimationController->m_pAnimationTracks[4].m_nAnimationSet;
+		float length = m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[animSetIndex]->m_fLength;
+
+		if (currentPos >= 1.5)
+		{
+			m_pSkinnedAnimationController->SetTrackEnable(4, false);
+			m_pSkinnedAnimationController->SetTrackPosition(4, 0.0f);
+		}
+	}
+
+
+	CGameObject::Animate(fTimeElapsed);
 }

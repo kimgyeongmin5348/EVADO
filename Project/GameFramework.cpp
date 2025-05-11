@@ -483,7 +483,7 @@ void CGameFramework::BuildObjects()
 	else if (m_nCurrentScene == 1) {
 		m_ppScenes[1] = new CScene();
 		m_ppScenes[1]->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
-		CTerrainPlayer* pPlayer = new CTerrainPlayer(m_pd3dDevice, m_pd3dCommandList, m_ppScenes[1]->GetGraphicsRootSignature(), m_ppScenes[1]->m_pTerrain);
+		CTerrainPlayer* pPlayer = new CTerrainPlayer(m_pd3dDevice, m_pd3dCommandList, m_ppScenes[1]->GetGraphicsRootSignature(), NULL);
 		m_ppScenes[1]->SetPlayer(pPlayer);
 		m_pPlayer->SetPosition(XMFLOAT3(0,0,0));
 	}
@@ -572,7 +572,9 @@ void CGameFramework::AnimateObjects()
 {
 	float fTimeElapsed = m_GameTimer.GetTimeElapsed();
 
-	if (m_pScene) m_pScene->AnimateObjects(fTimeElapsed);
+	if (m_pScene) { 
+		m_pScene->AnimateObjects(fTimeElapsed); 
+	}
 
 	m_pPlayer->Animate(fTimeElapsed);
 
@@ -589,6 +591,7 @@ void CGameFramework::AnimateObjects()
 				}
 			}
 		}
+		m_pScene->m_ppOtherPlayers[0]->m_pSkinnedAnimationController->SetTrackEnable(0, true);
 	}
 }
 

@@ -52,6 +52,10 @@ public:
 	{
 		m_ppScenes[m_nCurrentScene]->UpdateOtherPlayerPosition(clinetnum, position);
 	}
+	void UpdateOtherPlayerAnimation(int clinetnum, int animNum)
+	{
+		m_ppScenes[m_nCurrentScene]->UpdateOtherPlayerAnimation(clinetnum, animNum);
+	}
 
 	bool isLoading = false;
 	bool isStartScene = true;

@@ -140,6 +140,21 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	CLoadedModelInfo* pOtherPlayerModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Player.bin", NULL);
 	m_ppOtherPlayers[0] = new OtherPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pOtherPlayerModel);
 	m_ppOtherPlayers[0]->SetPosition(-1000, -1000, -1000);
+	m_ppOtherPlayers[0]->m_pSkinnedAnimationController->SetTrackEnable(0, true);
+	m_ppOtherPlayers[0]->m_pSkinnedAnimationController->SetTrackEnable(1, false);
+	m_ppOtherPlayers[0]->m_pSkinnedAnimationController->SetTrackEnable(2, false);
+	m_ppOtherPlayers[0]->m_pSkinnedAnimationController->SetTrackEnable(3, false);
+	m_ppOtherPlayers[0]->m_pSkinnedAnimationController->SetTrackEnable(4, false);
+	m_ppOtherPlayers[0]->m_pSkinnedAnimationController->SetTrackEnable(5, false);
+	m_ppOtherPlayers[0]->m_pSkinnedAnimationController->SetTrackEnable(6, false);
+
+	m_ppOtherPlayers[0]->m_pSkinnedAnimationController->SetTrackPosition(1, 0.0f);
+	m_ppOtherPlayers[0]->m_pSkinnedAnimationController->SetTrackPosition(2, 0.0f);
+	m_ppOtherPlayers[0]->m_pSkinnedAnimationController->SetTrackPosition(3, 0.0f);
+	m_ppOtherPlayers[0]->m_pSkinnedAnimationController->SetTrackPosition(4, 0.0f);
+	m_ppOtherPlayers[0]->m_pSkinnedAnimationController->SetTrackPosition(5, 0.0f);
+	m_ppOtherPlayers[0]->m_pSkinnedAnimationController->SetTrackPosition(6, 0.0f);
+
 	if (pOtherPlayerModel) delete pOtherPlayerModel;
 	//// OtherPlayer
 	//m_nGameObjects = 1;
@@ -542,11 +557,11 @@ bool CScene::ProcessInput(UCHAR *pKeysBuffer)
 
 void CScene::AnimateObjects(float fTimeElapsed)
 {
-	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Animate(fTimeElapsed);
+	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Animate(fTimeElapsed);	
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);
 
 	if (m_pLights)
-	{
+	{	
 		m_pLights[1].m_xmf3Position = m_pPlayer->GetPosition();
 		m_pLights[1].m_xmf3Direction = m_pPlayer->GetLookVector();
 	}
@@ -584,6 +599,7 @@ void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera
 	for (int i = 0; i < m_nOtherPlayers; ++i) 
 	{
 		//if (m_ppOtherPlayers[i]->isConnedted)
+		m_ppOtherPlayers[i]->Animate(m_ppOtherPlayers[i]->animation, m_fElapsedTime);
 		m_ppOtherPlayers[i]->Render(pd3dCommandList, pCamera);
 	}
 
