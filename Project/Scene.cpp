@@ -106,7 +106,7 @@ void CScene::InitializeCollisionSystem()
 
 void CScene::GenerateGameObjectsBoundingBox()
 {
-	//m_pPlayer->CalculateBoundingBox();
+	m_pPlayer->CalculateBoundingBox();
 
 	for (int i = 0; i < m_nGameObjects; ++i) {
 		m_ppGameObjects[i]->CalculateBoundingBox();
@@ -228,9 +228,6 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	pInventoryShader->SetTexture(pTexture);
 
 	m_ppShaders[1] = pInventoryShader;
-
-	InitializeCollisionSystem();
-	GenerateGameObjectsBoundingBox();
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
@@ -622,6 +619,8 @@ void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera
 			m_ppHierarchicalGameObjects[i]->Render(pd3dCommandList, pCamera);
 		}
 	}
+
+	m_CollisionManager.Update(m_pPlayer);
   
 	for (int i = 0; i < m_nOtherPlayers; ++i) 
 	{
