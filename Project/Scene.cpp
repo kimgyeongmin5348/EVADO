@@ -98,7 +98,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	XMFLOAT3 xmf3Scale(0.0f, 0.0f, 0.0f);
 	XMFLOAT4 xmf4Color(0.0f, 0.3f, 0.0f, 0.0f);
-	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Terrain/HeightMap.raw"), 257, 257, xmf3Scale, xmf4Color);
+	//m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Terrain/HeightMap.raw"), 257, 257, xmf3Scale, xmf4Color);
 
 	m_nHierarchicalGameObjects = 4; // spider, flashlight, shovel, whistle
 	m_ppHierarchicalGameObjects = new CGameObject * [m_nHierarchicalGameObjects];
@@ -167,44 +167,48 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	////if (pOtherPlayerModel) delete pOtherPlayerModel;
 
 	// 인벤토리 UI
-	m_nShaders = 2;
+	m_nShaders = 4;
 	m_ppShaders = new CShader * [m_nShaders];
 
-	CTextureToScreenShader* pTextureItemShader = new CTextureToScreenShader(3);
-	pTextureItemShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-
-	CTexture* pTextureItem = new CTexture(3, RESOURCE_TEXTURE2D, 0, 1);
-	pTextureItem->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/FlashLight_bg_ui.dds", RESOURCE_TEXTURE2D, 0);
-	pTextureItem->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Shovel_bg_ui.dds", RESOURCE_TEXTURE2D, 1);
-	pTextureItem->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Whistle_bg_ui.dds", RESOURCE_TEXTURE2D, 2);
-
-	CreateShaderResourceViews(pd3dDevice, pTextureItem, 0, 15);
-
+	CTextureToScreenShader* pTextureItem1Shader = new CTextureToScreenShader(1);
+	pTextureItem1Shader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	CTexture* pTextureItem1 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pTextureItem1->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/FlashLight_bg_ui.dds", RESOURCE_TEXTURE2D, 0);
+	CreateShaderResourceViews(pd3dDevice, pTextureItem1, 0, 15);
 	CScreenRectMeshTextured* pMesh = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, -0.5f + 0.02f, 0.225f, -0.55f, 0.45f);
-	pTextureItemShader->SetMesh(0, pMesh);
-	pMesh = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, -0.25f + 0.02f, 0.225f, -0.55f, 0.45f);
-	pTextureItemShader->SetMesh(1, pMesh);
-	pMesh = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, 0.0f + 0.02f, 0.225f, -0.55f, 0.45f);
-	pTextureItemShader->SetMesh(2, pMesh);
+	pTextureItem1Shader->SetMesh(0, pMesh);
+	pTextureItem1Shader->SetTexture(pTextureItem1);
+	m_ppShaders[0] = pTextureItem1Shader;
 
-	pTextureItemShader->SetTexture(pTextureItem);
+	CTextureToScreenShader* pTextureItem2Shader = new CTextureToScreenShader(1);
+	pTextureItem2Shader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	CTexture* pTextureItem2 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pTextureItem2->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Shovel_bg_ui.dds", RESOURCE_TEXTURE2D, 0);
+	CreateShaderResourceViews(pd3dDevice, pTextureItem2, 0, 15);
+	CScreenRectMeshTextured* pMesh1 = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, -0.25f + 0.02f, 0.225f, -0.55f, 0.45f);
+	pTextureItem2Shader->SetMesh(0, pMesh1);
+	pTextureItem2Shader->SetTexture(pTextureItem2);
+	m_ppShaders[1] = pTextureItem2Shader;
 
-	m_ppShaders[0] = pTextureItemShader;
+	CTextureToScreenShader* pTextureItem3Shader = new CTextureToScreenShader(1);
+	pTextureItem3Shader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	CTexture* pTextureItem3 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pTextureItem3->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Whistle_bg_ui.dds", RESOURCE_TEXTURE2D, 0);
+	CreateShaderResourceViews(pd3dDevice, pTextureItem3, 0, 15);
+	CScreenRectMeshTextured* pMesh2 = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, 0.0f + 0.02f, 0.225f, -0.55f, 0.45f);
+	pTextureItem3Shader->SetMesh(0, pMesh2);
+	pTextureItem3Shader->SetTexture(pTextureItem3);
+	m_ppShaders[2] = pTextureItem3Shader;
 
 	CTextureToScreenShader* pInventoryShader = new CTextureToScreenShader(1);
 	pInventoryShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-
 	CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
 	pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Inventory.dds", RESOURCE_TEXTURE2D, 0);
-
 	CreateShaderResourceViews(pd3dDevice, pTexture, 0, 15);
-
-	CScreenRectMeshTextured* pMesh1 = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, -0.5f, 1.0f, -0.5f, 0.5f);
-	pInventoryShader->SetMesh(0, pMesh1);
-
+	CScreenRectMeshTextured* pInventoryMesh = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, -0.5f, 1.0f, -0.5f, 0.5f);
+	pInventoryShader->SetMesh(0, pInventoryMesh);
 	pInventoryShader->SetTexture(pTexture);
-
-	m_ppShaders[1] = pInventoryShader;
+	m_ppShaders[3] = pInventoryShader;
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
@@ -603,7 +607,7 @@ void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera
 		m_ppOtherPlayers[i]->Render(pd3dCommandList, pCamera);
 	}
 
-	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
+	for (int i = 0; i < m_nShaders; i++) if (dynamic_cast<CTextureToScreenShader*>(m_ppShaders[i])->IsInventory[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
 }
 
 void CStartScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)

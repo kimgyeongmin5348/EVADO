@@ -340,9 +340,12 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		case '3':
 		{
 			int itemIndex = wParam - '0';
+			int shaderIndex = wParam - '1';
 			if (itemIndex < m_pScene->m_nHierarchicalGameObjects) {
 				ItemToHand(itemIndex);
 				m_pPlayer->items[itemIndex] = !m_pPlayer->items[itemIndex];
+				dynamic_cast<CTextureToScreenShader*>(m_pScene->m_ppShaders[shaderIndex])->IsInventory[shaderIndex] 
+					= !dynamic_cast<CTextureToScreenShader*>(m_pScene->m_ppShaders[shaderIndex])->IsInventory[shaderIndex];
 			}
 			break;
 		}

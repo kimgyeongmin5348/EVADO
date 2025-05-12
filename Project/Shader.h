@@ -85,6 +85,8 @@ public:
 
 	CTexture* m_pTexture = NULL;
 
+	bool IsInventory[4] = { false, false, false, true };
+
 	void SetMesh(UINT nIndex, CMesh* pMesh);
 	void SetTexture(CTexture* pTexture);
 };
