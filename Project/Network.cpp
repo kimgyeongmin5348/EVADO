@@ -132,7 +132,7 @@ void InitializeNetwork()
     // 5. 비동기 연결 설정
     sockaddr_in serverAddr{};
     serverAddr.sin_family = AF_INET;
-    inet_pton(AF_INET, "192.168.78.208", &serverAddr.sin_addr); // 경민노트북
+    inet_pton(AF_INET, "127.0.0.1", &serverAddr.sin_addr); // 경민노트북
     serverAddr.sin_port = htons(SERVER_PORT);
 
     // 6. 비동기 연결 시작
@@ -154,7 +154,7 @@ void InitializeNetwork()
     // 8. 초기 수신 작업 시작
     PostRecv();
 
-    std::cout << "서버에 성공적으로 연결되었습니다." << std::endl;
+    std::cout << "Sever Connect" << std::endl;
 
     // 9. 로그인 패킷 전송
     cs_packet_login p;
@@ -164,7 +164,7 @@ void InitializeNetwork()
     strcpy_s(p.name, sizeof(p.name), user_name.c_str());
     send_packet(&p);
 
-    std::cout << "[클라] 로그인 패킷 전송: 이름=" << p.name << std::endl;
+    std::cout << "[Client] Login Packet Send : Name=" << p.name << std::endl;
 }
 
 void ProcessPacket(char* ptr)
@@ -245,7 +245,7 @@ void ProcessPacket(char* ptr)
         sc_packet_leave* packet = reinterpret_cast<sc_packet_leave*>(ptr);
         int other_id = packet->id;
 
-        std::cout << "[Client] 플레이어 제거: ID=" << other_id << std::endl;
+        std::cout << "[Client] Player Remove: ID=" << other_id << std::endl;
 
         break;
     }
@@ -307,7 +307,7 @@ void ProcessPacket(char* ptr)
     
 
     default:
-        std::cout << "알 수 없는 패킷 타입 [" << ptr[1] << "]" << std::endl;
+        std::cout << "Unknown Packet Type [" << ptr[1] << "]" << std::endl;
     }
 }
 

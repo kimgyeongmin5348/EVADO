@@ -296,14 +296,16 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 				m_pScene->BuildDefaultLightsAndMaterials(flashlightToggle);
 			}
 			if (m_pPlayer->items[2]) m_pPlayer->isSwing = true;
+			::SetCapture(hWnd);
+			::GetCursorPos(&m_ptOldCursorPos);
 			break;
 		case WM_LBUTTONUP:
 		case WM_RBUTTONUP:
+			::ReleaseCapture();
 			break;
 		case WM_MOUSEMOVE:
-			::SetCapture(hWnd);
-			::GetCursorPos(&m_ptOldCursorPos);
-			//::ReleaseCapture();
+
+			//
 			break;
 		default:
 			break;
@@ -319,7 +321,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		switch (wParam)
 		{
 		case VK_ESCAPE:
-			::PostQuitMessage(0);
+			exit(0);
 			break;
 		case VK_RETURN:
 			m_ppScenes[m_nScene]->ReleaseObjects();
