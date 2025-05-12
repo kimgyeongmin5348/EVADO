@@ -181,6 +181,3 @@ private:
         }
     }
 };
-
-
-backup_main 은, ForCollsion_Jade 브랜치가 main 브랜치에 컨플릭트를 해결하고 머지를 하기 직전 상태의 main 을 갖고있는 브랜치이다.따라서
