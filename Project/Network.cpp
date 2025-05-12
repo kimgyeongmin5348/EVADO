@@ -21,7 +21,7 @@ HANDLE g_hIOCP = INVALID_HANDLE_VALUE;
 
 WSADATA wsaData;
 
-CPlayer player;
+//CPlayer player;
 CGameObject object;
 long long g_myid = 0;
 
