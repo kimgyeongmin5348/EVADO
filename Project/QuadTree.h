@@ -1,4 +1,5 @@
-#pragma once
+ï»¿#pragma once
+
 #include "Object.h"
 #include "Player.h"
 
@@ -22,7 +23,7 @@ class CQuadTree
 public:
     QuadTreeNode* root;
     int maxObjectsPerNode;
-    float minNodeSize; // ÃÖ¼Ò ³ëµå Å©±â (¹«ÇÑ ºÐÇÒ ¹æÁö)
+    float minNodeSize; // ìµœì†Œ ë…¸ë“œ í¬ê¸° (ë¬´í•œ ë¶„í•  ë°©ì§€)
     int maxDepth;
 
     CQuadTree(float minSize = 10.0f) : root(nullptr), maxObjectsPerNode(10), minNodeSize(minSize), maxDepth(0) {}
@@ -34,7 +35,7 @@ public:
     void Build(const BoundingBox& worldBounds, int maxObjects, int maxDepth)
     {
         maxObjectsPerNode = maxObjects > 0 ? maxObjects : 10;
-        this->maxDepth = maxDepth > 0 ? maxDepth : 4; // ±âº»°ª 4
+        this->maxDepth = maxDepth > 0 ? maxDepth : 4; // ê¸°ë³¸ê°’ 4
         if (root) DeleteNode(root);
         root = new QuadTreeNode(worldBounds);
         root->depth = 0;

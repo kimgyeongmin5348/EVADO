@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "QuadTree.h"
 
@@ -30,18 +30,18 @@ public:
 
     void Update(CPlayer* player)
     {
-        // ÇÃ·¹ÀÌ¾î°¡ ¼ÓÇÑ ³ëµå Å½»ö
+        // í”Œë ˆì´ì–´ê°€ ì†í•œ ë…¸ë“œ íƒìƒ‰
         QuadTreeNode* playerNode = m_pQuadTree->FindNode(m_pQuadTree->root, player->GetBoundingBox());
         if (!playerNode) return;
 
-        if (frameCounter % 60 == 0) // 60 ÇÁ·¹ÀÓ¸¶´Ù Ãâ·Â
+        if (frameCounter % 60 == 0) // 60 í”„ë ˆì„ë§ˆë‹¤ ì¶œë ¥
             cout << playerNode->bounds.Center.x << ", " << playerNode->bounds.Center.z << endl;
 
-        // ±ÙÃ³ ¿ÀºêÁ§Æ® ¼öÁı
+        // ê·¼ì²˜ ì˜¤ë¸Œì íŠ¸ ìˆ˜ì§‘
         m_collisions.clear();
         CollectNearbyObjects(playerNode, player->GetBoundingBox(), m_collisions);
 
-        // Ãæµ¹ °Ë»ç ¹× Ã³¸®
+        // ì¶©ëŒ ê²€ì‚¬ ë° ì²˜ë¦¬
         for (CGameObject* obj : m_collisions)
         {
             if (obj != player && player->GetBoundingBox().Intersects(obj->GetBoundingBox()))
@@ -53,11 +53,11 @@ public:
 
     bool IsColliding(const BoundingBox& box1, const BoundingBox& box2)
     {
-        // XÃà Ãæµ¹ °Ë»ç
+        // Xì¶• ì¶©ëŒ ê²€ì‚¬
         if (fabs(box1.Center.x - box2.Center.x) > (box1.Extents.x + box2.Extents.x))
             return false;
 
-        // ZÃà Ãæµ¹ °Ë»ç
+        // Zì¶• ì¶©ëŒ ê²€ì‚¬
         if (fabs(box1.Center.z - box2.Center.z) > (box1.Extents.z + box2.Extents.z))
             return false;
 
@@ -89,34 +89,34 @@ private:
             || std::string::npos != ObjectFrameName.find("Map_wall_baydoor")
             )
         {
-            // ÇÃ·¹ÀÌ¾î¿Í º®ÀÇ °æ°è »óÀÚ °¡Á®¿À±â
+            // í”Œë ˆì´ì–´ì™€ ë²½ì˜ ê²½ê³„ ìƒì ê°€ì ¸ì˜¤ê¸°
             BoundingBox playerBox = player->GetBoundingBox();
             BoundingBox wallBox = obj->GetBoundingBox();
 
-            // ÇÃ·¹ÀÌ¾î¿Í º®ÀÇ Áß½É °£ Â÷ÀÌ
+            // í”Œë ˆì´ì–´ì™€ ë²½ì˜ ì¤‘ì‹¬ ê°„ ì°¨ì´
             XMFLOAT3 playerCenter = playerBox.Center;
             XMFLOAT3 wallCenter = wallBox.Center;
             XMFLOAT3 diff(playerCenter.x - wallCenter.x, playerCenter.y - wallCenter.y, playerCenter.z - wallCenter.z);
 
-            //// ÇÃ·¹ÀÌ¾î BoundingBoxÀÇ 4°³ ²ÀÁşÁ¡ °è»ê
+            //// í”Œë ˆì´ì–´ BoundingBoxì˜ 4ê°œ ê¼­ì§“ì  ê³„ì‚°
             XMFLOAT3 playerExtents = playerBox.Extents;
             XMFLOAT3 playerVertices[4] = {
-                XMFLOAT3(playerCenter.x - playerExtents.x, playerCenter.y, playerCenter.z - playerExtents.z), // ¿ì»ó´Ü
-                XMFLOAT3(playerCenter.x + playerExtents.x, playerCenter.y, playerCenter.z - playerExtents.z), // ÁÂ»ó´Ü
-                XMFLOAT3(playerCenter.x + playerExtents.x, playerCenter.y, playerCenter.z + playerExtents.z), // ÁÂÇÏ´Ü
-                XMFLOAT3(playerCenter.x - playerExtents.x, playerCenter.y, playerCenter.z + playerExtents.z), // ¿ìÇÏ´Ü
+                XMFLOAT3(playerCenter.x - playerExtents.x, playerCenter.y, playerCenter.z - playerExtents.z), // ìš°ìƒë‹¨
+                XMFLOAT3(playerCenter.x + playerExtents.x, playerCenter.y, playerCenter.z - playerExtents.z), // ì¢Œìƒë‹¨
+                XMFLOAT3(playerCenter.x + playerExtents.x, playerCenter.y, playerCenter.z + playerExtents.z), // ì¢Œí•˜ë‹¨
+                XMFLOAT3(playerCenter.x - playerExtents.x, playerCenter.y, playerCenter.z + playerExtents.z), // ìš°í•˜ë‹¨
             };
 
-            // º® BoundingBoxÀÇ 4°³ ²ÀÁşÁ¡ °è»ê
+            // ë²½ BoundingBoxì˜ 4ê°œ ê¼­ì§“ì  ê³„ì‚°
             XMFLOAT3 wallExtents = wallBox.Extents;
             XMFLOAT3 wallVertices[4] = {
-                XMFLOAT3(wallCenter.x - wallExtents.x, playerCenter.y, wallCenter.z - wallExtents.z), // ¿ì»ó´Ü
-                XMFLOAT3(wallCenter.x + wallExtents.x, playerCenter.y, wallCenter.z - wallExtents.z), // ÁÂ»ó´Ü
-                XMFLOAT3(wallCenter.x + wallExtents.x, playerCenter.y, wallCenter.z + wallExtents.z), // ÁÂÇÏ´Ü
-                XMFLOAT3(wallCenter.x - wallExtents.x, playerCenter.y, wallCenter.z + wallExtents.z), // ¿ìÇÏ´Ü
+                XMFLOAT3(wallCenter.x - wallExtents.x, playerCenter.y, wallCenter.z - wallExtents.z), // ìš°ìƒë‹¨
+                XMFLOAT3(wallCenter.x + wallExtents.x, playerCenter.y, wallCenter.z - wallExtents.z), // ì¢Œìƒë‹¨
+                XMFLOAT3(wallCenter.x + wallExtents.x, playerCenter.y, wallCenter.z + wallExtents.z), // ì¢Œí•˜ë‹¨
+                XMFLOAT3(wallCenter.x - wallExtents.x, playerCenter.y, wallCenter.z + wallExtents.z), // ìš°í•˜ë‹¨
             };
 
-            // º®ÀÌ ¹Ğ¾î³¾ ¹æÇâ °ú °Å¸® Ã£±â
+            // ë²½ì´ ë°€ì–´ë‚¼ ë°©í–¥ ê³¼ ê±°ë¦¬ ì°¾ê¸°
             XMFLOAT3 pushDirection(0, 0, 0);
             float pushDistance{ 0.0f };
             float pushMargin{ 0.0f };
@@ -125,13 +125,13 @@ private:
             {
                 if (diff.z < 0)
                 {
-                    // À§·Î ¹Ğ¾î¾ß ÇÔ
+                    // ìœ„ë¡œ ë°€ì–´ì•¼ í•¨
                     pushDirection = XMFLOAT3(0, 0, -1);
                     pushDistance = playerVertices[2].z - wallVertices[1].z + pushMargin;
                 }
                 else
                 {
-                    // ¾Æ·¡·Î ¹Ğ¾î¾ß ÇÔ
+                    // ì•„ë˜ë¡œ ë°€ì–´ì•¼ í•¨
                     pushDirection = XMFLOAT3(0, 0, 1);
                     pushDistance = wallVertices[2].z - playerVertices[1].z + pushMargin;
                 }
@@ -140,13 +140,13 @@ private:
             {
                 if (diff.x < 0)
                 {
-                    // ¿À¸¥ÂÊÀ¸·Î ¹Ğ¾î¾ß ÇÔ
+                    // ì˜¤ë¥¸ìª½ìœ¼ë¡œ ë°€ì–´ì•¼ í•¨
                     pushDirection = XMFLOAT3(-1, 0, 0);
                     pushDistance = playerVertices[1].x - wallVertices[0].x + pushMargin;
                 }
                 else
                 {
-                    // ¿ŞÂÊÀ¸·Î ¹Ğ¾î¾ß ÇÔ
+                    // ì™¼ìª½ìœ¼ë¡œ ë°€ì–´ì•¼ í•¨
                     pushDirection = XMFLOAT3(1, 0, 0);
                     pushDistance = wallVertices[1].x - playerVertices[0].x + pushMargin;
                 }
@@ -197,7 +197,7 @@ private:
             BoundingBox playerBox = player->GetBoundingBox();
             BoundingBox objBox = obj->GetBoundingBox();
 
-            // Min, Max °è»ê
+            // Min, Max ê³„ì‚°
             DirectX::XMFLOAT3 playerMin, playerMax, objMin, objMax;
             playerMin.x = playerBox.Center.x - playerBox.Extents.x;
             playerMin.y = playerBox.Center.y - playerBox.Extents.y;
@@ -213,28 +213,28 @@ private:
             objMax.y = objBox.Center.y + objBox.Extents.y;
             objMax.z = objBox.Center.z + objBox.Extents.z;
 
-            // °ãÄ§ Å©±â °è»ê (x, zÃà)
+            // ê²¹ì¹¨ í¬ê¸° ê³„ì‚° (x, zì¶•)
             DirectX::XMFLOAT3 overlap;
             overlap.x = std::min(playerMax.x, objMax.x) - std::max(playerMin.x, objMin.x);
             overlap.z = std::min(playerMax.z, objMax.z) - std::max(playerMin.z, objMin.z);
 
-            // °ãÄ§ÀÌ ÀÛÀº ÃàÀ» ±âÁØÀ¸·Î ÇÃ·¹ÀÌ¾î À§Ä¡ Á¶Á¤
+            // ê²¹ì¹¨ì´ ì‘ì€ ì¶•ì„ ê¸°ì¤€ìœ¼ë¡œ í”Œë ˆì´ì–´ ìœ„ì¹˜ ì¡°ì •
             if (overlap.x < overlap.z)
             {
                 if (playerPos.x < objBox.Center.x)
-                    playerPos.x = objMin.x - playerBox.Extents.x; // ¿ŞÂÊÀ¸·Î ¹Ğ¾î³¿
+                    playerPos.x = objMin.x - playerBox.Extents.x; // ì™¼ìª½ìœ¼ë¡œ ë°€ì–´ëƒ„
                 else
-                    playerPos.x = objMax.x + playerBox.Extents.x; // ¿À¸¥ÂÊÀ¸·Î ¹Ğ¾î³¿
+                    playerPos.x = objMax.x + playerBox.Extents.x; // ì˜¤ë¥¸ìª½ìœ¼ë¡œ ë°€ì–´ëƒ„
             }
             else
             {
                 if (playerPos.z < objBox.Center.z)
-                    playerPos.z = objMin.z - playerBox.Extents.z; // ¾Æ·¡·Î ¹Ğ¾î³¿
+                    playerPos.z = objMin.z - playerBox.Extents.z; // ì•„ë˜ë¡œ ë°€ì–´ëƒ„
                 else
-                    playerPos.z = objMax.z + playerBox.Extents.z; // À§·Î ¹Ğ¾î³¿
+                    playerPos.z = objMax.z + playerBox.Extents.z; // ìœ„ë¡œ ë°€ì–´ëƒ„
             }
-            player->SetPosition(playerPos); // ÇÃ·¹ÀÌ¾î À§Ä¡ °»½Å
-            player->SetVelocity({ 0.0f, 0.0f, 0.0f }); // ¼Óµµ Á¤Áö
+            player->SetPosition(playerPos); // í”Œë ˆì´ì–´ ìœ„ì¹˜ ê°±ì‹ 
+            player->SetVelocity({ 0.0f, 0.0f, 0.0f }); // ì†ë„ ì •ì§€
             player->CalculateBoundingBox();
             playerBox = player->GetBoundingBox();
         }
