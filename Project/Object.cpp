@@ -285,7 +285,7 @@ void CMaterial::LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		_stprintf_s(pstrDebug, 256, _T("Texture Name: %d %c %s\n"), (pstrTextureName[0] == '@') ? nRepeatedTextures++ : nTextures++, (pstrTextureName[0] == '@') ? '@' : ' ', pwstrTextureName);
 		OutputDebugString(pstrDebug);
 #endif
-		// ìƒˆë¡œìš´ í…ìŠ¤ì²˜ì¸ ê²½ìš° DDS íŒŒì¼ì—ì„œ í…ìŠ¤ì²˜ ë¡œë“œ
+		// »õ·Î¿î ÅØ½ºÃ³ÀÎ °æ¿ì DDS ÆÄÀÏ¿¡¼­ ÅØ½ºÃ³ ·Îµå
 		if (!bDuplicated)
 		{
 			*ppTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
@@ -294,7 +294,7 @@ void CMaterial::LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 			CScene::CreateShaderResourceViews(pd3dDevice, *ppTexture, 0, nRootParameter);
 		}
-		// ì¤‘ë³µëœ í…ìŠ¤ì²˜ì¸ ê²½ìš° ë£¨íŠ¸ ì˜¤ë¸Œì íŠ¸ê¹Œì§€ ê±°ìŠ¬ëŸ¬ ì˜¬ë¼ê°€ ì´ë¯¸ ë¡œë“œëœ í…ìŠ¤ì²˜ë¥¼ ì°¾ì•„ì„œ ì¬ì‚¬ìš©
+		// Áßº¹µÈ ÅØ½ºÃ³ÀÎ °æ¿ì ·çÆ® ¿ÀºêÁ§Æ®±îÁö °Å½½·¯ ¿Ã¶ó°¡ ÀÌ¹Ì ·ÎµåµÈ ÅØ½ºÃ³¸¦ Ã£¾Æ¼­ Àç»ç¿ë
 		else
 		{
 			if (pParent)
@@ -523,7 +523,7 @@ CAnimationController::CAnimationController(ID3D12Device *pd3dDevice, ID3D12Graph
 	m_ppd3dcbSkinningBoneTransforms = new ID3D12Resource*[m_nSkinnedMeshes];
 	m_ppcbxmf4x4MappedSkinningBoneTransforms = new XMFLOAT4X4*[m_nSkinnedMeshes];
 
-	UINT ncbElementBytes = (((sizeof(XMFLOAT4X4) * SKINNED_ANIMATION_BONES) + 255) & ~255); //256ì˜ ë°°ìˆ˜
+	UINT ncbElementBytes = (((sizeof(XMFLOAT4X4) * SKINNED_ANIMATION_BONES) + 255) & ~255); //256ÀÇ ¹è¼ö
 	for (int i = 0; i < m_nSkinnedMeshes; i++)
 	{
 		m_ppd3dcbSkinningBoneTransforms[i] = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
@@ -914,7 +914,6 @@ void CGameObject::Move(XMFLOAT3 xmf3Offset)
 	m_xmf4x4ToParent._42 += xmf3Offset.y;
 	m_xmf4x4ToParent._43 += xmf3Offset.z;
 
-	CalculateBoundingBox();
 	UpdateTransform(NULL);
 }
 
@@ -994,48 +993,6 @@ void CGameObject::Rotate(XMFLOAT4 *pxmf4Quaternion)
 	m_xmf4x4ToParent = Matrix4x4::Multiply(mtxRotate, m_xmf4x4ToParent);
 
 	UpdateTransform(NULL);
-}
-
-void CGameObject::CalculateBoundingBox()
-{
-	std::vector<CGameObject*> nodesToProcess = { this };
-	bool isFirst = true;
-
-	while (!nodesToProcess.empty())
-	{
-		CGameObject* current = nodesToProcess.back();
-		nodesToProcess.pop_back();
-
-		if (current->m_pMesh)
-		{
-			BoundingBox localBox = current->m_pMesh->GetBoundingBox();
-			BoundingBox transformedBox;
-
-			localBox.Transform(transformedBox, XMLoadFloat4x4(&current->m_xmf4x4World));
-
-			if (isFirst)
-			{
-				m_BoundingBox = transformedBox;
-				isFirst = false;
-			}
-			else
-			{
-				BoundingBox::CreateMerged(m_BoundingBox, m_BoundingBox, transformedBox);
-			}
-		}
-
-		if (current->m_pChild)
-		{
-			CGameObject* child = current->m_pChild;
-			nodesToProcess.push_back(child);
-
-			while (child->m_pSibling)
-			{
-				child = child->m_pSibling;
-				nodesToProcess.push_back(child);
-			}
-		}
-	}
 }
 
 //#define _WITH_DEBUG_FRAME_HIERARCHY
@@ -1469,14 +1426,14 @@ CGameObject* CGameObject::Clone()
 {
 	CGameObject* pNewObject = new CGameObject(*this);
 
-	// ìì‹ ê°ì²´ ë³µì‚¬
+	// ÀÚ½Ä °´Ã¼ º¹»ç
 	if (m_pChild)
 	{
 		pNewObject->m_pChild = m_pChild->Clone();
 		pNewObject->m_pChild->m_pParent = pNewObject;
 	}
 
-	// í˜•ì œ ê°ì²´ ë³µì‚¬
+	// ÇüÁ¦ °´Ã¼ º¹»ç
 	if (m_pSibling)
 	{
 		pNewObject->m_pSibling = m_pSibling->Clone();
@@ -1593,12 +1550,11 @@ CSpider::~CSpider()
 {
 }
 
-
 void CSpider::Animate(float fTimeElapsed)
 {
 
 	XMFLOAT3 enemyPos = GetPosition();
-	XMFLOAT3 playerPos = pPlayer->GetPosition(); // í”Œë ˆì´ì–´ ìœ„ì¹˜ ë°›ì•„ì˜¤ê¸°
+	XMFLOAT3 playerPos = pPlayer->GetPosition(); // ÇÃ·¹ÀÌ¾î À§Ä¡ ¹Ş¾Æ¿À±â
 
 	XMFLOAT3 delta = Vector3::Subtract(playerPos, enemyPos);
 	float distance = Vector3::Length(delta);
@@ -1607,13 +1563,13 @@ void CSpider::Animate(float fTimeElapsed)
 	{
 		if (distance > 15.0f)
 		{
-			// ê±·ëŠ” ì• ë‹ˆë©”ì´ì…˜ í™œì„±í™”
+			// °È´Â ¾Ö´Ï¸ŞÀÌ¼Ç È°¼ºÈ­
 			m_pSkinnedAnimationController->SetTrackEnable(0, true); // walk
 			m_pSkinnedAnimationController->SetTrackEnable(1, false); // idle
 			m_pSkinnedAnimationController->SetTrackEnable(2, false); // attack
 			m_pSkinnedAnimationController->SetTrackSpeed(0, 5.f);
 
-			// ì´ë™ ì²˜ë¦¬
+			// ÀÌµ¿ Ã³¸®
 			XMFLOAT3 direction = Vector3::Normalize(delta);
 			XMFLOAT3 velocity = Vector3::ScalarProduct(direction, 2.5f * fTimeElapsed, false);
 			LookAt(playerPos, XMFLOAT3(0.0f, 1.0f, 0.0f));
@@ -1623,19 +1579,19 @@ void CSpider::Animate(float fTimeElapsed)
 		}
 		else
 		{
-			// ê³µê²© ì• ë‹ˆë©”ì´ì…˜
+			// °ø°İ ¾Ö´Ï¸ŞÀÌ¼Ç
 			m_pSkinnedAnimationController->SetTrackEnable(0, false);
 			m_pSkinnedAnimationController->SetTrackEnable(1, false);
 			m_pSkinnedAnimationController->SetTrackEnable(2, true);
 			m_pSkinnedAnimationController->SetTrackSpeed(2, 5.f);
 
-			// ë‹¨ìˆœíˆ ê³µê²©ë§Œ í•˜ê³  ì´ë™ì€ í•˜ì§€ ì•ŠìŒ
+			// ´Ü¼øÈ÷ °ø°İ¸¸ ÇÏ°í ÀÌµ¿Àº ÇÏÁö ¾ÊÀ½
 			LookAt(playerPos, XMFLOAT3(0.0f, 1.0f, 0.0f));
 		}
 	}
 	else
 	{
-		// ë²”ìœ„ ë²—ì–´ë‚˜ë©´ idle
+		// ¹üÀ§ ¹ş¾î³ª¸é idle
 		m_pSkinnedAnimationController->SetTrackEnable(0, false);
 		m_pSkinnedAnimationController->SetTrackEnable(1, true);
 		m_pSkinnedAnimationController->SetTrackEnable(2, false);

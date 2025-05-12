@@ -11,15 +11,6 @@
 #include "Camera.h"
 #include "Network.h"
 
-struct BoundingCylinder
-{
-	XMFLOAT3 Center;
-	float Radius;
-	float Height;
-
-	BoundingCylinder() : Radius(0.0f), Height(0.0f) {}
-};
-
 class CPlayer : public CGameObject
 {
 protected:
@@ -45,9 +36,6 @@ protected:
 
 	CCamera						*m_pCamera = NULL;
 
-	XMFLOAT3 m_lastPushDirection; // ������ �浹 ���� ����
-	BoundingCylinder m_BoundingCylinder;
-
 public:
 	bool	isSwing = false;
 	bool	isCrouch = false;
@@ -61,7 +49,6 @@ public:
 	XMFLOAT3 GetLookVector() { return(m_xmf3Look); }
 	XMFLOAT3 GetUpVector() { return(m_xmf3Up); }
 	XMFLOAT3 GetRightVector() { return(m_xmf3Right); }
-	XMFLOAT3 GetPushDirection() const { return m_lastPushDirection; }
 
 	void SetFriction(float fFriction) { m_fFriction = fFriction; }
 	void SetGravity(const XMFLOAT3& xmf3Gravity) { m_xmf3Gravity = xmf3Gravity; }
@@ -69,7 +56,6 @@ public:
 	void SetMaxVelocityY(float fMaxVelocity) { m_fMaxVelocityY = fMaxVelocity; }
 	void SetVelocity(const XMFLOAT3& xmf3Velocity) { m_xmf3Velocity = xmf3Velocity; }
 	void SetPosition(const XMFLOAT3& xmf3Position) { Move(XMFLOAT3(xmf3Position.x - m_xmf3Position.x, xmf3Position.y - m_xmf3Position.y, xmf3Position.z - m_xmf3Position.z), false); }
-	void SetPushDirection(const XMFLOAT3& direction) { m_lastPushDirection = direction; }
 
 	void SetScale(XMFLOAT3& xmf3Scale) { m_xmf3Scale = xmf3Scale; }
 
@@ -83,16 +69,10 @@ public:
 
 	virtual void Move(ULONG nDirection, float fDistance, bool bVelocity = false);
 	void Move(const XMFLOAT3& xmf3Shift, bool bVelocity = false);
-	void Move(float fx = 0.0f, float fyOffset = 0.0f, float fzOffset = 0.0f);
+	void Move(float fx= 0.0f, float fyOffset = 0.0f, float fzOffset = 0.0f);
 	void Rotate(float x, float y, float z);
 
 	virtual void Update(float fTimeElapsed);
-	virtual void CalculateBoundingBox() override;
-	void ConvertCylinderToAABB(const BoundingCylinder& cylinder, BoundingBox& outBox)
-	{
-		outBox.Center = cylinder.Center;
-		outBox.Extents = XMFLOAT3(cylinder.Radius, cylinder.Height * 0.5f, cylinder.Radius);
-	}
 
 	virtual void OnPlayerUpdateCallback(float fTimeElapsed) { }
 	void SetPlayerUpdatedContext(LPVOID pContext) { m_pPlayerUpdatedContext = pContext; }
@@ -139,7 +119,6 @@ public:
 	virtual void Move(ULONG nDirection, float fDistance, bool bVelocity = false);
 
 	virtual void Update(float fTimeElapsed);
-
 
 	bool isJump = false;
 

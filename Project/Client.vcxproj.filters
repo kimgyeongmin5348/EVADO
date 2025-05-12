@@ -16,9 +16,6 @@
     <Filter Include="Network">
       <UniqueIdentifier>{615a8c3d-ea84-4f46-813a-75b31cc0c5ba}</UniqueIdentifier>
     </Filter>
-    <Filter Include="소스 파일\Collision">
-      <UniqueIdentifier>{354ef4ff-7714-432e-9232-811d2a54cd9e}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">
@@ -82,12 +79,6 @@
     <ClCompile Include="OtherPlayer.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="CollisionManager.cpp">
-      <Filter>소스 파일\Collision</Filter>
-    </ClCompile>
-    <ClCompile Include="QuadTree.cpp">
-      <Filter>소스 파일\Collision</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -143,12 +134,6 @@
     </ClInclude>
     <ClInclude Include="OtherPlayer.h">
       <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="CollisionManager.h">
-      <Filter>소스 파일\Collision</Filter>
-    </ClInclude>
-    <ClInclude Include="QuadTree.h">
-      <Filter>소스 파일\Collision</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
