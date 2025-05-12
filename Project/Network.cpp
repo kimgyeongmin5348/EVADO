@@ -347,5 +347,4 @@ void send_position_to_server(const XMFLOAT3& position, const XMFLOAT3& look, con
     p.right = right;
     p.animState = animState;
     send_packet(&p);
-
 }

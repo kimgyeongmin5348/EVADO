@@ -9,6 +9,7 @@
 #include "Object_Items.h"
 #include "OtherPlayer.h"
 #include "Map.h"
+#include "CollisionManager.h"
 
 #define MAX_LIGHTS						16 
 
@@ -137,9 +138,18 @@ public:
 	ID3D12Resource						*m_pd3dcbLights = NULL;
 	LIGHTS								*m_pcbMappedLights = NULL;
 
+	CCollisionManager					m_CollisionManager;
+
 	//server
 	
 public:
+	void AddRemotePlayer(long long id, const XMFLOAT3& pos, ID3D12Device* device, ID3D12GraphicsCommandList* cmd, ID3D12RootSignature* root, void* context);
+	void RemoveRemotePlayer(long long id);
+	void UpdateRemotePlayer(long long id, const XMFLOAT3& pos);
+
+	void InitializeCollisionSystem();
+	void GenerateGameObjectsBoundingBox();
+  
 	void AddItem(long long id, ITEM_TYPE type, const XMFLOAT3& position);
 
 	void OnOtherClientConnedted()

@@ -81,6 +81,45 @@ void CScene::BuildDefaultLightsAndMaterials(bool toggle)
 	m_pLights[4].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.001f, 0.0001f);
 }
 
+void CScene::InitializeCollisionSystem()
+{
+	BoundingBox worldBounds(XMFLOAT3(-20.0f, -10.f, -66.0f), XMFLOAT3(150.0f, 100.0f, 170.0f));
+	m_CollisionManager.Build(worldBounds, 35, 4);
+
+	for (int i = 0; i < m_nGameObjects; ++i) {
+		m_CollisionManager.InsertObject(m_ppGameObjects[i]);
+	}
+
+	for (int i = 0; i < m_nHierarchicalGameObjects; ++i) {
+		m_CollisionManager.InsertObject(m_ppHierarchicalGameObjects[i]);
+	}
+
+	for (auto obj : m_pMap->m_vMapObjects) {
+		std::string strFrameName = obj->GetFrameName();
+		if (std::string::npos != strFrameName.find("floor") || std::string::npos != strFrameName.find("ceiling"))
+			continue;
+		m_CollisionManager.InsertObject(obj);
+	}
+
+	m_CollisionManager.PrintTree();
+}
+
+void CScene::GenerateGameObjectsBoundingBox()
+{
+	m_pPlayer->CalculateBoundingBox();
+
+	for (int i = 0; i < m_nGameObjects; ++i) {
+		m_ppGameObjects[i]->CalculateBoundingBox();
+	}
+	for (int i = 0; i < m_nHierarchicalGameObjects; ++i) {
+		m_ppHierarchicalGameObjects[i]->CalculateBoundingBox();
+	}
+
+	for (auto obj : m_pMap->m_vMapObjects) {
+		obj->CalculateBoundingBox();
+	}
+}
+
 void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
@@ -119,6 +158,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_ppHierarchicalGameObjects[1]->SetScale(3, 3, 3);
 	m_ppHierarchicalGameObjects[1]->Rotate(90, 0, 0);
 	m_ppHierarchicalGameObjects[1]->SetPosition(3, 2, 10);
+	m_ppHierarchicalGameObjects[1]->CalculateBoundingBox();
 	if (pFlashlightModel) delete pFlashlightModel;
 
 	CLoadedModelInfo* pShovelModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Shovel.bin", NULL);
@@ -126,12 +166,14 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_ppHierarchicalGameObjects[2]->SetScale(1, 1, 1);
 	m_ppHierarchicalGameObjects[2]->Rotate(0, 0, 90);
 	m_ppHierarchicalGameObjects[2]->SetPosition(3, 2, 12);
+	m_ppHierarchicalGameObjects[2]->CalculateBoundingBox();
 	if (pShovelModel) delete pShovelModel;
 
 	CLoadedModelInfo* pWhistleModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Whistle.bin", NULL);
 	m_ppHierarchicalGameObjects[3] = new Whistle(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pWhistleModel);
 	m_ppHierarchicalGameObjects[3]->SetScale(1, 1, 1);
 	m_ppHierarchicalGameObjects[3]->SetPosition(3, 2, 13);
+	m_ppHierarchicalGameObjects[3]->CalculateBoundingBox();
 	if (pWhistleModel) delete pWhistleModel;
 
 	m_nOtherPlayers = 1;
@@ -567,6 +609,8 @@ void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera
 	if (m_pSkyBox) m_pSkyBox->Render(pd3dCommandList, pCamera);
 	if (m_pTerrain) m_pTerrain->Render(pd3dCommandList, pCamera);
 	if (m_pMap) m_pMap->Render(pd3dCommandList, pCamera);
+
+	m_CollisionManager.Update(m_pPlayer);
 
 	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Render(pd3dCommandList, pCamera);
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);

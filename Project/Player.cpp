@@ -77,7 +77,6 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 
 void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
 {
-
 	if (bUpdateVelocity)
 	{
 		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, xmf3Shift);
@@ -87,7 +86,7 @@ void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
 		m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Shift);
 		m_pCamera->Move(xmf3Shift);
 	}
-	
+	CalculateBoundingBox();
 }
 
 void CPlayer::Rotate(float x, float y, float z)
@@ -173,7 +172,7 @@ void CPlayer::Update(float fTimeElapsed)
 	DWORD nCurrentCameraMode = m_pCamera->GetMode();
 	if (nCurrentCameraMode == THIRD_PERSON_CAMERA) { 
 		m_pCamera->Update(m_xmf3Position, fTimeElapsed); 
-		m_pCamera->SetLookAt(m_xmf3Position); // �÷��̾ ȸ�� �� ī�޶� ȸ��
+		m_pCamera->SetLookAt(m_xmf3Position); // 플레이어가 회전 시 카메라도 회전
 	}
 	if (m_pCameraUpdatedContext) OnCameraUpdateCallback(fTimeElapsed);
 	if (nCurrentCameraMode == THIRD_PERSON_CAMERA) m_pCamera->SetLookAt(m_xmf3Position);
@@ -183,6 +182,59 @@ void CPlayer::Update(float fTimeElapsed)
 	float fDeceleration = (m_fFriction * fTimeElapsed);
 	if (fDeceleration > fLength) fDeceleration = fLength;
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
+
+	CalculateBoundingBox();
+ }
+
+void CPlayer::CalculateBoundingBox()
+{
+	std::vector<CGameObject*> nodesToProcess = { this };
+	bool isFirst = true;
+	BoundingBox mergedBox;
+
+	while (!nodesToProcess.empty())
+	{
+		CGameObject* current = nodesToProcess.back();
+		nodesToProcess.pop_back();
+
+		if (current->m_pMesh)
+		{
+			BoundingBox localBox = current->m_pMesh->GetBoundingBox();
+			BoundingBox transformedBox;
+
+			localBox.Transform(transformedBox, XMLoadFloat4x4(&current->m_xmf4x4World));
+
+			if (isFirst)
+			{
+				mergedBox = transformedBox;
+				isFirst = false;
+			}
+			else
+			{
+				BoundingBox::CreateMerged(mergedBox, mergedBox, transformedBox);
+			}
+		}
+
+		if (current->m_pChild)
+		{
+			CGameObject* child = current->m_pChild;
+			nodesToProcess.push_back(child);
+
+			while (child->m_pSibling)
+			{
+				child = child->m_pSibling;
+				nodesToProcess.push_back(child);
+			}
+		}
+	}
+
+	float diameter = std::max(mergedBox.Extents.x, mergedBox.Extents.z) * 2.0f;
+	m_BoundingCylinder.Radius = diameter * 0.5f;
+	m_BoundingCylinder.Height = mergedBox.Extents.y * 2.0f;
+	m_BoundingCylinder.Center = mergedBox.Center;
+
+	// 3. 원통을 감싸는 AABB로 변환
+	ConvertCylinderToAABB(m_BoundingCylinder, m_BoundingBox);
 }
 
 CCamera *CPlayer::OnChangeCamera(DWORD nNewCameraMode, DWORD nCurrentCameraMode)
@@ -273,13 +325,13 @@ CTerrainPlayer::CTerrainPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandLi
 	SetChild(pPlayerModel->m_pModelRootObject, true);
 
 	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 7, pPlayerModel);
-	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0); // �⺻
-	m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1); // �ȱ�
-	m_pSkinnedAnimationController->SetTrackAnimationSet(2, 2); // �ٱ�
-	m_pSkinnedAnimationController->SetTrackAnimationSet(3, 3); // �ֵθ���
-	m_pSkinnedAnimationController->SetTrackAnimationSet(4, 4); // ����
-	m_pSkinnedAnimationController->SetTrackAnimationSet(5, 5); // ��ũ����
-	m_pSkinnedAnimationController->SetTrackAnimationSet(6, 6); // ��ũ���� �ȱ�
+	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0); // 기본
+	m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1); // 걷기
+	m_pSkinnedAnimationController->SetTrackAnimationSet(2, 2); // 뛰기
+	m_pSkinnedAnimationController->SetTrackAnimationSet(3, 3); // 휘두르기
+	m_pSkinnedAnimationController->SetTrackAnimationSet(4, 4); // 점프
+	m_pSkinnedAnimationController->SetTrackAnimationSet(5, 5); // 웅크리기
+	m_pSkinnedAnimationController->SetTrackAnimationSet(6, 6); // 웅크리고 걷기
 	m_pSkinnedAnimationController->SetTrackEnable(1, false); 
 	m_pSkinnedAnimationController->SetTrackEnable(2, false); 
 	m_pSkinnedAnimationController->SetTrackEnable(3, false); 
@@ -481,8 +533,8 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 			if (currentPos >= 1.5)
 			{
 				isJump = false;
-				m_pSkinnedAnimationController->SetTrackEnable(3, false); // ?�니메이???�났?�니�?�?
-				m_pSkinnedAnimationController->SetTrackPosition(3, 0.0f); // ?�음?????�행?????�게 초기??
+				m_pSkinnedAnimationController->SetTrackEnable(3, false); // ?硫????쇰源?爰?
+				m_pSkinnedAnimationController->SetTrackPosition(3, 0.0f); // ?ㅼ?????ㅽ?????寃 珥湲??
 			}
 
 		}
