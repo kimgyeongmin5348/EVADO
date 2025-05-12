@@ -81,6 +81,45 @@ void CScene::BuildDefaultLightsAndMaterials(bool toggle)
 	m_pLights[4].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.001f, 0.0001f);
 }
 
+void CScene::InitializeCollisionSystem()
+{
+	BoundingBox worldBounds(XMFLOAT3(-20.0f, -10.f, -66.0f), XMFLOAT3(150.0f, 100.0f, 170.0f));
+	m_CollisionManager.Build(worldBounds, 35, 4);
+
+	for (int i = 0; i < m_nGameObjects; ++i) {
+		m_CollisionManager.InsertObject(m_ppGameObjects[i]);
+	}
+
+	for (int i = 0; i < m_nHierarchicalGameObjects; ++i) {
+		m_CollisionManager.InsertObject(m_ppHierarchicalGameObjects[i]);
+	}
+
+	for (auto obj : m_pMap->m_vMapObjects) {
+		std::string strFrameName = obj->GetFrameName();
+		if (std::string::npos != strFrameName.find("floor") || std::string::npos != strFrameName.find("ceiling"))
+			continue;
+		m_CollisionManager.InsertObject(obj);
+	}
+
+	m_CollisionManager.PrintTree();
+}
+
+void CScene::GenerateGameObjectsBoundingBox()
+{
+	m_pPlayer->CalculateBoundingBox();
+
+	for (int i = 0; i < m_nGameObjects; ++i) {
+		m_ppGameObjects[i]->CalculateBoundingBox();
+	}
+	for (int i = 0; i < m_nHierarchicalGameObjects; ++i) {
+		m_ppHierarchicalGameObjects[i]->CalculateBoundingBox();
+	}
+
+	for (auto obj : m_pMap->m_vMapObjects) {
+		obj->CalculateBoundingBox();
+	}
+}
+
 void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
@@ -189,6 +228,9 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	pInventoryShader->SetTexture(pTexture);
 
 	m_ppShaders[1] = pInventoryShader;
+
+	InitializeCollisionSystem();
+	GenerateGameObjectsBoundingBox();
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }

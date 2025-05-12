@@ -87,7 +87,7 @@ void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
 		m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Shift);
 		m_pCamera->Move(xmf3Shift);
 	}
-	
+	CalculateBoundingBox();
 }
 
 void CPlayer::Rotate(float x, float y, float z)
@@ -147,6 +147,57 @@ void CPlayer::Rotate(float x, float y, float z)
 	m_xmf3Look = Vector3::Normalize(m_xmf3Look);
 	m_xmf3Right = Vector3::CrossProduct(m_xmf3Up, m_xmf3Look, true);
 	m_xmf3Up = Vector3::CrossProduct(m_xmf3Look, m_xmf3Right, true);
+}
+
+void CPlayer::CalculateBoundingBox()
+{
+	std::vector<CGameObject*> nodesToProcess = { this };
+	bool isFirst = true;
+	BoundingBox mergedBox;
+
+	while (!nodesToProcess.empty())
+	{
+		CGameObject* current = nodesToProcess.back();
+		nodesToProcess.pop_back();
+
+		if (current->m_pMesh)
+		{
+			BoundingBox localBox = current->m_pMesh->GetBoundingBox();
+			BoundingBox transformedBox;
+
+			localBox.Transform(transformedBox, XMLoadFloat4x4(&current->m_xmf4x4World));
+
+			if (isFirst)
+			{
+				mergedBox = transformedBox;
+				isFirst = false;
+			}
+			else
+			{
+				BoundingBox::CreateMerged(mergedBox, mergedBox, transformedBox);
+			}
+		}
+
+		if (current->m_pChild)
+		{
+			CGameObject* child = current->m_pChild;
+			nodesToProcess.push_back(child);
+
+			while (child->m_pSibling)
+			{
+				child = child->m_pSibling;
+				nodesToProcess.push_back(child);
+			}
+		}
+	}
+
+	float diameter = std::max(mergedBox.Extents.x, mergedBox.Extents.z) * 2.0f;
+	m_BoundingCylinder.Radius = diameter * 0.5f;
+	m_BoundingCylinder.Height = mergedBox.Extents.y * 2.0f;
+	m_BoundingCylinder.Center = mergedBox.Center;
+
+	// 3. 원통을 감싸는 AABB로 변환
+	ConvertCylinderToAABB(m_BoundingCylinder, m_BoundingBox);
 }
 
 void CPlayer::Update(float fTimeElapsed)

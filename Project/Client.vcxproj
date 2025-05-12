@@ -142,6 +142,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="CollisionManager.cpp" />
     <ClCompile Include="DDSTextureLoader12.cpp" />
     <ClCompile Include="GameFramework.cpp" />
     <ClCompile Include="Client.cpp" />
@@ -152,6 +153,7 @@
     <ClCompile Include="Object_Items.cpp" />
     <ClCompile Include="OtherPlayer.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="QuadTree.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="stdafx.cpp" />
@@ -160,6 +162,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="CollisionManager.h" />
     <ClInclude Include="Common.h" />
     <ClInclude Include="d3dx12.h" />
     <ClInclude Include="DDSTextureLoader12.h" />
@@ -172,6 +175,7 @@
     <ClInclude Include="Object_Items.h" />
     <ClInclude Include="OtherPlayer.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="QuadTree.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="stdafx.h" />
