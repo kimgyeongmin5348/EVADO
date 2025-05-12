@@ -132,7 +132,7 @@ void InitializeNetwork()
     // 5. 비동기 연결 설정
     sockaddr_in serverAddr{};
     serverAddr.sin_family = AF_INET;
-    inet_pton(AF_INET, "127.0.0.1", &serverAddr.sin_addr);
+    inet_pton(AF_INET, "192.168.78.208", &serverAddr.sin_addr); // 경민노트북
     serverAddr.sin_port = htons(SERVER_PORT);
 
     // 6. 비동기 연결 시작
