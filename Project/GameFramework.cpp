@@ -474,6 +474,8 @@ void CGameFramework::BuildObjects()
 	m_nScenes = 2; // 총 Scene 개수
 	m_ppScenes = new CScene * [m_nScenes];
 
+	bool b = false;
+
 	if (m_nCurrentScene == 0) {
 		m_ppScenes[0] = new CStartScene();
 		m_ppScenes[0]->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
@@ -482,11 +484,11 @@ void CGameFramework::BuildObjects()
 	}
 	else if (m_nCurrentScene == 1) {
 		m_ppScenes[1] = new CScene();
+		m_ppScenes[1]->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
+
 		CTerrainPlayer* pPlayer = new CTerrainPlayer(m_pd3dDevice, m_pd3dCommandList, m_ppScenes[1]->GetGraphicsRootSignature(), m_ppScenes[1]->m_pTerrain);
 		m_ppScenes[1]->SetPlayer(pPlayer);
 		m_pPlayer->SetPosition(XMFLOAT3(0,0,0));
-
-		m_ppScenes[1]->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
 
 		m_ppScenes[1]->GenerateGameObjectsBoundingBox();
 		m_ppScenes[1]->InitializeCollisionSystem();

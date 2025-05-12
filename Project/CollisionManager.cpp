@@ -80,8 +80,8 @@ void CCollisionManager::HandleCollision(CPlayer* player, CGameObject* obj)
 {
     std::string ObjectFrameName = obj->GetFrameName();
 
-    //if (frameCounter % 60 == 0)
-    //    cout << "ObjectFrameName: " << ObjectFrameName << endl;
+    if (frameCounter % 60 == 0)
+        cout << "ObjectFrameName: " << ObjectFrameName << endl;
 
     if (std::string::npos != ObjectFrameName.find("Map_wall_window")
         || std::string::npos != ObjectFrameName.find("Map_wall_plain")

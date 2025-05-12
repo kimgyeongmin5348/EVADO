@@ -106,7 +106,7 @@ void CScene::InitializeCollisionSystem()
 
 void CScene::GenerateGameObjectsBoundingBox()
 {
-	m_pPlayer->CalculateBoundingBox();
+	//m_pPlayer->CalculateBoundingBox();
 
 	for (int i = 0; i < m_nGameObjects; ++i) {
 		m_ppGameObjects[i]->CalculateBoundingBox();
