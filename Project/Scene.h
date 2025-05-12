@@ -154,6 +154,10 @@ public:
 	{
 		m_ppOtherPlayers[clinetnum]->SetPosition(position);
 	}
+	void UpdateOtherPlayerAnimation(int clinetnum, int animNum)
+	{
+		m_ppOtherPlayers[clinetnum]->animation = animNum;
+	}
 };
 
 class CMainScene : public CScene

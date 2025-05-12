@@ -293,4 +293,36 @@ void CThirdPersonCamera::SetLookAt(XMFLOAT3& xmf3LookAt)
 	m_xmf3Right = XMFLOAT3(mtxLookAt._11, mtxLookAt._21, mtxLookAt._31);
 	m_xmf3Up = XMFLOAT3(mtxLookAt._12, mtxLookAt._22, mtxLookAt._32);
 	m_xmf3Look = XMFLOAT3(mtxLookAt._13, mtxLookAt._23, mtxLookAt._33);
+
+	//m_xmf3Look = Vector3::Normalize(Vector3::Subtract(xmf3LookAt, m_xmf3Position));
+	//m_xmf3Right = Vector3::Normalize(Vector3::CrossProduct(XMFLOAT3(0.0f, 1.0f, 0.0f), m_xmf3Look));
+	//m_xmf3Up = Vector3::Normalize(Vector3::CrossProduct(m_xmf3Look, m_xmf3Right));
 }
+
+void CThirdPersonCamera::Rotate(float fPitch, float fYaw, float fRoll)
+{
+	if (!m_pPlayer) return;
+
+	if (fPitch != 0.0f)
+	{
+		XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Right), XMConvertToRadians(fPitch));
+		m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
+		m_xmf3Up = Vector3::TransformNormal(m_xmf3Up, xmmtxRotate);
+	}
+
+	if (fYaw != 0.0f)
+	{
+		XMFLOAT3 xmf3Up = m_pPlayer->GetUpVector();
+		XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&xmf3Up), XMConvertToRadians(fYaw));
+		m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
+		m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
+	}
+
+	if (fRoll != 0.0f)
+	{
+		XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Look), XMConvertToRadians(fRoll));
+		m_xmf3Up = Vector3::TransformNormal(m_xmf3Up, xmmtxRotate);
+		m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
+	}
+}
+

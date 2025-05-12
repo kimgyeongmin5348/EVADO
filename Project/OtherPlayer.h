@@ -11,10 +11,11 @@ public:
 	virtual ~OtherPlayer();
 
 public:
-	virtual void Update(float fTimeElapsed);
+	virtual void Animate(int animation, float fTimeElapsed);
 
 	bool isJump = false;
 
+	int animation = 0;
 
 	XMFLOAT3 m_xmf3Position;
 	XMFLOAT3 m_xmf3Look;
