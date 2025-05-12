@@ -285,7 +285,7 @@ void CMaterial::LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		_stprintf_s(pstrDebug, 256, _T("Texture Name: %d %c %s\n"), (pstrTextureName[0] == '@') ? nRepeatedTextures++ : nTextures++, (pstrTextureName[0] == '@') ? '@' : ' ', pwstrTextureName);
 		OutputDebugString(pstrDebug);
 #endif
-		// »õ·Î¿î ÅØ½ºÃ³ÀÎ °æ¿ì DDS ÆÄÀÏ¿¡¼­ ÅØ½ºÃ³ ·Îµå
+		// ìƒˆë¡œìš´ í…ìŠ¤ì²˜ì¸ ê²½ìš° DDS íŒŒì¼ì—ì„œ í…ìŠ¤ì²˜ ë¡œë“œ
 		if (!bDuplicated)
 		{
 			*ppTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
@@ -294,7 +294,7 @@ void CMaterial::LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 			CScene::CreateShaderResourceViews(pd3dDevice, *ppTexture, 0, nRootParameter);
 		}
-		// Áßº¹µÈ ÅØ½ºÃ³ÀÎ °æ¿ì ·çÆ® ¿ÀºêÁ§Æ®±îÁö °Å½½·¯ ¿Ã¶ó°¡ ÀÌ¹Ì ·ÎµåµÈ ÅØ½ºÃ³¸¦ Ã£¾Æ¼­ Àç»ç¿ë
+		// ì¤‘ë³µëœ í…ìŠ¤ì²˜ì¸ ê²½ìš° ë£¨íŠ¸ ì˜¤ë¸Œì íŠ¸ê¹Œì§€ ê±°ìŠ¬ëŸ¬ ì˜¬ë¼ê°€ ì´ë¯¸ ë¡œë“œëœ í…ìŠ¤ì²˜ë¥¼ ì°¾ì•„ì„œ ì¬ì‚¬ìš©
 		else
 		{
 			if (pParent)
@@ -523,7 +523,7 @@ CAnimationController::CAnimationController(ID3D12Device *pd3dDevice, ID3D12Graph
 	m_ppd3dcbSkinningBoneTransforms = new ID3D12Resource*[m_nSkinnedMeshes];
 	m_ppcbxmf4x4MappedSkinningBoneTransforms = new XMFLOAT4X4*[m_nSkinnedMeshes];
 
-	UINT ncbElementBytes = (((sizeof(XMFLOAT4X4) * SKINNED_ANIMATION_BONES) + 255) & ~255); //256ÀÇ ¹è¼ö
+	UINT ncbElementBytes = (((sizeof(XMFLOAT4X4) * SKINNED_ANIMATION_BONES) + 255) & ~255); //256ì˜ ë°°ìˆ˜
 	for (int i = 0; i < m_nSkinnedMeshes; i++)
 	{
 		m_ppd3dcbSkinningBoneTransforms[i] = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
@@ -1469,14 +1469,14 @@ CGameObject* CGameObject::Clone()
 {
 	CGameObject* pNewObject = new CGameObject(*this);
 
-	// ÀÚ½Ä °´Ã¼ º¹»ç
+	// ìì‹ ê°ì²´ ë³µì‚¬
 	if (m_pChild)
 	{
 		pNewObject->m_pChild = m_pChild->Clone();
 		pNewObject->m_pChild->m_pParent = pNewObject;
 	}
 
-	// ÇüÁ¦ °´Ã¼ º¹»ç
+	// í˜•ì œ ê°ì²´ ë³µì‚¬
 	if (m_pSibling)
 	{
 		pNewObject->m_pSibling = m_pSibling->Clone();
@@ -1527,23 +1527,6 @@ CHeightMapTerrain::~CHeightMapTerrain(void)
 {
 	if (m_pHeightMapImage) delete m_pHeightMapImage;
 }
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-Spider::Spider(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, int nAnimationTracks)
-{
-	CLoadedModelInfo* pSpiderModel = pModel;
-	if (!pSpiderModel) pSpiderModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Monster_spider.bin", NULL);
-
-	SetChild(pSpiderModel->m_pModelRootObject, true);
-	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, nAnimationTracks, pSpiderModel);
-}
-
-Spider::~Spider()
-{
-}
-
-
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 
@@ -1615,7 +1598,7 @@ void CSpider::Animate(float fTimeElapsed)
 {
 
 	XMFLOAT3 enemyPos = GetPosition();
-	XMFLOAT3 playerPos = pPlayer->GetPosition(); // ÇÃ·¹ÀÌ¾î À§Ä¡ ¹Ş¾Æ¿À±â
+	XMFLOAT3 playerPos = pPlayer->GetPosition(); // í”Œë ˆì´ì–´ ìœ„ì¹˜ ë°›ì•„ì˜¤ê¸°
 
 	XMFLOAT3 delta = Vector3::Subtract(playerPos, enemyPos);
 	float distance = Vector3::Length(delta);
@@ -1624,13 +1607,13 @@ void CSpider::Animate(float fTimeElapsed)
 	{
 		if (distance > 15.0f)
 		{
-			// °È´Â ¾Ö´Ï¸ŞÀÌ¼Ç È°¼ºÈ­
+			// ê±·ëŠ” ì• ë‹ˆë©”ì´ì…˜ í™œì„±í™”
 			m_pSkinnedAnimationController->SetTrackEnable(0, true); // walk
 			m_pSkinnedAnimationController->SetTrackEnable(1, false); // idle
 			m_pSkinnedAnimationController->SetTrackEnable(2, false); // attack
 			m_pSkinnedAnimationController->SetTrackSpeed(0, 5.f);
 
-			// ÀÌµ¿ Ã³¸®
+			// ì´ë™ ì²˜ë¦¬
 			XMFLOAT3 direction = Vector3::Normalize(delta);
 			XMFLOAT3 velocity = Vector3::ScalarProduct(direction, 2.5f * fTimeElapsed, false);
 			LookAt(playerPos, XMFLOAT3(0.0f, 1.0f, 0.0f));
@@ -1640,19 +1623,19 @@ void CSpider::Animate(float fTimeElapsed)
 		}
 		else
 		{
-			// °ø°İ ¾Ö´Ï¸ŞÀÌ¼Ç
+			// ê³µê²© ì• ë‹ˆë©”ì´ì…˜
 			m_pSkinnedAnimationController->SetTrackEnable(0, false);
 			m_pSkinnedAnimationController->SetTrackEnable(1, false);
 			m_pSkinnedAnimationController->SetTrackEnable(2, true);
 			m_pSkinnedAnimationController->SetTrackSpeed(2, 5.f);
 
-			// ´Ü¼øÈ÷ °ø°İ¸¸ ÇÏ°í ÀÌµ¿Àº ÇÏÁö ¾ÊÀ½
+			// ë‹¨ìˆœíˆ ê³µê²©ë§Œ í•˜ê³  ì´ë™ì€ í•˜ì§€ ì•ŠìŒ
 			LookAt(playerPos, XMFLOAT3(0.0f, 1.0f, 0.0f));
 		}
 	}
 	else
 	{
-		// ¹üÀ§ ¹ş¾î³ª¸é idle
+		// ë²”ìœ„ ë²—ì–´ë‚˜ë©´ idle
 		m_pSkinnedAnimationController->SetTrackEnable(0, false);
 		m_pSkinnedAnimationController->SetTrackEnable(1, true);
 		m_pSkinnedAnimationController->SetTrackEnable(2, false);

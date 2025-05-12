@@ -21,17 +21,26 @@ OtherPlayer::OtherPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
-	if (pPlayerModel) delete pPlayerModel;
+	//if (pPlayerModel) delete pPlayerModel;
 }
 
 OtherPlayer::~OtherPlayer()
 {
 }
 
+//void OtherPlayer::SetPosition(const XMFLOAT3& position) {
+//	m_xmf3Position = position;
+//	UpdateTransform();
+//}
+
 void OtherPlayer::Update(float fTimeElapsed)
 {
 	// 위치 및 회전 업데이트
-
+	//XMMATRIX xmTranslate = XMMatrixTranslation(
+	//	m_xmf3Position.x,
+	//	m_xmf3Position.y,
+	//	m_xmf3Position.z
+	//);
 
 	// 애니메이션
 }

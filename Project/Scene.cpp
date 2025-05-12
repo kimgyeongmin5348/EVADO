@@ -1,7 +1,6 @@
 //-----------------------------------------------------------------------------
 // File: CScene.cpp
 //-----------------------------------------------------------------------------
-
 #include "stdafx.h"
 #include "Scene.h"
 
@@ -17,19 +16,16 @@ D3D12_GPU_DESCRIPTOR_HANDLE	CScene::m_d3dCbvGPUDescriptorNextHandle;
 D3D12_CPU_DESCRIPTOR_HANDLE	CScene::m_d3dSrvCPUDescriptorNextHandle;
 D3D12_GPU_DESCRIPTOR_HANDLE	CScene::m_d3dSrvGPUDescriptorNextHandle;
 
+
 CScene::CScene()
 {
-	InitializeCriticalSection(&m_csRemotePlayers);
 }
 
 CScene::~CScene()
 {
-	DeleteCriticalSection(&m_csRemotePlayers);
-	// m_remotePlayers ∏ﬁ∏∏Æ «ÿ¡¶ √ﬂ∞°
-	for (auto& [id, pPlayer] : m_remotePlayers) delete pPlayer;
 }
 
-void CScene::BuildDefaultLightsAndMaterials()
+void CScene::BuildDefaultLightsAndMaterials(bool toggle)
 {
 	m_nLights = 5;
 	m_pLights = new LIGHT[m_nLights];
@@ -37,7 +33,7 @@ void CScene::BuildDefaultLightsAndMaterials()
 
 	m_xmf4GlobalAmbient = XMFLOAT4(0.15f, 0.15f, 0.15f, 1.0f);
 
-	m_pLights[0].m_bEnable = true;
+	m_pLights[0].m_bEnable = toggle;
 	m_pLights[0].m_nType = POINT_LIGHT;
 	m_pLights[0].m_fRange = 300.0f;
 	m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
@@ -45,7 +41,7 @@ void CScene::BuildDefaultLightsAndMaterials()
 	m_pLights[0].m_xmf4Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 0.0f);
 	m_pLights[0].m_xmf3Position = XMFLOAT3(230.0f, 330.0f, 480.0f);
 	m_pLights[0].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.001f, 0.0001f);
-	m_pLights[1].m_bEnable = true;
+	m_pLights[1].m_bEnable = toggle;
 	m_pLights[1].m_nType = SPOT_LIGHT;
 	m_pLights[1].m_fRange = 300.0f;
 	m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
@@ -57,13 +53,13 @@ void CScene::BuildDefaultLightsAndMaterials()
 	m_pLights[1].m_fFalloff = 8.0f;
 	m_pLights[1].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
 	m_pLights[1].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
-	m_pLights[2].m_bEnable = true;
+	m_pLights[2].m_bEnable = toggle;
 	m_pLights[2].m_nType = DIRECTIONAL_LIGHT;
 	m_pLights[2].m_xmf4Ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
 	m_pLights[2].m_xmf4Diffuse = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
 	m_pLights[2].m_xmf4Specular = XMFLOAT4(0.4f, 0.4f, 0.4f, 0.0f);
 	m_pLights[2].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	m_pLights[3].m_bEnable = true;
+	m_pLights[3].m_bEnable = toggle;
 	m_pLights[3].m_nType = SPOT_LIGHT;
 	m_pLights[3].m_fRange = 600.0f;
 	m_pLights[3].m_xmf4Ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
@@ -75,7 +71,7 @@ void CScene::BuildDefaultLightsAndMaterials()
 	m_pLights[3].m_fFalloff = 8.0f;
 	m_pLights[3].m_fPhi = (float)cos(XMConvertToRadians(90.0f));
 	m_pLights[3].m_fTheta = (float)cos(XMConvertToRadians(30.0f));
-	m_pLights[4].m_bEnable = true;
+	m_pLights[4].m_bEnable = toggle;
 	m_pLights[4].m_nType = POINT_LIGHT;
 	m_pLights[4].m_fRange = 200.0f;
 	m_pLights[4].m_xmf4Ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
@@ -132,7 +128,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature); 
 
-	BuildDefaultLightsAndMaterials();
+	BuildDefaultLightsAndMaterials(false);
 
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
@@ -153,13 +149,14 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_ppHierarchicalGameObjects[0]->m_pSkinnedAnimationController->SetTrackEnable(1, false);
 	m_ppHierarchicalGameObjects[0]->m_pSkinnedAnimationController->SetTrackEnable(2, false);
 	m_ppHierarchicalGameObjects[0]->SetPosition(3, 0, 30);
-	m_ppHierarchicalGameObjects[0]->Rotate(0, 180, 0);
+	m_ppHierarchicalGameObjects[0]->Rotate(0, 0, 0);
 
 	if (pSpiderModel) delete pSpiderModel;
 
 	CLoadedModelInfo* pFlashlightModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Flashlightgold.bin", NULL);
 	m_ppHierarchicalGameObjects[1] = new FlashLight(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFlashlightModel);
 	m_ppHierarchicalGameObjects[1]->SetScale(3, 3, 3);
+	m_ppHierarchicalGameObjects[1]->Rotate(90, 0, 0);
 	m_ppHierarchicalGameObjects[1]->SetPosition(3, 2, 10);
 	m_ppHierarchicalGameObjects[1]->CalculateBoundingBox();
 	if (pFlashlightModel) delete pFlashlightModel;
@@ -167,7 +164,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	CLoadedModelInfo* pShovelModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Shovel.bin", NULL);
 	m_ppHierarchicalGameObjects[2] = new Shovel(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShovelModel);
 	m_ppHierarchicalGameObjects[2]->SetScale(1, 1, 1);
-	m_ppHierarchicalGameObjects[2]->Rotate(-90, 0, 0);
+	m_ppHierarchicalGameObjects[2]->Rotate(0, 0, 90);
 	m_ppHierarchicalGameObjects[2]->SetPosition(3, 2, 12);
 	m_ppHierarchicalGameObjects[2]->CalculateBoundingBox();
 	if (pShovelModel) delete pShovelModel;
@@ -179,36 +176,61 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_ppHierarchicalGameObjects[3]->CalculateBoundingBox();
 	if (pWhistleModel) delete pWhistleModel;
 
-	// OtherPlayer
-	m_nGameObjects = 1;
-	m_ppGameObjects = new CGameObject * [m_nGameObjects];
-
+	m_nOtherPlayers = 1;
+	m_ppOtherPlayers = new OtherPlayer * [m_nOtherPlayers];
 	CLoadedModelInfo* pOtherPlayerModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Player.bin", NULL);
-	m_ppGameObjects[0] = new OtherPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pOtherPlayerModel);
-	//º≠πˆø°º≠ ¡§∫∏ πﬁæ∆º≠ æ˜µ•¿Ã∆Æ « ø‰ -> æ˜µ•¿Ã∆Æ«‘ºˆ∑Œ
-	m_ppGameObjects[0]->SetPosition(3, 0, 22);
-	//if (pOtherPlayerModel) delete pOtherPlayerModel;
+	m_ppOtherPlayers[0] = new OtherPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pOtherPlayerModel);
+	m_ppOtherPlayers[0]->SetPosition(-1000, -1000, -1000);
+	if (pOtherPlayerModel) delete pOtherPlayerModel;
+	//// OtherPlayer
+	//m_nGameObjects = 1;
+	//m_ppGameObjects = new CGameObject * [m_nGameObjects];
 
-	// ¿Œ∫•≈‰∏Æ UI
-	m_nShaders = 1;
+	//CLoadedModelInfo* pOtherPlayerModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Player.bin", NULL);
+	//m_ppGameObjects[0] = new OtherPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pOtherPlayerModel);
+	////ÏÑúÎ≤ÑÏóêÏÑú Ï†ïÎ≥¥ Î∞õÏïÑÏÑú ÏóÖÎç∞Ïù¥Ìä∏ ÌïÑÏöî -> ÏóÖÎç∞Ïù¥Ìä∏Ìï®ÏàòÎ°ú
+	//m_ppGameObjects[0]->SetPosition(0, 0, 0);
+	////if (pOtherPlayerModel) delete pOtherPlayerModel;
+
+	// Ïù∏Î≤§ÌÜ†Î¶¨ UI
+	m_nShaders = 2;
 	m_ppShaders = new CShader * [m_nShaders];
 
-	CTextureToScreenShader* pTextureToScreenShader = new CTextureToScreenShader(1);
-	pTextureToScreenShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	CTextureToScreenShader* pTextureItemShader = new CTextureToScreenShader(3);
+	pTextureItemShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+
+	CTexture* pTextureItem = new CTexture(3, RESOURCE_TEXTURE2D, 0, 1);
+	pTextureItem->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/FlashLight_bg_ui.dds", RESOURCE_TEXTURE2D, 0);
+	pTextureItem->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Shovel_bg_ui.dds", RESOURCE_TEXTURE2D, 1);
+	pTextureItem->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Whistle_bg_ui.dds", RESOURCE_TEXTURE2D, 2);
+
+	CreateShaderResourceViews(pd3dDevice, pTextureItem, 0, 15);
+
+	CScreenRectMeshTextured* pMesh = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, -0.5f + 0.02f, 0.225f, -0.55f, 0.45f);
+	pTextureItemShader->SetMesh(0, pMesh);
+	pMesh = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, -0.25f + 0.02f, 0.225f, -0.55f, 0.45f);
+	pTextureItemShader->SetMesh(1, pMesh);
+	pMesh = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, 0.0f + 0.02f, 0.225f, -0.55f, 0.45f);
+	pTextureItemShader->SetMesh(2, pMesh);
+
+	pTextureItemShader->SetTexture(pTextureItem);
+
+	m_ppShaders[0] = pTextureItemShader;
+
+	CTextureToScreenShader* pInventoryShader = new CTextureToScreenShader(1);
+	pInventoryShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
 	CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
 	pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Inventory.dds", RESOURCE_TEXTURE2D, 0);
-	////pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/FlashLight.dds", RESOURCE_TEXTURE2D, 1);
-	////pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Shovel.dds", RESOURCE_TEXTURE2D, 2);
-	////pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Whistle.dds", RESOURCE_TEXTURE2D, 3);
 
 	CreateShaderResourceViews(pd3dDevice, pTexture, 0, 15);
 
-	CScreenRectMeshTextured* pMesh = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, -0.5f, 1.0f, -0.5f, 0.5f);
-	pTextureToScreenShader->SetMesh(0, pMesh);
-	pTextureToScreenShader->SetTexture(pTexture);
+	CScreenRectMeshTextured* pMesh1 = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, -0.5f, 1.0f, -0.5f, 0.5f);
+	pInventoryShader->SetMesh(0, pMesh1);
 
-	m_ppShaders[0] = pTextureToScreenShader;
+	pInventoryShader->SetTexture(pTexture);
+
+	m_ppShaders[1] = pInventoryShader;
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
@@ -453,7 +475,7 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 
 void CScene::CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
 {
-	UINT ncbElementBytes = ((sizeof(LIGHTS) + 255) & ~255); //256¿« πËºˆ
+	UINT ncbElementBytes = ((sizeof(LIGHTS) + 255) & ~255); //256Ïùò Î∞∞Ïàò
 	m_pd3dcbLights = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 
 	m_pd3dcbLights->Map(0, NULL, (void **)&m_pcbMappedLights);
@@ -561,31 +583,14 @@ bool CScene::ProcessInput(UCHAR *pKeysBuffer)
 
 void CScene::AnimateObjects(float fTimeElapsed)
 {
-	m_fElapsedTime = fTimeElapsed;
-
 	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Animate(fTimeElapsed);
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);
 
 	if (m_pLights)
 	{
 		m_pLights[1].m_xmf3Position = m_pPlayer->GetPosition();
-		m_pLights[1].m_xmf3Position.y += 2.0f;
 		m_pLights[1].m_xmf3Direction = m_pPlayer->GetLookVector();
 	}
-
-/*
-	static float fAngle = 0.0f;
-	fAngle += 1.50f;
-//	XMFLOAT3 xmf3Position = XMFLOAT3(50.0f, 0.0f, 0.0f);
-	XMFLOAT4X4 xmf4x4Rotate = Matrix4x4::Rotate(0.0f, -fAngle, 0.0f);
-	XMFLOAT3 xmf3Position = Vector3::TransformCoord(XMFLOAT3(65.0f, 0.0f, 0.0f), xmf4x4Rotate);
-//	m_ppHierarchicalGameObjects[11]->m_xmf4x4ToParent._41 = m_xmf3RotatePosition.x + xmf3Position.x;
-//	m_ppHierarchicalGameObjects[11]->m_xmf4x4ToParent._42 = m_xmf3RotatePosition.y + xmf3Position.y;
-//	m_ppHierarchicalGameObjects[11]->m_xmf4x4ToParent._43 = m_xmf3RotatePosition.z + xmf3Position.z;
-
-	m_ppHierarchicalGameObjects[11]->m_xmf4x4ToParent = Matrix4x4::AffineTransformation(XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, -fAngle, 0.0f), Vector3::Add(m_xmf3RotatePosition, xmf3Position));
-	m_ppHierarchicalGameObjects[11]->Rotate(0.0f, -1.5f, 0.0f);
-//**/
 }
 
 void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera)
@@ -609,7 +614,7 @@ void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera
 
 	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Render(pd3dCommandList, pCamera);
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
-
+  
 	for (int i = 0; i < m_nHierarchicalGameObjects; i++)
 	{
 		if (m_ppHierarchicalGameObjects[i])
@@ -619,7 +624,54 @@ void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera
 			m_ppHierarchicalGameObjects[i]->Render(pd3dCommandList, pCamera);
 		}
 	}
+  
+	for (int i = 0; i < m_nOtherPlayers; ++i) 
+	{
+		//if (m_ppOtherPlayers[i]->isConnedted)
+		m_ppOtherPlayers[i]->Render(pd3dCommandList, pCamera);
+	}
+
+
 }
+
+// ÏïÑÏù¥ÌÖú ÏÉùÏÑ± server
+void CScene::AddItem(long long id, ITEM_TYPE type, const XMFLOAT3& position) {
+	CLoadedModelInfo* pModel = nullptr;
+	Item* pNewItem = nullptr;
+
+	switch (type)
+	{
+	case ITEM_TYPE_SHOVEL:
+		pModel = CGameObject::LoadGeometryAndAnimationFromFile(g_pd3dDevice, g_pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Shovel.bin", NULL);
+		pNewItem = new Shovel(g_pd3dDevice, g_pd3dCommandList, m_pd3dGraphicsRootSignature, pModel);
+		break;
+	case ITEM_TYPE_HANDMAP:
+		pModel = CGameObject::LoadGeometryAndAnimationFromFile(g_pd3dDevice, g_pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Flashlight.bin", NULL);
+		pNewItem = new FlashLight(g_pd3dDevice, g_pd3dCommandList, m_pd3dGraphicsRootSignature, pModel);
+		break;
+	case ITEM_TYPE_FLASHLIGHT:
+		pModel = CGameObject::LoadGeometryAndAnimationFromFile(g_pd3dDevice, g_pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Flashlight.bin", NULL);
+		pNewItem = new FlashLight(g_pd3dDevice, g_pd3dCommandList, m_pd3dGraphicsRootSignature, pModel);
+		break;
+
+	case ITEM_TYPE_WHISTLE:
+		pModel = CGameObject::LoadGeometryAndAnimationFromFile(g_pd3dDevice, g_pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Whistle.bin", NULL);
+		pNewItem = new Whistle(g_pd3dDevice, g_pd3dCommandList, m_pd3dGraphicsRootSignature, pModel);
+		break;
+	default:
+		std::cerr << "[Error] Unknown item type: " << static_cast<int>(type) << std::endl;
+		return;
+	}
+	if (pModel && pNewItem) {
+		pNewItem->SetPosition(position);
+		pNewItem->SetScale(1.0f, 1.0f, 1.0f); // Í∏∞Î≥∏ Ïä§ÏºÄÏùº ÏÑ§Ï†ï
+
+		std::lock_guard<std::mutex> lock(g_item_mutex);
+		g_items[id] = pNewItem;
+		delete pModel; // Î™®Îç∏ Îç∞Ïù¥ÌÑ∞Îäî Î≥µÏ†úÎêòÏóàÏúºÎØÄÎ°ú ÏÇ≠Ï†ú
+	}
+}
+
 
 void CStartScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
@@ -646,6 +698,7 @@ void CStartScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	pTextureToScreenShader->SetTexture(pTexture);
 
 	m_ppShaders[0] = pTextureToScreenShader;
+
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
@@ -678,11 +731,11 @@ void CStartScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
 
-	EnterCriticalSection(&m_csRemotePlayers);
+	/*EnterCriticalSection(&m_csRemotePlayers);
 	for (auto& [id, pPlayer] : m_remotePlayers) {
 		pPlayer->Render(pd3dCommandList, pCamera);
 	}
-	LeaveCriticalSection(&m_csRemotePlayers);
+	LeaveCriticalSection(&m_csRemotePlayers);*/
 }
 
 void CStartScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
@@ -702,34 +755,34 @@ void CStartScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM
 }
 
 //server
-void CScene::AddRemotePlayer(long long id, const XMFLOAT3& pos, ID3D12Device* device, ID3D12GraphicsCommandList* cmd, ID3D12RootSignature* root, void* context) {
-	EnterCriticalSection(&m_csRemotePlayers);
-	if (m_remotePlayers.find(id) == m_remotePlayers.end()) {
-		CRemotePlayer* pNew = new CRemotePlayer();
-		//pNew->BuildObjects(device, cmd, root, context);
-		pNew->SetPosition(pos);
-		m_remotePlayers[id] = pNew;
-	}
-	LeaveCriticalSection(&m_csRemotePlayers);
-}
-
-void CScene::RemoveRemotePlayer(long long id) {
-	EnterCriticalSection(&m_csRemotePlayers);
-	auto it = m_remotePlayers.find(id);
-	if (it != m_remotePlayers.end()) {
-		it->second->ReleaseShaderVariables();
-		delete it->second;
-		m_remotePlayers.erase(it);
-	}
-	LeaveCriticalSection(&m_csRemotePlayers);
-}
-
-void CScene::UpdateRemotePlayer(long long id, const XMFLOAT3& pos) {
-	EnterCriticalSection(&m_csRemotePlayers);
-	auto it = m_remotePlayers.find(id);
-	if (it != m_remotePlayers.end()) {
-		it->second->SetPosition(pos);
-	}
-	LeaveCriticalSection(&m_csRemotePlayers);
-}
+//void CScene::AddRemotePlayer(long long id, const XMFLOAT3& pos, ID3D12Device* device, ID3D12GraphicsCommandList* cmd, ID3D12RootSignature* root, void* context) {
+//	EnterCriticalSection(&m_csRemotePlayers);
+//	if (m_remotePlayers.find(id) == m_remotePlayers.end()) {
+//		CRemotePlayer* pNew = new CRemotePlayer();
+//		//pNew->BuildObjects(device, cmd, root, context);
+//		pNew->SetPosition(pos);
+//		m_remotePlayers[id] = pNew;
+//	}
+//	LeaveCriticalSection(&m_csRemotePlayers);
+//}
+//
+//void CScene::RemoveRemotePlayer(long long id) {
+//	EnterCriticalSection(&m_csRemotePlayers);
+//	auto it = m_remotePlayers.find(id);
+//	if (it != m_remotePlayers.end()) {
+//		it->second->ReleaseShaderVariables();
+//		delete it->second;
+//		m_remotePlayers.erase(it);
+//	}
+//	LeaveCriticalSection(&m_csRemotePlayers);
+//}
+//
+//void CScene::UpdateRemotePlayer(long long id, const XMFLOAT3& pos) {
+//	EnterCriticalSection(&m_csRemotePlayers);
+//	auto it = m_remotePlayers.find(id);
+//	if (it != m_remotePlayers.end()) {
+//		it->second->SetPosition(pos);
+//	}
+//	LeaveCriticalSection(&m_csRemotePlayers);
+//}
 

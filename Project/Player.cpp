@@ -11,10 +11,7 @@
 
 CPlayer::CPlayer()
 {
-	//----------------------------------------------------------------------
-	m_pCamera = new CCamera(); // ¸í½ÃÀû »ý¼º
-	m_pCamera->SetPosition({ 0,0,0 }); // ±âº» À§Ä¡ ¼³Á¤
-	//----------------------------------------------------------------------
+	
 
 	m_pCamera = NULL;
 
@@ -37,8 +34,8 @@ CPlayer::CPlayer()
 	m_pCameraUpdatedContext = NULL;
 
 	//server
-	m_pCamera = new CCamera(); // ¸í½ÃÀû »ý¼º
-	m_pCamera->SetPosition({ 0,0,0 }); // ±âº» À§Ä¡ ¼³Á¤
+	m_pCamera = new CCamera();
+	m_pCamera->SetPosition({ 0,0,0 }); 
 }
 
 CPlayer::~CPlayer()
@@ -173,7 +170,10 @@ void CPlayer::Update(float fTimeElapsed)
 	if (m_pPlayerUpdatedContext) OnPlayerUpdateCallback(fTimeElapsed);
 
 	DWORD nCurrentCameraMode = m_pCamera->GetMode();
-	if (nCurrentCameraMode == THIRD_PERSON_CAMERA) m_pCamera->Update(m_xmf3Position, fTimeElapsed);
+	if (nCurrentCameraMode == THIRD_PERSON_CAMERA) { 
+		m_pCamera->Update(m_xmf3Position, fTimeElapsed); 
+		m_pCamera->SetLookAt(m_xmf3Position); // í”Œë ˆì´ì–´ê°€ íšŒì „ ì‹œ ì¹´ë©”ë¼ë„ íšŒì „
+	}
 	if (m_pCameraUpdatedContext) OnCameraUpdateCallback(fTimeElapsed);
 	if (nCurrentCameraMode == THIRD_PERSON_CAMERA) m_pCamera->SetLookAt(m_xmf3Position);
 	m_pCamera->RegenerateViewMatrix();
@@ -233,7 +233,7 @@ void CPlayer::CalculateBoundingBox()
 	m_BoundingCylinder.Height = mergedBox.Extents.y * 2.0f;
 	m_BoundingCylinder.Center = mergedBox.Center;
 
-	// 3. ¿øÅëÀ» °¨½Î´Â AABB·Î º¯È¯
+	// 3. ì›í†µì„ ê°ì‹¸ëŠ” AABBë¡œ ë³€í™˜
 	ConvertCylinderToAABB(m_BoundingCylinder, m_BoundingBox);
 }
 
@@ -297,6 +297,7 @@ void CPlayer::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamer
 	if (nCameraMode == THIRD_PERSON_CAMERA) CGameObject::Render(pd3dCommandList, pCamera);
 }
 
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 
 #define _WITH_DEBUG_CALLBACK_DATA
@@ -323,16 +324,20 @@ CTerrainPlayer::CTerrainPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandLi
 	CLoadedModelInfo *pPlayerModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Player.bin", NULL);
 	SetChild(pPlayerModel->m_pModelRootObject, true);
 
-	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 5, pPlayerModel);
-	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-	m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1);
-	m_pSkinnedAnimationController->SetTrackAnimationSet(2, 2);
-	m_pSkinnedAnimationController->SetTrackAnimationSet(3, 3);
-	m_pSkinnedAnimationController->SetTrackAnimationSet(4, 4);
-	m_pSkinnedAnimationController->SetTrackEnable(1, false);
-	m_pSkinnedAnimationController->SetTrackEnable(2, false);
-	m_pSkinnedAnimationController->SetTrackEnable(3, false);
-	m_pSkinnedAnimationController->SetTrackEnable(4, false);
+	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 7, pPlayerModel);
+	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0); // ê¸°ë³¸
+	m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1); // ê±·ê¸°
+	m_pSkinnedAnimationController->SetTrackAnimationSet(2, 2); // ë›°ê¸°
+	m_pSkinnedAnimationController->SetTrackAnimationSet(3, 3); // íœ˜ë‘ë¥´ê¸°
+	m_pSkinnedAnimationController->SetTrackAnimationSet(4, 4); // ì í”„
+	m_pSkinnedAnimationController->SetTrackAnimationSet(5, 5); // ì›…í¬ë¦¬ê¸°
+	m_pSkinnedAnimationController->SetTrackAnimationSet(6, 6); // ì›…í¬ë¦¬ê³  ê±·ê¸°
+	m_pSkinnedAnimationController->SetTrackEnable(1, false); 
+	m_pSkinnedAnimationController->SetTrackEnable(2, false); 
+	m_pSkinnedAnimationController->SetTrackEnable(3, false); 
+	m_pSkinnedAnimationController->SetTrackEnable(4, false); 
+	m_pSkinnedAnimationController->SetTrackEnable(5, false); 
+	m_pSkinnedAnimationController->SetTrackEnable(6, false); 
 
 	m_pSkinnedAnimationController->SetCallbackKeys(1, 2);
 #ifdef _WITH_SOUND_RESOURCE
@@ -376,7 +381,7 @@ CCamera *CTerrainPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 			SetMaxVelocityY(800.0f);
 			m_pCamera = OnChangeCamera(FIRST_PERSON_CAMERA, nCurrentCameraMode);
 			m_pCamera->SetTimeLag(0.0f);
-			m_pCamera->SetOffset(XMFLOAT3(0.0f, 1.5f, 0.0f));
+			m_pCamera->SetOffset(XMFLOAT3(0.0f, 1.5f, -0.15f));
 			m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
 			m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 			m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
@@ -456,7 +461,7 @@ void CTerrainPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVeloci
 {
 	if (dwDirection & DIR_DOWN)
 	{
-		fDistance *= 1.5f; // Shift°¡ ´­¸®¸é ÀÌµ¿ ¼Óµµ¸¦ 1.5¹è Áõ°¡
+		fDistance *= 1.5f;
 	}
 
 	if (!isJump) {
@@ -466,6 +471,9 @@ void CTerrainPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVeloci
 			m_pSkinnedAnimationController->SetTrackEnable(1, false);
 			m_pSkinnedAnimationController->SetTrackEnable(2, true);
 			m_pSkinnedAnimationController->SetTrackEnable(3, false);
+			m_pSkinnedAnimationController->SetTrackEnable(4, false);
+			m_pSkinnedAnimationController->SetTrackEnable(5, false);
+			m_pSkinnedAnimationController->SetTrackEnable(6, false);
 		}
 		else if (dwDirection & (DIR_FORWARD | DIR_BACKWARD | DIR_LEFT | DIR_RIGHT))
 		{
@@ -473,13 +481,28 @@ void CTerrainPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVeloci
 			m_pSkinnedAnimationController->SetTrackEnable(1, true);
 			m_pSkinnedAnimationController->SetTrackEnable(2, false);
 			m_pSkinnedAnimationController->SetTrackEnable(3, false);
+			m_pSkinnedAnimationController->SetTrackEnable(4, false);
+			m_pSkinnedAnimationController->SetTrackEnable(5, false);
+			m_pSkinnedAnimationController->SetTrackEnable(6, false);
 		}
+			
+		if ((dwDirection & DIR_CROUCH) && (dwDirection & (DIR_FORWARD | DIR_BACKWARD | DIR_LEFT | DIR_RIGHT)))
+		{
+			isCrouch = false;
+			m_pSkinnedAnimationController->SetTrackEnable(0, false);
+			m_pSkinnedAnimationController->SetTrackEnable(1, false);
+			m_pSkinnedAnimationController->SetTrackEnable(2, false);
+			m_pSkinnedAnimationController->SetTrackEnable(3, false);
+			m_pSkinnedAnimationController->SetTrackEnable(4, false);
+			m_pSkinnedAnimationController->SetTrackEnable(5, false);
+			m_pSkinnedAnimationController->SetTrackEnable(6, true);
+		}
+		else if (dwDirection & DIR_CROUCH) isCrouch = true;
+		else isCrouch = false;
 	}
-	if (dwDirection & DIR_UP)
-	{
-		isJump = true;
-	}
-	
+
+	if (dwDirection & DIR_UP) isJump = true;
+
 	CPlayer::Move(dwDirection, fDistance, bUpdateVelocity);
 }
 
@@ -497,6 +520,9 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 			m_pSkinnedAnimationController->SetTrackEnable(1, false);
 			m_pSkinnedAnimationController->SetTrackEnable(2, false);
 			m_pSkinnedAnimationController->SetTrackEnable(3, true);
+			m_pSkinnedAnimationController->SetTrackEnable(4, false);
+			m_pSkinnedAnimationController->SetTrackEnable(5, false);
+			m_pSkinnedAnimationController->SetTrackEnable(6, false);
 
 			m_pSkinnedAnimationController->SetTrackSpeed(3, 2.0f);
 
@@ -507,8 +533,8 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 			if (currentPos >= 1.5)
 			{
 				isJump = false;
-				m_pSkinnedAnimationController->SetTrackEnable(3, false); // ¾Ö´Ï¸ÞÀÌ¼Ç ³¡³µÀ¸´Ï±î ²¨!
-				m_pSkinnedAnimationController->SetTrackPosition(3, 0.0f); // ´ÙÀ½¿¡ ¶Ç ½ÇÇàÇÒ ¼ö ÀÖ°Ô ÃÊ±âÈ­
+				m_pSkinnedAnimationController->SetTrackEnable(3, false); // ?Â‹Âˆï§ŽÂ”Â???ÂÂ‚?ì‡°Â‹Âˆæº?çˆ°?
+				m_pSkinnedAnimationController->SetTrackPosition(3, 0.0f); // ?ã…¼ÂÂŒ?????ã…½Â–Â‰?????Âˆå¯ƒÂŒ ç¥Âˆæ¹²??
 			}
 
 		}
@@ -518,6 +544,8 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 			m_pSkinnedAnimationController->SetTrackEnable(2, false);
 			m_pSkinnedAnimationController->SetTrackEnable(3, false);
 			m_pSkinnedAnimationController->SetTrackEnable(4, true);
+			m_pSkinnedAnimationController->SetTrackEnable(5, false);
+			m_pSkinnedAnimationController->SetTrackEnable(6, false);
 
 			m_pSkinnedAnimationController->SetTrackSpeed(4, 2.0f);
 
@@ -528,9 +556,19 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 			if (currentPos >= 1.5)
 			{
 				isSwing = false;
-				m_pSkinnedAnimationController->SetTrackEnable(4, false); // ¾Ö´Ï¸ÞÀÌ¼Ç ³¡³µÀ¸´Ï±î ²¨!
-				m_pSkinnedAnimationController->SetTrackPosition(4, 0.0f); // ´ÙÀ½¿¡ ¶Ç ½ÇÇàÇÒ ¼ö ÀÖ°Ô ÃÊ±âÈ­
+				m_pSkinnedAnimationController->SetTrackEnable(4, false);
+				m_pSkinnedAnimationController->SetTrackPosition(4, 0.0f);
 			}
+
+		}
+		else if (isCrouch) {
+			m_pSkinnedAnimationController->SetTrackEnable(0, false);
+			m_pSkinnedAnimationController->SetTrackEnable(1, false);
+			m_pSkinnedAnimationController->SetTrackEnable(2, false);
+			m_pSkinnedAnimationController->SetTrackEnable(3, false);
+			m_pSkinnedAnimationController->SetTrackEnable(4, false);
+			m_pSkinnedAnimationController->SetTrackEnable(5, true);
+			m_pSkinnedAnimationController->SetTrackEnable(6, false);
 
 		}
 		else if (::IsZero(fLength))
@@ -539,10 +577,68 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 			m_pSkinnedAnimationController->SetTrackEnable(1, false);
 			m_pSkinnedAnimationController->SetTrackEnable(2, false);
 			m_pSkinnedAnimationController->SetTrackEnable(3, false);
+			m_pSkinnedAnimationController->SetTrackEnable(4, false);
+			m_pSkinnedAnimationController->SetTrackEnable(5, false);
+			m_pSkinnedAnimationController->SetTrackEnable(6, false);
+
 			m_pSkinnedAnimationController->SetTrackPosition(1, 0.0f);
 			m_pSkinnedAnimationController->SetTrackPosition(2, 0.0f);
 			m_pSkinnedAnimationController->SetTrackPosition(3, 0.0f);
+			m_pSkinnedAnimationController->SetTrackPosition(4, 0.0f);
+			m_pSkinnedAnimationController->SetTrackPosition(5, 0.0f);
+			m_pSkinnedAnimationController->SetTrackPosition(6, 0.0f);
 		}
+	}
+
+
+	// server
+
+	// position, look, right ------------------------------------
+
+
+	static XMFLOAT3 prevPosition = GetPosition();
+	static XMFLOAT3 prevLook = GetLook();
+	static XMFLOAT3 prevRight = GetRight();
+
+	XMFLOAT3 currPosition = GetPosition();
+	XMFLOAT3 currLook = GetLook();
+	XMFLOAT3 currRight = GetRight();
+	// -----------------------------------------------------------
+
+	// animation ------------------------------------------------
+	float fLength = 0.0f;
+	if (m_pSkinnedAnimationController)
+	{
+		fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x +
+			m_xmf3Velocity.z * m_xmf3Velocity.z);
+
+		uint8_t currentAnimState = static_cast<uint8_t>(AnimationState::IDLE);
+		if (isJump)
+			currentAnimState = static_cast<uint8_t>(AnimationState::JUMP); // 4
+		else if (isSwing)
+			currentAnimState = static_cast<uint8_t>(AnimationState::SWING); // 3
+		else if (isCrouch)
+			currentAnimState = static_cast<uint8_t>(AnimationState::CROUCH); //5
+		else if (::IsZero(fLength))
+			currentAnimState = static_cast<uint8_t>(AnimationState::IDLE); //0
+		else
+			currentAnimState = static_cast<uint8_t>(AnimationState::WALK); //1
+
+		static uint8_t prevAnimState = currentAnimState;
+		// -----------------------------------------------------------
+
+		if (currPosition.x != prevPosition.x || currPosition.y != prevPosition.y || currPosition.z != prevPosition.z ||
+			currLook.x != prevLook.x || currLook.y != prevLook.y || currLook.z != prevLook.z ||
+			currRight.x != prevRight.x || currRight.y != prevRight.y || currRight.z != prevRight.z ||
+			currentAnimState != prevAnimState)
+		{
+			send_position_to_server(currPosition, currLook, currRight, currentAnimState);
+			prevPosition = currPosition;
+			prevLook = currLook;
+			prevRight = currRight;
+			prevAnimState = currentAnimState;
+		}
+
 	}
 }
 

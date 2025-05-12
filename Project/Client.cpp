@@ -49,6 +49,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	::LoadString(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
 	::LoadString(hInstance, IDC_LABPROJECT0798, szWindowClass, MAX_LOADSTRING);
 	MyRegisterClass(hInstance);
+	if (!InitInstance(hInstance, nCmdShow)) return(FALSE);
 
 	// ----------------- 네트워크 초기화 및 서버 연결 -----------------
 	wcout.imbue(locale("korean"));
@@ -56,8 +57,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	std::cin >> user_name;
 	InitializeNetwork();
 	//----------------------------------------------------------------
-
-	if (!InitInstance(hInstance, nCmdShow)) return(FALSE);
 
 	hAccelTable = ::LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_LABPROJECT0798));
 

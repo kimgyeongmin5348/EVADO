@@ -9,6 +9,7 @@
 
 #include "Object.h"
 #include "Camera.h"
+#include "Network.h"
 
 struct BoundingCylinder
 {
@@ -44,11 +45,13 @@ protected:
 
 	CCamera						*m_pCamera = NULL;
 
-	XMFLOAT3 m_lastPushDirection; // ¸¶Áö¸· Ãæµ¹ ¹æÇâ ÀúÀå
+	XMFLOAT3 m_lastPushDirection; // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½æµ¹ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	BoundingCylinder m_BoundingCylinder;
 
 public:
-	bool isSwing = false;
+	bool	isSwing = false;
+	bool	isCrouch = false;
+	bool	items[4] = { false,false,false,false };
 
 public:
 	CPlayer();
@@ -124,6 +127,8 @@ public:
 	CTerrainPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, void *pContext=NULL);
 	virtual ~CTerrainPlayer();
 
+	//server
+	AnimationState m_currentAnim = AnimationState::IDLE;
 
 public:
 	virtual CCamera *ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed);
@@ -137,17 +142,8 @@ public:
 
 
 	bool isJump = false;
+
+
 };
 
-// server
-class CRemotePlayer : public CPlayer {
-public:
-	void Initialize(ID3D12Device* pd3dDevice,
-		ID3D12GraphicsCommandList* pd3dCommandList,
-		ID3D12RootSignature* pd3dGraphicsRootSignature) {
-		CLoadedModelInfo* pModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Player.bin", nullptr);
-		SetChild(pModel->m_pModelRootObject, true);
-		// ·ÎÄÃ ÇÃ·¹ÀÌ¾î¿Í µ¿ÀÏÇÑ ¸ðµ¨ ·Îµå
-	}
-};
 

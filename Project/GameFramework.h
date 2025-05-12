@@ -44,6 +44,25 @@ public:
 
 	void ItemToHand(int objectIndex);
 
+	void OnOtherClientConnected()
+	{
+		m_ppScenes[m_nCurrentScene]->OnOtherClientConnedted();
+	}
+	void UpdateOtherPlayerPosition(int clinetnum, XMFLOAT3 position)
+	{
+		m_ppScenes[m_nCurrentScene]->UpdateOtherPlayerPosition(clinetnum, position);
+	}
+
+	//해볼려고 했음...
+	void AddItemToScene(long long id, ITEM_TYPE type, const XMFLOAT3& position)
+	{
+		if (m_ppScenes && m_ppScenes[m_nCurrentScene]) {
+			m_ppScenes[m_nCurrentScene]->AddItem(id, type, position);
+		}
+	}
+
+	bool isLoading = false;
+	bool isStartScene = true;
 
 private:
 	HINSTANCE m_hInstance;
@@ -89,25 +108,17 @@ private:
 
 	int m_nCurrentScene = 0;
 	int m_nScene = 0;
-
 	int m_nScenes = 0;
 	CScene** m_ppScenes = NULL;
 
-
-
 	POINT m_ptOldCursorPos;
-
 
 	_TCHAR						m_pszFrameRate[70];
 
-	bool	items[4] = { false,false,false,false };
+	bool flashlightToggle = false;
 
 	//server
-	float m_fLastPositionSendTime = 0.0f;  // 위치 전송 시간 추적
-
-
-	
-
+	//float m_fLastPositionSendTime = 0.0f;  // 위치 전송 시간 추적
 };
 
 
