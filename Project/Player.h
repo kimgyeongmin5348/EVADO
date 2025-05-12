@@ -17,7 +17,7 @@ struct BoundingCylinder
 	float Radius;
 	float Height;
 
-	BoundingCylinder() : Radius(0.0f), Height(0.0f) {}
+	BoundingCylinder() : Center(0.0f,0.0f,0.0f), Radius(0.0f), Height(0.0f) {}
 };
 
 class CPlayer : public CGameObject
@@ -45,8 +45,8 @@ protected:
 
 	CCamera						*m_pCamera = NULL;
 
-	XMFLOAT3 m_lastPushDirection; // 마지막 충돌 방향 저장
-	BoundingCylinder m_BoundingCylinder;
+	XMFLOAT3			m_lastPushDirection; // 마지막 충돌 방향 저장
+	BoundingCylinder	m_BoundingCylinder;
 
 public:
 	bool	isSwing = false;

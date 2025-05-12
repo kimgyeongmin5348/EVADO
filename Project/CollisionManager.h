@@ -2,6 +2,7 @@
 
 #include "QuadTree.h"
 
+
 class CCollisionManager
 {
 private:
