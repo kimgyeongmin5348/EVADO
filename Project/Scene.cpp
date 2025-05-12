@@ -606,7 +606,7 @@ void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera
 		m_ppOtherPlayers[i]->Render(pd3dCommandList, pCamera);
 	}
 
-
+	for (int i = 0; i < m_nShaders; i++) if (dynamic_cast<CTextureToScreenShader*>(m_ppShaders[i])->IsInventory[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
 }
 
 // 아이템 생성 server
