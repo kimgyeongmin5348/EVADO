@@ -41,7 +41,7 @@ DWORD WINAPI WorkerThread(LPVOID lpParam) {
 
         if (!result || bytesTransferred == 0) {
             int error_code = result ? WSAGetLastError() : WSAECONNRESET;
-            std::cerr << "[클라] 연결 종료. 오류 코드: " << error_code << std::endl;
+            std::cerr << "[클라] Connect Exit. Error code: " << error_code << std::endl;
 
             // 1. 소켓 정리
             if (ConnectSocket != INVALID_SOCKET) {
@@ -103,7 +103,7 @@ void send_packet(void* packet) {
     int result = WSASend(ConnectSocket, &overlapped->wsaBuf, 1, nullptr, 0, reinterpret_cast<LPWSAOVERLAPPED>(overlapped), nullptr);
 
     if (result == SOCKET_ERROR && WSAGetLastError() != WSA_IO_PENDING) {
-        std::cerr << "WSASend 오류: " << WSAGetLastError() << std::endl;
+        std::cerr << "WSASend Error: " << WSAGetLastError() << std::endl;
         delete overlapped;
     }
 
@@ -141,7 +141,7 @@ void InitializeNetwork()
     if (connectResult == SOCKET_ERROR) {
         int err = WSAGetLastError();
         if (err != WSAEWOULDBLOCK) {
-            std::cerr << "연결 실패: " << err << std::endl;
+            std::cerr << "connect Fail: " << err << std::endl;
             closesocket(ConnectSocket);
             WSACleanup();
             exit(1);
