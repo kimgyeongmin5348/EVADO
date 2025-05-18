@@ -17,6 +17,8 @@
 
 class CShader;
 class CStandardShader;
+struct QuadTreeNode;
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -367,6 +369,9 @@ public:
 
 	CAnimationController* m_pSkinnedAnimationController = NULL;
 
+	BoundingBox						m_BoundingBox = BoundingBox();
+	QuadTreeNode* m_pNode;
+
 	void SetMesh(CMesh* pMesh);
 	void SetShader(CShader* pShader);
 	void SetShader(int nMaterial, CShader* pShader);
@@ -422,6 +427,7 @@ public:
 	CGameObject* GetParent() { return(m_pParent); }
 	CGameObject* GetChild() { return(m_pChild); }
 	CGameObject* GetSibling() { return(m_pSibling); }
+	BoundingBox GetBoundingBox() const { return m_BoundingBox; }
 
 	void Move(XMFLOAT3 xmf3Offset);
 
@@ -469,6 +475,8 @@ public:
 
 	// 오브젝트의 계층 구조 전체를 복사
 	CGameObject* Clone();
+
+	virtual void CalculateBoundingBox();
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

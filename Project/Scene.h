@@ -9,6 +9,7 @@
 #include "Object_Items.h"
 #include "OtherPlayer.h"
 #include "Map.h"
+#include "CollisionManager.h"
 
 #define MAX_LIGHTS						16 
 
@@ -65,6 +66,9 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera=NULL);
 
 	void ReleaseUploadBuffers();
+
+	void InitializeCollisionSystem();
+	void GenerateGameObjectsBoundingBox();
 
 	CPlayer								*m_pPlayer = NULL;
 
@@ -137,6 +141,7 @@ public:
 	ID3D12Resource						*m_pd3dcbLights = NULL;
 	LIGHTS								*m_pcbMappedLights = NULL;
 
+	CCollisionManager					m_CollisionManager;
 	//server
 	
 public:
