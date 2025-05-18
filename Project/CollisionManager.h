@@ -3,8 +3,8 @@
 #include <vector>
 #include "QuadTree.h"
 
-class CGameObject;     // 반드시 필요
-class CPlayer;         // 반드시 필요
+class CGameObject;
+class CPlayer;
 
 class CCollisionManager
 {
