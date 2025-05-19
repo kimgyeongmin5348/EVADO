@@ -111,12 +111,15 @@ void CScene::GenerateGameObjectsBoundingBox()
 	for (int i = 0; i < m_nGameObjects; ++i) {
 		m_ppGameObjects[i]->CalculateBoundingBox();
 	}
+
 	for (int i = 0; i < m_nHierarchicalGameObjects; ++i) {
 		m_ppHierarchicalGameObjects[i]->CalculateBoundingBox();
 	}
 
 	for (auto obj : m_pMap->m_vMapObjects) {
-		obj->CalculateBoundingBox();
+		obj->CalculateBoundingBox(); 
+		std::string ObjectFrameName = obj->GetFrameName();
+		cout << ObjectFrameName << " : " << obj->GetBoundingBox().Extents.x << ", " << obj->GetBoundingBox().Extents.z << endl;
 	}
 }
 
