@@ -101,7 +101,7 @@ void CScene::InitializeCollisionSystem()
 		m_CollisionManager.InsertObject(obj);
 	}
 
-	m_CollisionManager.PrintTree();
+	//m_CollisionManager.PrintTree();
 }
 
 void CScene::GenerateGameObjectsBoundingBox()
@@ -118,8 +118,6 @@ void CScene::GenerateGameObjectsBoundingBox()
 
 	for (auto obj : m_pMap->m_vMapObjects) {
 		obj->CalculateBoundingBox(); 
-		std::string ObjectFrameName = obj->GetFrameName();
-		cout << ObjectFrameName << " : " << obj->GetBoundingBox().Extents.x << ", " << obj->GetBoundingBox().Extents.z << endl;
 	}
 }
 
