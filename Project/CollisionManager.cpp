@@ -34,8 +34,8 @@ void CCollisionManager::Update(CPlayer* player)
     QuadTreeNode* playerNode = m_pQuadTree->FindNode(m_pQuadTree->root, player->GetBoundingBox());
     if (!playerNode) return;
 
-    if (frameCounter % 60 == 0) // 60 프레임마다 출력
-        cout << playerNode->bounds.Center.x << ", " << playerNode->bounds.Center.z << endl;
+    //if (frameCounter % 60 == 0) // 60 프레임마다 출력
+    //    cout << playerNode->bounds.Center.x << ", " << playerNode->bounds.Center.z << endl;
 
     // 근처 오브젝트 수집
     m_collisions.clear();

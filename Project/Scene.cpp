@@ -101,7 +101,7 @@ void CScene::InitializeCollisionSystem()
 		m_CollisionManager.InsertObject(obj);
 	}
 
-	m_CollisionManager.PrintTree();
+	//m_CollisionManager.PrintTree();
 }
 
 void CScene::GenerateGameObjectsBoundingBox()
@@ -111,12 +111,13 @@ void CScene::GenerateGameObjectsBoundingBox()
 	for (int i = 0; i < m_nGameObjects; ++i) {
 		m_ppGameObjects[i]->CalculateBoundingBox();
 	}
+
 	for (int i = 0; i < m_nHierarchicalGameObjects; ++i) {
 		m_ppHierarchicalGameObjects[i]->CalculateBoundingBox();
 	}
 
 	for (auto obj : m_pMap->m_vMapObjects) {
-		obj->CalculateBoundingBox();
+		obj->CalculateBoundingBox(); 
 	}
 }
 
