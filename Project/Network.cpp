@@ -224,7 +224,6 @@ void ProcessPacket(char* ptr)
 
         // OtherPlayer의 위치를 반영한다
         if (!gGameFramework.isLoading && !gGameFramework.isStartScene) {
-            //packet->position.x += 3.8;
             gGameFramework.UpdateOtherPlayerPosition(0, packet->position);
             gGameFramework.UpdateOtherPlayerAnimation(0, packet->animState);
         }
