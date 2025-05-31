@@ -6,6 +6,11 @@ struct MATERIAL
 	float4					m_cEmissive;
 };
 
+cbuffer cbWorldViewProj : register(b0)
+{
+    matrix g_worldViewProjMatrix;
+};
+
 cbuffer cbCameraInfo : register(b1)
 {
 	matrix					gmtxView : packoffset(c0);
@@ -79,31 +84,36 @@ VS_STANDARD_OUTPUT VSStandard(VS_STANDARD_INPUT input)
 
 float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 {
-	float4 cAlbedoColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
-	if (gnTexturesMask & MATERIAL_ALBEDO_MAP) cAlbedoColor = gtxtAlbedoTexture.Sample(gssWrap, input.uv);
-	float4 cSpecularColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
-	if (gnTexturesMask & MATERIAL_SPECULAR_MAP) cSpecularColor = gtxtSpecularTexture.Sample(gssWrap, input.uv);
-	float4 cNormalColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
-	if (gnTexturesMask & MATERIAL_NORMAL_MAP) cNormalColor = gtxtNormalTexture.Sample(gssWrap, input.uv);
-	float4 cMetallicColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
-	if (gnTexturesMask & MATERIAL_METALLIC_MAP) cMetallicColor = gtxtMetallicTexture.Sample(gssWrap, input.uv);
-	float4 cEmissionColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
-	if (gnTexturesMask & MATERIAL_EMISSION_MAP) cEmissionColor = gtxtEmissionTexture.Sample(gssWrap, input.uv);
+    float4 cAlbedoColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+    if (gnTexturesMask & MATERIAL_ALBEDO_MAP)
+        cAlbedoColor = gtxtAlbedoTexture.Sample(gssWrap, input.uv);
+    float4 cSpecularColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+    if (gnTexturesMask & MATERIAL_SPECULAR_MAP)
+        cSpecularColor = gtxtSpecularTexture.Sample(gssWrap, input.uv);
+    float4 cNormalColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+    if (gnTexturesMask & MATERIAL_NORMAL_MAP)
+        cNormalColor = gtxtNormalTexture.Sample(gssWrap, input.uv);
+    float4 cMetallicColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+    if (gnTexturesMask & MATERIAL_METALLIC_MAP)
+        cMetallicColor = gtxtMetallicTexture.Sample(gssWrap, input.uv);
+    float4 cEmissionColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+    if (gnTexturesMask & MATERIAL_EMISSION_MAP)
+        cEmissionColor = gtxtEmissionTexture.Sample(gssWrap, input.uv);
 
-	float3 normalW;
-	float4 cColor = cAlbedoColor + cSpecularColor + cMetallicColor + cEmissionColor;
-	if (gnTexturesMask & MATERIAL_NORMAL_MAP)
-	{
-		float3x3 TBN = float3x3(normalize(input.tangentW), normalize(input.bitangentW), normalize(input.normalW));
-		float3 vNormal = normalize(cNormalColor.rgb * 2.0f - 1.0f); //[0, 1] ¡æ [-1, 1]
-		normalW = normalize(mul(vNormal, TBN));
-	}
-	else
-	{
-		normalW = normalize(input.normalW);
-	}
-	float4 cIllumination = Lighting(input.positionW, normalW);
-	return(lerp(cColor, cIllumination, 0.5f));
+    float3 normalW;
+    float4 cColor = cAlbedoColor + cSpecularColor + cMetallicColor + cEmissionColor;
+    if (gnTexturesMask & MATERIAL_NORMAL_MAP)
+    {
+        float3x3 TBN = float3x3(normalize(input.tangentW), normalize(input.bitangentW), normalize(input.normalW));
+        float3 vNormal = normalize(cNormalColor.rgb * 2.0f - 1.0f); //[0, 1] ¡æ [-1, 1]
+        normalW = normalize(mul(vNormal, TBN));
+    }
+    else
+    {
+        normalW = normalize(input.normalW);
+    }
+    float4 cIllumination = Lighting(input.positionW, normalW);
+    return (lerp(cColor, cIllumination, 0.5f));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -203,6 +213,37 @@ float4 PSTextureToScreen(VS_TEXTURED_OUTPUT input) : SV_TARGET
 	
     return (cColor);
 }
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+struct VS_INPUT
+{
+    float3 pos : POSITION;
+    float2 uv : TEXCOORD;
+};
+
+struct PS_INPUT
+{
+    float4 pos : SV_POSITION;
+    float2 uv : TEXCOORD;
+};
+
+PS_INPUT VSParticle(VS_INPUT input)
+{
+    PS_INPUT output;
+	
+    output.pos = mul(float4(input.pos, 1.0f), g_worldViewProjMatrix);
+    output.uv = input.uv;
+	
+    return (output);
+}
+
+float4 PSParticle(PS_INPUT input) : SV_Target
+{
+    float4 cColor = gtxtTexture.Sample(gssWrap, input.uv);
+    
+	return (cColor);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 Texture2D gtxtTerrainBaseTexture : register(t1);

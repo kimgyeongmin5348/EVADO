@@ -143,6 +143,9 @@
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CollisionManager.cpp" />
+    <ClCompile Include="CParticleEffect.cpp" />
+    <ClCompile Include="CParticleMesh.cpp" />
+    <ClCompile Include="CParticleShader.cpp" />
     <ClCompile Include="DDSTextureLoader12.cpp" />
     <ClCompile Include="GameFramework.cpp" />
     <ClCompile Include="Client.cpp" />
@@ -164,6 +167,9 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CollisionManager.h" />
     <ClInclude Include="Common.h" />
+    <ClInclude Include="CParticleEffect.h" />
+    <ClInclude Include="CParticleMesh.h" />
+    <ClInclude Include="CParticleShader.h" />
     <ClInclude Include="d3dx12.h" />
     <ClInclude Include="DDSTextureLoader12.h" />
     <ClInclude Include="GameFramework.h" />

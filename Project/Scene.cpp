@@ -135,6 +135,8 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	m_pMap = new Map(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
+	m_pEffect = new CParticleEffect(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+
 	XMFLOAT3 xmf3Scale(0.0f, 0.0f, 0.0f);
 	XMFLOAT4 xmf4Color(0.0f, 0.3f, 0.0f, 0.0f);
 	//m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Terrain/HeightMap.raw"), 257, 257, xmf3Scale, xmf4Color);
@@ -608,6 +610,8 @@ void CScene::AnimateObjects(float fTimeElapsed)
 		m_pLights[1].m_xmf3Position = m_pPlayer->GetPosition();
 		m_pLights[1].m_xmf3Direction = m_pPlayer->GetLookVector();
 	}
+
+	if (m_pEffect) m_pEffect->Animate(fTimeElapsed);
 }
 
 void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera)
@@ -640,7 +644,9 @@ void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera
 	}
 
 	m_CollisionManager.Update(m_pPlayer);
-  
+	
+	if (m_pEffect) m_pEffect->Render(pd3dCommandList, pCamera);
+
 	for (int i = 0; i < m_nOtherPlayers; ++i) 
 	{
 		//if (m_ppOtherPlayers[i]->isConnedted)

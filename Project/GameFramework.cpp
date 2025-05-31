@@ -295,7 +295,10 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 				flashlightToggle = !flashlightToggle;
 				m_pScene->BuildDefaultLightsAndMaterials(flashlightToggle);
 			}
-			if (m_pPlayer->items[2]) m_pPlayer->isSwing = true;
+			if (m_pPlayer->items[2]) { 
+				m_pPlayer->isSwing = true; 
+				m_pScene->m_pEffect->Activate(m_pPlayer->GetPosition());
+			}
 			::SetCapture(hWnd);
 			::GetCursorPos(&m_ptOldCursorPos);
 			break;
