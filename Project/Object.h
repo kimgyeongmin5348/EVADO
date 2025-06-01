@@ -539,9 +539,11 @@ public:
 
 	virtual void Animate(float fTimeElapsed);
 	virtual void SetPlayer(CPlayer* p) { pPlayer = p; }
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
 
 private:
 	CPlayer* pPlayer = NULL;
+	CGameObject* m_pHpbar = NULL;
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
