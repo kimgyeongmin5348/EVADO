@@ -6,11 +6,6 @@ struct MATERIAL
 	float4					m_cEmissive;
 };
 
-cbuffer cbWorldViewProj : register(b0)
-{
-    matrix g_worldViewProjMatrix;
-};
-
 cbuffer cbCameraInfo : register(b1)
 {
 	matrix					gmtxView : packoffset(c0);
@@ -194,6 +189,24 @@ struct VS_TEXTURED_OUTPUT
     float2 uv : TEXCOORD;
 };
 
+VS_TEXTURED_OUTPUT VSTextured(VS_TEXTURED_INPUT input)
+{
+    VS_TEXTURED_OUTPUT output;
+
+    output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
+    output.uv = input.uv;
+
+    return (output);
+}
+
+float4 PSTextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
+{
+    //float4 cColor = gtxtTexture.Sample(gssWrap, input.uv);
+    //cColor.a = 0.25f;
+    //return (cColor);
+    return float4(1.0, 0.0, 0.0, 1.0);
+}
+
 VS_TEXTURED_OUTPUT VSTextureToScreen(VS_TEXTURED_INPUT input)
 {
     VS_TEXTURED_OUTPUT output;
@@ -212,36 +225,6 @@ float4 PSTextureToScreen(VS_TEXTURED_OUTPUT input) : SV_TARGET
         discard;
 	
     return (cColor);
-}
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-struct VS_INPUT
-{
-    float3 pos : POSITION;
-    float2 uv : TEXCOORD;
-};
-
-struct PS_INPUT
-{
-    float4 pos : SV_POSITION;
-    float2 uv : TEXCOORD;
-};
-
-PS_INPUT VSParticle(VS_INPUT input)
-{
-    PS_INPUT output;
-	
-    output.pos = mul(float4(input.pos, 1.0f), g_worldViewProjMatrix);
-    output.uv = input.uv;
-	
-    return (output);
-}
-
-float4 PSParticle(PS_INPUT input) : SV_Target
-{
-    float4 cColor = gtxtTexture.Sample(gssWrap, input.uv);
-    
-	return (cColor);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

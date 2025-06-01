@@ -297,7 +297,7 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 			}
 			if (m_pPlayer->items[2]) { 
 				m_pPlayer->isSwing = true; 
-				m_pScene->m_pEffect->Activate(m_pPlayer->GetPosition());
+				m_pScene->m_pEffect->Activate();
 			}
 			::SetCapture(hWnd);
 			::GetCursorPos(&m_ptOldCursorPos);

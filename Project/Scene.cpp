@@ -125,7 +125,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 300);
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 350);
 
 	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature); 
 
@@ -135,11 +135,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	m_pMap = new Map(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
-	m_pEffect = new CParticleEffect(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-
-	XMFLOAT3 xmf3Scale(0.0f, 0.0f, 0.0f);
-	XMFLOAT4 xmf4Color(0.0f, 0.3f, 0.0f, 0.0f);
-	//m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Terrain/HeightMap.raw"), 257, 257, xmf3Scale, xmf4Color);
+	m_pEffect = new CParticle(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
 	m_nHierarchicalGameObjects = 4; // spider, flashlight, shovel, whistle
 	m_ppHierarchicalGameObjects = new CGameObject * [m_nHierarchicalGameObjects];
@@ -197,15 +193,6 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_ppOtherPlayers[0]->m_pSkinnedAnimationController->SetTrackPosition(6, 0.0f);
 
 	if (pOtherPlayerModel) delete pOtherPlayerModel;
-	//// OtherPlayer
-	//m_nGameObjects = 1;
-	//m_ppGameObjects = new CGameObject * [m_nGameObjects];
-
-	//CLoadedModelInfo* pOtherPlayerModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Player.bin", NULL);
-	//m_ppGameObjects[0] = new OtherPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pOtherPlayerModel);
-	////서버에서 정보 받아서 업데이트 필요 -> 업데이트함수로
-	//m_ppGameObjects[0]->SetPosition(0, 0, 0);
-	////if (pOtherPlayerModel) delete pOtherPlayerModel;
 
 	// 인벤토리 UI
 	m_nShaders = 4;
@@ -216,7 +203,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	CTexture* pTextureItem1 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
 	pTextureItem1->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/FlashLight_bg_ui.dds", RESOURCE_TEXTURE2D, 0);
 	CreateShaderResourceViews(pd3dDevice, pTextureItem1, 0, 15);
-	CScreenRectMeshTextured* pMesh = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, -0.5f + 0.02f, 0.225f, -0.55f, 0.45f);
+	CScreenRectMeshTextured* pMesh = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, -0.5f + 0.02f, 0.225f, -0.55f, 0.225f);
 	pTextureItem1Shader->SetMesh(0, pMesh);
 	pTextureItem1Shader->SetTexture(pTextureItem1);
 	m_ppShaders[0] = pTextureItem1Shader;
@@ -226,7 +213,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	CTexture* pTextureItem2 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
 	pTextureItem2->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Shovel_bg_ui.dds", RESOURCE_TEXTURE2D, 0);
 	CreateShaderResourceViews(pd3dDevice, pTextureItem2, 0, 15);
-	CScreenRectMeshTextured* pMesh1 = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, -0.25f + 0.02f, 0.225f, -0.55f, 0.45f);
+	CScreenRectMeshTextured* pMesh1 = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, -0.25f + 0.02f, 0.225f, -0.55f, 0.225f);
 	pTextureItem2Shader->SetMesh(0, pMesh1);
 	pTextureItem2Shader->SetTexture(pTextureItem2);
 	m_ppShaders[1] = pTextureItem2Shader;
@@ -236,7 +223,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	CTexture* pTextureItem3 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
 	pTextureItem3->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Whistle_bg_ui.dds", RESOURCE_TEXTURE2D, 0);
 	CreateShaderResourceViews(pd3dDevice, pTextureItem3, 0, 15);
-	CScreenRectMeshTextured* pMesh2 = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, 0.0f + 0.02f, 0.225f, -0.55f, 0.45f);
+	CScreenRectMeshTextured* pMesh2 = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, 0.0f + 0.02f, 0.225f, -0.55f, 0.225f);
 	pTextureItem3Shader->SetMesh(0, pMesh2);
 	pTextureItem3Shader->SetTexture(pTextureItem3);
 	m_ppShaders[2] = pTextureItem3Shader;
@@ -611,7 +598,7 @@ void CScene::AnimateObjects(float fTimeElapsed)
 		m_pLights[1].m_xmf3Direction = m_pPlayer->GetLookVector();
 	}
 
-	if (m_pEffect) m_pEffect->Animate(fTimeElapsed);
+	if (m_pEffect) m_pEffect->Animate(fTimeElapsed, m_ppHierarchicalGameObjects[2]->GetPosition());
 }
 
 void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera)
