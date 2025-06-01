@@ -1,7 +1,9 @@
 #include "stdafx.h"
 #include "Network.h"
 #include "GameFramework.h"
+#include <iostream>
 
+// 클라이언트 부분 (not server)
 CScene* g_pScene = nullptr;
 ID3D12Device* g_pd3dDevice = nullptr;
 ID3D12GraphicsCommandList* g_pd3dCommandList = nullptr;
@@ -9,163 +11,185 @@ ID3D12RootSignature* g_pd3dGraphicsRootSignature = nullptr;
 void* g_pContext = nullptr;
 
 extern CGameFramework gGameFramework;
+CGameObject object;
 
-std::unordered_map<long long, OtherPlayer*> g_other_players;
-std::mutex g_player_mutex; // 멀티스레드 접근 방지
-
-std::unordered_map<long long, Item*> g_items;
-std::mutex g_item_mutex;
-
+// 전역 변수 정의
 SOCKET ConnectSocket = INVALID_SOCKET;
-HANDLE g_hIOCP = INVALID_HANDLE_VALUE;
+std::atomic<bool> g_running{ true };
+//std::string user_name;
+long long g_myid = 0;
+
+std::queue<std::vector<char>> g_sendQueue;
+std::mutex g_sendMutex;
+std::condition_variable g_sendCV;
 
 WSADATA wsaData;
 
-//CPlayer player;
-CGameObject object;
-long long g_myid = 0;
-
-char recv_buffer[MAX_BUFFER];
-int  saved_data = 0;
-
-void PostRecv();
+// 객체 관리 맵
+std::unordered_map<long long, OtherPlayer*> g_other_players;
+std::mutex g_player_mutex;
+std::unordered_map<long long, Item*> g_items;
+std::mutex g_item_mutex;
 
 
-DWORD WINAPI WorkerThread(LPVOID lpParam) {
-    while (true) {
-        DWORD bytesTransferred = 0;
-        ULONG_PTR completionKey = 0;
-        OverlappedEx* overlapped = nullptr;
 
-        BOOL result = GetQueuedCompletionStatus(g_hIOCP, &bytesTransferred, &completionKey, reinterpret_cast<LPOVERLAPPED*>(&overlapped), INFINITE);
+// =================================================================
+//                      네트워크 코어 로직
+// =================================================================
 
-        if (!result || bytesTransferred == 0) {
-            int error_code = result ? WSAGetLastError() : WSAECONNRESET;
-            std::cerr << "[클라] Connect Exit. Error code: " << error_code << std::endl;
 
-            // 1. 소켓 정리
-            if (ConnectSocket != INVALID_SOCKET) {
-                closesocket(ConnectSocket);
-                ConnectSocket = INVALID_SOCKET;
-            }
-
-            // 2. 다른 플레이어 데이터 초기화
-            g_other_players.clear();
-            g_myid = 0;
-
-            // 3. 서버에 연결 종료 알림 (옵션)
-            //PostQuitMessage(0); // GUI 애플리케이션인 경우
-
-            delete overlapped;
-            continue;
+void SendThread() {
+    while (g_running) {
+        std::vector<char> packet;
+        {
+            std::unique_lock<std::mutex> lock(g_sendMutex);
+            g_sendCV.wait(lock, [] { return !g_sendQueue.empty() || !g_running; });
+            if (!g_running) break;
+            packet = std::move(g_sendQueue.front());
+            g_sendQueue.pop();
         }
 
-        switch (overlapped->operation) {
-        case IO_RECV:
-            if (bytesTransferred > 0) {
-                process_data(overlapped->buffer, bytesTransferred);
-                PostRecv();
+        WSABUF wsaBuf = { static_cast<ULONG>(packet.size()), packet.data() };
+        WSAOVERLAPPED overlapped = {};
+        overlapped.hEvent = WSACreateEvent();
+
+        DWORD sent = 0;
+        int ret = WSASend(ConnectSocket, &wsaBuf, 1, &sent, 0, &overlapped, nullptr);
+
+        if (ret == SOCKET_ERROR) {
+            if (WSAGetLastError() == WSA_IO_PENDING) {
+                DWORD result = WSAWaitForMultipleEvents(1, &overlapped.hEvent, TRUE, 1000, FALSE);
+                if (result == WSA_WAIT_FAILED) {
+                    std::cerr << "송신 오류: " << WSAGetLastError() << std::endl;
+                    break;
+                }
+                WSAGetOverlappedResult(ConnectSocket, &overlapped, &sent, TRUE, nullptr);
             }
-            delete overlapped;
+            else {
+                std::cerr << "송신 실패: " << WSAGetLastError() << std::endl;
+            }
+        }
+        WSACloseEvent(overlapped.hEvent);
+    }
+}
+
+void RecvThread() {
+    thread_local size_t saved_packet_size = 0;
+    thread_local char packet_buffer[BUF_SIZE];
+
+    while (g_running) {
+        char buffer[MAX_PACKET_SIZE];
+        WSABUF wsaBuf = { MAX_PACKET_SIZE, buffer };
+        DWORD flags = 0, recvBytes = 0;
+        WSAOVERLAPPED overlapped = {};
+        overlapped.hEvent = WSACreateEvent();
+
+        int ret = WSARecv(ConnectSocket, &wsaBuf, 1, &recvBytes, &flags, &overlapped, nullptr);
+
+        if (ret == SOCKET_ERROR) {
+            if (WSAGetLastError() == WSA_IO_PENDING) {
+                DWORD wait = WSAWaitForMultipleEvents(1, &overlapped.hEvent, TRUE, INFINITE, FALSE);
+                if (wait == WSA_WAIT_FAILED || !WSAGetOverlappedResult(ConnectSocket, &overlapped, &recvBytes, FALSE, &flags)) {
+                    WSACloseEvent(overlapped.hEvent);
+                    break;
+                }
+            }
+            else {
+                WSACloseEvent(overlapped.hEvent);
+                break;
+            }
+        }
+
+        WSACloseEvent(overlapped.hEvent);
+
+        if (recvBytes == 0) {
+            std::cout << "서버 연결 종료" << std::endl;
+            g_running = false;
             break;
-        case IO_SEND:
-            delete overlapped;
-            break;
+        }
+
+        // 패킷 처리
+        char* ptr = buffer;
+        size_t remaining = recvBytes;
+        while (remaining > 0) {
+            size_t packet_size = ptr[0];
+            if (packet_size == 0) break;
+
+            if (saved_packet_size + remaining >= packet_size) {
+                memcpy(packet_buffer + saved_packet_size, ptr, packet_size - saved_packet_size);
+                ProcessPacket(packet_buffer);
+                ptr += packet_size - saved_packet_size;
+                remaining -= packet_size - saved_packet_size;
+                saved_packet_size = 0;
+            }
+            else {
+                memcpy(packet_buffer + saved_packet_size, ptr, remaining);
+                saved_packet_size += remaining;
+                remaining = 0;
+            }
         }
     }
-    return 0;
 }
 
-void PostRecv() {
-    if (ConnectSocket == INVALID_SOCKET) return;
-    OverlappedEx* overlapped = new OverlappedEx{};
-    overlapped->operation = IO_RECV;
-    overlapped->wsaBuf.buf = overlapped->buffer;
-    overlapped->wsaBuf.len = MAX_PACKET_SIZE;
-
-    DWORD flags = 0;
-    WSARecv(ConnectSocket, &overlapped->wsaBuf, 1, nullptr, &flags, reinterpret_cast<LPWSAOVERLAPPED>(overlapped), nullptr);
-}
+// =================================================================
+//                      유틸리티 함수
+// =================================================================
 
 void send_packet(void* packet) {
+    unsigned char* p = static_cast<unsigned char*>(packet);
+    size_t packet_size = p[0];
 
-    if (ConnectSocket == INVALID_SOCKET) return;
-    unsigned char* p = reinterpret_cast<unsigned char*>(packet);
-    int packet_size = p[0];
-
-    OverlappedEx* overlapped = new OverlappedEx{};
-    overlapped->operation = IO_SEND;
-    memcpy(overlapped->buffer, packet, packet_size);
-
-    overlapped->wsaBuf.buf = overlapped->buffer;
-    overlapped->wsaBuf.len = packet_size;
-
-    int result = WSASend(ConnectSocket, &overlapped->wsaBuf, 1, nullptr, 0, reinterpret_cast<LPWSAOVERLAPPED>(overlapped), nullptr);
-
-    if (result == SOCKET_ERROR && WSAGetLastError() != WSA_IO_PENDING) {
-        std::cerr << "WSASend Error: " << WSAGetLastError() << std::endl;
-        delete overlapped;
+    std::vector<char> buf(p, p + packet_size);
+    {
+        std::lock_guard<std::mutex> lock(g_sendMutex);
+        g_sendQueue.push(std::move(buf));
     }
-
-
+    g_sendCV.notify_one();
 }
 
-void InitializeNetwork()
-{
+void InitializeNetwork() {
+    
     WSAStartup(MAKEWORD(2, 2), &wsaData);
 
-    // 1. IOCP 핸들 생성
-    g_hIOCP = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, NUM_WORKER_THREADS);
+    ConnectSocket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, nullptr, 0, WSA_FLAG_OVERLAPPED);
 
-    // 2. 워커 스레드 생성
-    for (int i = 0; i < NUM_WORKER_THREADS; ++i) {
-        CreateThread(NULL, 0, WorkerThread, NULL, 0, NULL);
-    }
-
-    // 3. Overlapped 소켓 생성
-    ConnectSocket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
-
-    // 4. 논블로킹 소켓 설정
-    u_long nonBlockingMode = 1;
-    ioctlsocket(ConnectSocket, FIONBIO, &nonBlockingMode);
-
-    // 5. 비동기 연결 설정
+    // 비동기 연결 설정
     sockaddr_in serverAddr{};
     serverAddr.sin_family = AF_INET;
-    inet_pton(AF_INET, "127.0.0.1", &serverAddr.sin_addr); // 경민노트북
     serverAddr.sin_port = htons(SERVER_PORT);
+    inet_pton(AF_INET, "127.0.0.1", &serverAddr.sin_addr);
 
-    // 6. 비동기 연결 시작
-    int connectResult = WSAConnect(ConnectSocket, (sockaddr*)&serverAddr, sizeof(serverAddr), NULL, NULL, NULL, NULL);
+    WSAOVERLAPPED connectOverlapped{};
+    connectOverlapped.hEvent = WSACreateEvent();
 
-    if (connectResult == SOCKET_ERROR) {
-        int err = WSAGetLastError();
-        if (err != WSAEWOULDBLOCK) {
-            std::cerr << "connect Fail: " << err << std::endl;
-            closesocket(ConnectSocket);
-            WSACleanup();
-            exit(1);
-        }
+
+    if (connect(ConnectSocket, (sockaddr*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR) {
+        std::cerr << "연결 실패: " << WSAGetLastError() << std::endl;
+        closesocket(ConnectSocket);
+        WSACleanup();
+        exit(1);
     }
 
-    // 7. IOCP에 소켓 등록
-    CreateIoCompletionPort((HANDLE)ConnectSocket, g_hIOCP, 0, 0);
+    WSACloseEvent(connectOverlapped.hEvent);
 
-    // 8. 초기 수신 작업 시작
-    PostRecv();
+    std::thread(RecvThread).detach();
+    std::thread(SendThread).detach();
 
     std::cout << "Sever Connect" << std::endl;
 
-    // 9. 로그인 패킷 전송
-    cs_packet_login p;
+
+    // 로그인 패킷 전송
+    cs_packet_login p{};
     p.size = sizeof(p);
     p.type = CS_P_LOGIN;
-    // p.position = player.GetPosition();
     strcpy_s(p.name, sizeof(p.name), user_name.c_str());
     send_packet(&p);
-
+  
     std::cout << "[Client] Login Packet Send : Name=" << p.name << std::endl;
+
 }
+
+
 
 void ProcessPacket(char* ptr)
 {
@@ -189,7 +213,7 @@ void ProcessPacket(char* ptr)
             << " Positino(" << packet->position.x << "," << packet->position.y << "," << packet->position.z << ")"
             << " Look(" << packet->look.x << "," << packet->look.y << "," << packet->look.z << ")"
             << " Right(" << packet->right.x << "," << packet->right.y << "," << packet->right.z << ")"
-            << "Animation : " << static_cast<int>(packet ->animState)
+            << "Animation : " << static_cast<int>(packet->animState)
             << std::endl;
         break;
     }
@@ -208,7 +232,7 @@ void ProcessPacket(char* ptr)
             << " Right(" << packet->right.x << "," << packet->right.y << "," << packet->right.z << ")"
             << "Animation : " << static_cast<int>(packet->animState)
             << std::endl;
-        
+
         // 씬에 OtherPlayer가 딱 나타난다
         gGameFramework.OnOtherClientConnected();
 
@@ -224,7 +248,6 @@ void ProcessPacket(char* ptr)
 
         // OtherPlayer의 위치를 반영한다
         if (!gGameFramework.isLoading && !gGameFramework.isStartScene) {
-            packet->position.x += 3.8;
             gGameFramework.UpdateOtherPlayerPosition(0, packet->position);
             gGameFramework.UpdateOtherPlayerAnimation(0, packet->animState);
         }
@@ -250,7 +273,7 @@ void ProcessPacket(char* ptr)
         break;
     }
 
-    case SC_P_ITEM_SPAWN: 
+    case SC_P_ITEM_SPAWN:
     {
         sc_packet_item_spawn* pkt = reinterpret_cast<sc_packet_item_spawn*>(ptr);
 
@@ -265,14 +288,14 @@ void ProcessPacket(char* ptr)
         break;
     }
 
-    case SC_P_ITEM_DESPAWN: 
+    case SC_P_ITEM_DESPAWN:
     {
         sc_packet_item_despawn* pkt = reinterpret_cast<sc_packet_item_despawn*>(ptr);
         std::cout << "[Client] Item delete - ID: " << pkt->item_id << std::endl;
         break;
     }
 
-    case SC_P_ITEM_MOVE: 
+    case SC_P_ITEM_MOVE:
     {
         sc_packet_item_move* pkt = reinterpret_cast<sc_packet_item_move*>(ptr);
 
@@ -304,9 +327,10 @@ void ProcessPacket(char* ptr)
         // 예시 ->  gGameFramework.UpdateMonsterPosition(pkt->monsterID, pkt->position, pkt->state);
         break;
     }
-    
+
 
     default:
+
         std::cout << "Unknown Packet Type [" << ptr[1] << "]" << std::endl;
     }
 }
@@ -349,4 +373,11 @@ void send_position_to_server(const XMFLOAT3& position, const XMFLOAT3& look, con
     p.animState = animState;
     send_packet(&p);
 
+}
+
+void CleanupNetwork() {
+    g_running = false;
+    closesocket(ConnectSocket);
+    WSACleanup();
+    g_sendCV.notify_all(); // 송신 스레드 깨우기
 }

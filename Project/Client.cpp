@@ -22,14 +22,13 @@ INT_PTR CALLBACK About(HWND, UINT, WPARAM, LPARAM);
 std::string user_name;
 
 void InitializeNetwork();
-void CleanupNetwork();
 
-// Overlapped 구조체 정의
-struct ClientOverlapped : public WSAOVERLAPPED {
-	WSABUF wsaBuf;
-	char buffer[1024];
-	IO_OPERATION operation;
-};
+//// Overlapped 구조체 정의
+//struct ClientOverlapped : public WSAOVERLAPPED {
+//	WSABUF wsaBuf;
+//	char buffer[1024];
+//	IO_OPERATION operation;
+//};
 
 
 //----------------------------------------------------------------
@@ -194,15 +193,7 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 	return((INT_PTR)FALSE);
 }
 
-// ---------------- 네트워크 초기화 및 종료 ----------------
 
 
-void CleanupNetwork()
-{
-	if (ConnectSocket != INVALID_SOCKET) {
-		closesocket(ConnectSocket);
-		ConnectSocket = INVALID_SOCKET;
-	}
-	WSACleanup();
-}
+
 
