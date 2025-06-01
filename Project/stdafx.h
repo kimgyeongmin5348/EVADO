@@ -19,6 +19,8 @@
 #include <WS2tcpip.h>
 #include <thread>
 #include <mutex>
+#include <queue>
+#include <atomic>
 
 
 #pragma comment (lib, "WS2_32.LIB")
