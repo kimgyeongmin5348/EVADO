@@ -80,89 +80,89 @@ void CCollisionManager::HandleCollision(CPlayer* player, CGameObject* obj)
 {
     std::string ObjectFrameName = obj->GetFrameName();
 
-    if (frameCounter % 60 == 0)
-        cout << "ObjectFrameName: " << ObjectFrameName << endl;
+    //if (frameCounter % 60 == 0)
+    //    cout << "ObjectFrameName: " << ObjectFrameName << endl;
 
-    if (std::string::npos != ObjectFrameName.find("Map_wall_window")
-        || std::string::npos != ObjectFrameName.find("Map_wall_plain")
-        || std::string::npos != ObjectFrameName.find("Map_wall_baydoor")
-        )
-    {
-        // 플레이어와 벽의 경계 상자 가져오기
-        BoundingBox playerBox = player->GetBoundingBox();
-        BoundingBox wallBox = obj->GetBoundingBox();
+    //if (std::string::npos != ObjectFrameName.find("Map_wall_window")
+    //    || std::string::npos != ObjectFrameName.find("Map_wall_plain")
+    //    || std::string::npos != ObjectFrameName.find("Map_wall_baydoor")
+    //    )
+    //{
+    //    // 플레이어와 벽의 경계 상자 가져오기
+    //    BoundingBox playerBox = player->GetBoundingBox();
+    //    BoundingBox wallBox = obj->GetBoundingBox();
 
-        // 플레이어와 벽의 중심 간 차이
-        XMFLOAT3 playerCenter = playerBox.Center;
-        XMFLOAT3 wallCenter = wallBox.Center;
-        XMFLOAT3 diff(playerCenter.x - wallCenter.x, playerCenter.y - wallCenter.y, playerCenter.z - wallCenter.z);
+    //    // 플레이어와 벽의 중심 간 차이
+    //    XMFLOAT3 playerCenter = playerBox.Center;
+    //    XMFLOAT3 wallCenter = wallBox.Center;
+    //    XMFLOAT3 diff(playerCenter.x - wallCenter.x, playerCenter.y - wallCenter.y, playerCenter.z - wallCenter.z);
 
-        //// 플레이어 BoundingBox의 4개 꼭짓점 계산
-        XMFLOAT3 playerExtents = playerBox.Extents;
-        XMFLOAT3 playerVertices[4] = {
-            XMFLOAT3(playerCenter.x - playerExtents.x, playerCenter.y, playerCenter.z - playerExtents.z), // 우상단
-            XMFLOAT3(playerCenter.x + playerExtents.x, playerCenter.y, playerCenter.z - playerExtents.z), // 좌상단
-            XMFLOAT3(playerCenter.x + playerExtents.x, playerCenter.y, playerCenter.z + playerExtents.z), // 좌하단
-            XMFLOAT3(playerCenter.x - playerExtents.x, playerCenter.y, playerCenter.z + playerExtents.z), // 우하단
-        };
+    //    //// 플레이어 BoundingBox의 4개 꼭짓점 계산
+    //    XMFLOAT3 playerExtents = playerBox.Extents;
+    //    XMFLOAT3 playerVertices[4] = {
+    //        XMFLOAT3(playerCenter.x - playerExtents.x, playerCenter.y, playerCenter.z - playerExtents.z), // 우상단
+    //        XMFLOAT3(playerCenter.x + playerExtents.x, playerCenter.y, playerCenter.z - playerExtents.z), // 좌상단
+    //        XMFLOAT3(playerCenter.x + playerExtents.x, playerCenter.y, playerCenter.z + playerExtents.z), // 좌하단
+    //        XMFLOAT3(playerCenter.x - playerExtents.x, playerCenter.y, playerCenter.z + playerExtents.z), // 우하단
+    //    };
 
-        // 벽 BoundingBox의 4개 꼭짓점 계산
-        XMFLOAT3 wallExtents = wallBox.Extents;
-        XMFLOAT3 wallVertices[4] = {
-            XMFLOAT3(wallCenter.x - wallExtents.x, playerCenter.y, wallCenter.z - wallExtents.z), // 우상단
-            XMFLOAT3(wallCenter.x + wallExtents.x, playerCenter.y, wallCenter.z - wallExtents.z), // 좌상단
-            XMFLOAT3(wallCenter.x + wallExtents.x, playerCenter.y, wallCenter.z + wallExtents.z), // 좌하단
-            XMFLOAT3(wallCenter.x - wallExtents.x, playerCenter.y, wallCenter.z + wallExtents.z), // 우하단
-        };
+    //    // 벽 BoundingBox의 4개 꼭짓점 계산
+    //    XMFLOAT3 wallExtents = wallBox.Extents;
+    //    XMFLOAT3 wallVertices[4] = {
+    //        XMFLOAT3(wallCenter.x - wallExtents.x, playerCenter.y, wallCenter.z - wallExtents.z), // 우상단
+    //        XMFLOAT3(wallCenter.x + wallExtents.x, playerCenter.y, wallCenter.z - wallExtents.z), // 좌상단
+    //        XMFLOAT3(wallCenter.x + wallExtents.x, playerCenter.y, wallCenter.z + wallExtents.z), // 좌하단
+    //        XMFLOAT3(wallCenter.x - wallExtents.x, playerCenter.y, wallCenter.z + wallExtents.z), // 우하단
+    //    };
 
-        // 벽이 밀어낼 방향 과 거리 찾기
-        XMFLOAT3 pushDirection(0, 0, 0);
-        float pushDistance{ 0.0f };
-        float pushMargin{ 0.0f };
-        float maxExtent = std::max(wallExtents.x, wallExtents.z);
-        if (maxExtent == wallExtents.x)
-        {
-            if (diff.z < 0)
-            {
-                // 위로 밀어야 함
-                pushDirection = XMFLOAT3(0, 0, -1);
-                pushDistance = playerVertices[2].z - wallVertices[1].z + pushMargin;
-            }
-            else
-            {
-                // 아래로 밀어야 함
-                pushDirection = XMFLOAT3(0, 0, 1);
-                pushDistance = wallVertices[2].z - playerVertices[1].z + pushMargin;
-            }
-        }
-        else
-        {
-            if (diff.x < 0)
-            {
-                // 오른쪽으로 밀어야 함
-                pushDirection = XMFLOAT3(-1, 0, 0);
-                pushDistance = playerVertices[1].x - wallVertices[0].x + pushMargin;
-            }
-            else
-            {
-                // 왼쪽으로 밀어야 함
-                pushDirection = XMFLOAT3(1, 0, 0);
-                pushDistance = wallVertices[1].x - playerVertices[0].x + pushMargin;
-            }
-        }
+    //    // 벽이 밀어낼 방향 과 거리 찾기
+    //    XMFLOAT3 pushDirection(0, 0, 0);
+    //    float pushDistance{ 0.0f };
+    //    float pushMargin{ 0.0f };
+    //    float maxExtent = std::max(wallExtents.x, wallExtents.z);
+    //    if (maxExtent == wallExtents.x)
+    //    {
+    //        if (diff.z < 0)
+    //        {
+    //            // 위로 밀어야 함
+    //            pushDirection = XMFLOAT3(0, 0, -1);
+    //            pushDistance = playerVertices[2].z - wallVertices[1].z + pushMargin;
+    //        }
+    //        else
+    //        {
+    //            // 아래로 밀어야 함
+    //            pushDirection = XMFLOAT3(0, 0, 1);
+    //            pushDistance = wallVertices[2].z - playerVertices[1].z + pushMargin;
+    //        }
+    //    }
+    //    else
+    //    {
+    //        if (diff.x < 0)
+    //        {
+    //            // 오른쪽으로 밀어야 함
+    //            pushDirection = XMFLOAT3(-1, 0, 0);
+    //            pushDistance = playerVertices[1].x - wallVertices[0].x + pushMargin;
+    //        }
+    //        else
+    //        {
+    //            // 왼쪽으로 밀어야 함
+    //            pushDirection = XMFLOAT3(1, 0, 0);
+    //            pushDistance = wallVertices[1].x - playerVertices[0].x + pushMargin;
+    //        }
+    //    }
 
-        XMFLOAT3 pushVector(
-            pushDirection.x * pushDistance,
-            0,
-            pushDirection.z * pushDistance
-        );
+    //    XMFLOAT3 pushVector(
+    //        pushDirection.x * pushDistance,
+    //        0,
+    //        pushDirection.z * pushDistance
+    //    );
 
-        XMFLOAT3 shift = pushVector;
-        player->SetVelocity(XMFLOAT3(0, 0, 0));
-        player->Move(shift, false);
-        player->CalculateBoundingBox();
-        playerBox = player->GetBoundingBox();
-    }
+    //    XMFLOAT3 shift = pushVector;
+    //    player->SetVelocity(XMFLOAT3(0, 0, 0));
+    //    player->Move(shift, false);
+    //    player->CalculateBoundingBox();
+    //    playerBox = player->GetBoundingBox();
+    //}
 
     if (std::string::npos != ObjectFrameName.find("Map_barrel")
         || std::string::npos != ObjectFrameName.find("Map_pallet_variation_01")
@@ -190,6 +190,10 @@ void CCollisionManager::HandleCollision(CPlayer* player, CGameObject* obj)
         || std::string::npos != ObjectFrameName.find("Map_duct_tee")
         || std::string::npos != ObjectFrameName.find("Map_crate_long")
         || std::string::npos != ObjectFrameName.find("Map_crate_short")
+
+        || std::string::npos != ObjectFrameName.find("Map_wall_window")
+        || std::string::npos != ObjectFrameName.find("Map_wall_plain")
+        || std::string::npos != ObjectFrameName.find("Map_wall_baydoor")
         )
     {
         DirectX::XMFLOAT3 playerPos = player->GetPosition();
@@ -236,19 +240,5 @@ void CCollisionManager::HandleCollision(CPlayer* player, CGameObject* obj)
         player->SetVelocity({ 0.0f, 0.0f, 0.0f }); // 속도 정지
         player->CalculateBoundingBox();
         playerBox = player->GetBoundingBox();
-    }
-
-    if (std::string::npos != ObjectFrameName.find("Map_corridor_4way")
-        || std::string::npos != ObjectFrameName.find("Map_corridor_corner")
-        || std::string::npos != ObjectFrameName.find("Map_wall_corridor")
-        || std::string::npos != ObjectFrameName.find("Map_corridor_deadend_window")
-        || std::string::npos != ObjectFrameName.find("Map_corridor_passthrough")
-        || std::string::npos != ObjectFrameName.find("Map_corridor_tee")
-        )
-    {
-        //cout << obj->GetChild()->GetSibling()->GetBoundingBox().Center.x << ", " <<  
-        //    obj->GetChild()->GetSibling()->GetBoundingBox().Center.z << ", " <<
-        //    obj->GetChild()->GetSibling()->GetBoundingBox().Extents.x << ", " <<
-        //    obj->GetChild()->GetSibling()->GetBoundingBox().Extents.z << endl;
     }
 }
