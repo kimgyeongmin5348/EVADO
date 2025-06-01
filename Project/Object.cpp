@@ -914,6 +914,7 @@ void CGameObject::Move(XMFLOAT3 xmf3Offset)
 	m_xmf4x4ToParent._42 += xmf3Offset.y;
 	m_xmf4x4ToParent._43 += xmf3Offset.z;
 
+	CalculateBoundingBox();
 	UpdateTransform(NULL);
 }
 
@@ -1599,6 +1600,49 @@ void CSpider::Animate(float fTimeElapsed)
 
 	CGameObject::Animate(fTimeElapsed);
 }
+
+void CGameObject::CalculateBoundingBox()
+{
+	std::vector<CGameObject*> nodesToProcess = { this };
+	bool isFirst = true;
+
+	while (!nodesToProcess.empty())
+	{
+		CGameObject* current = nodesToProcess.back();
+		nodesToProcess.pop_back();
+
+		if (current->m_pMesh)
+		{
+			BoundingBox localBox = current->m_pMesh->GetBoundingBox();
+			BoundingBox transformedBox;
+
+			localBox.Transform(transformedBox, XMLoadFloat4x4(&current->m_xmf4x4World));
+
+			if (isFirst)
+			{
+				m_BoundingBox = transformedBox;
+				isFirst = false;
+			}
+			else
+			{
+				BoundingBox::CreateMerged(m_BoundingBox, m_BoundingBox, transformedBox);
+			}
+		}
+
+		if (current->m_pChild)
+		{
+			CGameObject* child = current->m_pChild;
+			nodesToProcess.push_back(child);
+
+			while (child->m_pSibling)
+			{
+				child = child->m_pSibling;
+				nodesToProcess.push_back(child);
+			}
+		}
+	}
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //

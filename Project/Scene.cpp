@@ -81,6 +81,46 @@ void CScene::BuildDefaultLightsAndMaterials(bool toggle)
 	m_pLights[4].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.001f, 0.0001f);
 }
 
+void CScene::InitializeCollisionSystem()
+{
+	BoundingBox worldBounds(XMFLOAT3(-20.0f, -10.f, -66.0f), XMFLOAT3(150.0f, 100.0f, 170.0f));
+	m_CollisionManager.Build(worldBounds, 35, 4);
+
+	for (int i = 0; i < m_nGameObjects; ++i) {
+		m_CollisionManager.InsertObject(m_ppGameObjects[i]);
+	}
+
+	for (int i = 0; i < m_nHierarchicalGameObjects; ++i) {
+		m_CollisionManager.InsertObject(m_ppHierarchicalGameObjects[i]);
+	}
+
+	for (auto obj : m_pMap->m_vMapObjects) {
+		std::string strFrameName = obj->GetFrameName();
+		if (std::string::npos != strFrameName.find("floor") || std::string::npos != strFrameName.find("ceiling"))
+			continue;
+		m_CollisionManager.InsertObject(obj);
+	}
+
+	//m_CollisionManager.PrintTree();
+}
+
+void CScene::GenerateGameObjectsBoundingBox()
+{
+	m_pPlayer->CalculateBoundingBox();
+
+	for (int i = 0; i < m_nGameObjects; ++i) {
+		m_ppGameObjects[i]->CalculateBoundingBox();
+	}
+
+	for (int i = 0; i < m_nHierarchicalGameObjects; ++i) {
+		m_ppHierarchicalGameObjects[i]->CalculateBoundingBox();
+	}
+
+	for (auto obj : m_pMap->m_vMapObjects) {
+		obj->CalculateBoundingBox(); 
+	}
+}
+
 void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
@@ -97,7 +137,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	XMFLOAT3 xmf3Scale(0.0f, 0.0f, 0.0f);
 	XMFLOAT4 xmf4Color(0.0f, 0.3f, 0.0f, 0.0f);
-	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Terrain/HeightMap.raw"), 257, 257, xmf3Scale, xmf4Color);
+	//m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Terrain/HeightMap.raw"), 257, 257, xmf3Scale, xmf4Color);
 
 	m_nHierarchicalGameObjects = 4; // spider, flashlight, shovel, whistle
 	m_ppHierarchicalGameObjects = new CGameObject * [m_nHierarchicalGameObjects];
@@ -139,6 +179,21 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	CLoadedModelInfo* pOtherPlayerModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Player.bin", NULL);
 	m_ppOtherPlayers[0] = new OtherPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pOtherPlayerModel);
 	m_ppOtherPlayers[0]->SetPosition(-1000, -1000, -1000);
+	m_ppOtherPlayers[0]->m_pSkinnedAnimationController->SetTrackEnable(0, true);
+	m_ppOtherPlayers[0]->m_pSkinnedAnimationController->SetTrackEnable(1, false);
+	m_ppOtherPlayers[0]->m_pSkinnedAnimationController->SetTrackEnable(2, false);
+	m_ppOtherPlayers[0]->m_pSkinnedAnimationController->SetTrackEnable(3, false);
+	m_ppOtherPlayers[0]->m_pSkinnedAnimationController->SetTrackEnable(4, false);
+	m_ppOtherPlayers[0]->m_pSkinnedAnimationController->SetTrackEnable(5, false);
+	m_ppOtherPlayers[0]->m_pSkinnedAnimationController->SetTrackEnable(6, false);
+
+	m_ppOtherPlayers[0]->m_pSkinnedAnimationController->SetTrackPosition(1, 0.0f);
+	m_ppOtherPlayers[0]->m_pSkinnedAnimationController->SetTrackPosition(2, 0.0f);
+	m_ppOtherPlayers[0]->m_pSkinnedAnimationController->SetTrackPosition(3, 0.0f);
+	m_ppOtherPlayers[0]->m_pSkinnedAnimationController->SetTrackPosition(4, 0.0f);
+	m_ppOtherPlayers[0]->m_pSkinnedAnimationController->SetTrackPosition(5, 0.0f);
+	m_ppOtherPlayers[0]->m_pSkinnedAnimationController->SetTrackPosition(6, 0.0f);
+
 	if (pOtherPlayerModel) delete pOtherPlayerModel;
 	//// OtherPlayer
 	//m_nGameObjects = 1;
@@ -151,44 +206,48 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	////if (pOtherPlayerModel) delete pOtherPlayerModel;
 
 	// 인벤토리 UI
-	m_nShaders = 2;
+	m_nShaders = 4;
 	m_ppShaders = new CShader * [m_nShaders];
 
-	CTextureToScreenShader* pTextureItemShader = new CTextureToScreenShader(3);
-	pTextureItemShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-
-	CTexture* pTextureItem = new CTexture(3, RESOURCE_TEXTURE2D, 0, 1);
-	pTextureItem->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/FlashLight_bg_ui.dds", RESOURCE_TEXTURE2D, 0);
-	pTextureItem->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Shovel_bg_ui.dds", RESOURCE_TEXTURE2D, 1);
-	pTextureItem->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Whistle_bg_ui.dds", RESOURCE_TEXTURE2D, 2);
-
-	CreateShaderResourceViews(pd3dDevice, pTextureItem, 0, 15);
-
+	CTextureToScreenShader* pTextureItem1Shader = new CTextureToScreenShader(1);
+	pTextureItem1Shader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	CTexture* pTextureItem1 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pTextureItem1->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/FlashLight_bg_ui.dds", RESOURCE_TEXTURE2D, 0);
+	CreateShaderResourceViews(pd3dDevice, pTextureItem1, 0, 15);
 	CScreenRectMeshTextured* pMesh = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, -0.5f + 0.02f, 0.225f, -0.55f, 0.45f);
-	pTextureItemShader->SetMesh(0, pMesh);
-	pMesh = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, -0.25f + 0.02f, 0.225f, -0.55f, 0.45f);
-	pTextureItemShader->SetMesh(1, pMesh);
-	pMesh = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, 0.0f + 0.02f, 0.225f, -0.55f, 0.45f);
-	pTextureItemShader->SetMesh(2, pMesh);
+	pTextureItem1Shader->SetMesh(0, pMesh);
+	pTextureItem1Shader->SetTexture(pTextureItem1);
+	m_ppShaders[0] = pTextureItem1Shader;
 
-	pTextureItemShader->SetTexture(pTextureItem);
+	CTextureToScreenShader* pTextureItem2Shader = new CTextureToScreenShader(1);
+	pTextureItem2Shader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	CTexture* pTextureItem2 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pTextureItem2->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Shovel_bg_ui.dds", RESOURCE_TEXTURE2D, 0);
+	CreateShaderResourceViews(pd3dDevice, pTextureItem2, 0, 15);
+	CScreenRectMeshTextured* pMesh1 = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, -0.25f + 0.02f, 0.225f, -0.55f, 0.45f);
+	pTextureItem2Shader->SetMesh(0, pMesh1);
+	pTextureItem2Shader->SetTexture(pTextureItem2);
+	m_ppShaders[1] = pTextureItem2Shader;
 
-	m_ppShaders[0] = pTextureItemShader;
+	CTextureToScreenShader* pTextureItem3Shader = new CTextureToScreenShader(1);
+	pTextureItem3Shader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	CTexture* pTextureItem3 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pTextureItem3->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Whistle_bg_ui.dds", RESOURCE_TEXTURE2D, 0);
+	CreateShaderResourceViews(pd3dDevice, pTextureItem3, 0, 15);
+	CScreenRectMeshTextured* pMesh2 = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, 0.0f + 0.02f, 0.225f, -0.55f, 0.45f);
+	pTextureItem3Shader->SetMesh(0, pMesh2);
+	pTextureItem3Shader->SetTexture(pTextureItem3);
+	m_ppShaders[2] = pTextureItem3Shader;
 
 	CTextureToScreenShader* pInventoryShader = new CTextureToScreenShader(1);
 	pInventoryShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-
 	CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
 	pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Inventory.dds", RESOURCE_TEXTURE2D, 0);
-
 	CreateShaderResourceViews(pd3dDevice, pTexture, 0, 15);
-
-	CScreenRectMeshTextured* pMesh1 = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, -0.5f, 1.0f, -0.5f, 0.5f);
-	pInventoryShader->SetMesh(0, pMesh1);
-
+	CScreenRectMeshTextured* pInventoryMesh = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, -0.5f, 1.0f, -0.5f, 0.5f);
+	pInventoryShader->SetMesh(0, pInventoryMesh);
 	pInventoryShader->SetTexture(pTexture);
-
-	m_ppShaders[1] = pInventoryShader;
+	m_ppShaders[3] = pInventoryShader;
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
@@ -541,11 +600,11 @@ bool CScene::ProcessInput(UCHAR *pKeysBuffer)
 
 void CScene::AnimateObjects(float fTimeElapsed)
 {
-	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Animate(fTimeElapsed);
+	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Animate(fTimeElapsed);	
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);
 
 	if (m_pLights)
-	{
+	{	
 		m_pLights[1].m_xmf3Position = m_pPlayer->GetPosition();
 		m_pLights[1].m_xmf3Direction = m_pPlayer->GetLookVector();
 	}
@@ -569,7 +628,6 @@ void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera
 	if (m_pMap) m_pMap->Render(pd3dCommandList, pCamera);
 
 	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Render(pd3dCommandList, pCamera);
-	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
   
 	for (int i = 0; i < m_nHierarchicalGameObjects; i++)
 	{
@@ -580,14 +638,17 @@ void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera
 			m_ppHierarchicalGameObjects[i]->Render(pd3dCommandList, pCamera);
 		}
 	}
+
+	m_CollisionManager.Update(m_pPlayer);
   
 	for (int i = 0; i < m_nOtherPlayers; ++i) 
 	{
 		//if (m_ppOtherPlayers[i]->isConnedted)
-			m_ppOtherPlayers[i]->Render(pd3dCommandList, pCamera);
+		m_ppOtherPlayers[i]->Animate(m_ppOtherPlayers[i]->animation, m_fElapsedTime);
+		m_ppOtherPlayers[i]->Render(pd3dCommandList, pCamera);
 	}
 
-
+	for (int i = 0; i < m_nShaders; i++) if (dynamic_cast<CTextureToScreenShader*>(m_ppShaders[i])->IsInventory[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
 }
 
 // 아이템 생성 server

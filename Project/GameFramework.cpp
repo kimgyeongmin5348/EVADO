@@ -296,14 +296,16 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 				m_pScene->BuildDefaultLightsAndMaterials(flashlightToggle);
 			}
 			if (m_pPlayer->items[2]) m_pPlayer->isSwing = true;
+			::SetCapture(hWnd);
+			::GetCursorPos(&m_ptOldCursorPos);
 			break;
 		case WM_LBUTTONUP:
 		case WM_RBUTTONUP:
+			::ReleaseCapture();
 			break;
 		case WM_MOUSEMOVE:
-			::SetCapture(hWnd);
-			::GetCursorPos(&m_ptOldCursorPos);
-			//::ReleaseCapture();
+
+			//
 			break;
 		default:
 			break;
@@ -319,13 +321,13 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		switch (wParam)
 		{
 		case VK_ESCAPE:
-			::PostQuitMessage(0);
+			exit(0);
 			break;
 		case VK_RETURN:
 			m_ppScenes[m_nScene]->ReleaseObjects();
 			m_nCurrentScene = 1;
 			BuildObjects();
-      isStartScene = false;
+			isStartScene = false;
 			break;
 		case VK_F1:
 		case VK_F2:
@@ -340,9 +342,12 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		case '3':
 		{
 			int itemIndex = wParam - '0';
+			int shaderIndex = wParam - '1';
 			if (itemIndex < m_pScene->m_nHierarchicalGameObjects) {
 				ItemToHand(itemIndex);
 				m_pPlayer->items[itemIndex] = !m_pPlayer->items[itemIndex];
+				dynamic_cast<CTextureToScreenShader*>(m_pScene->m_ppShaders[shaderIndex])->IsInventory[shaderIndex] 
+					= !dynamic_cast<CTextureToScreenShader*>(m_pScene->m_ppShaders[shaderIndex])->IsInventory[shaderIndex];
 			}
 			break;
 		}
@@ -474,6 +479,8 @@ void CGameFramework::BuildObjects()
 	m_nScenes = 2; // 총 Scene 개수
 	m_ppScenes = new CScene * [m_nScenes];
 
+	bool b = false;
+
 	if (m_nCurrentScene == 0) {
 		m_ppScenes[0] = new CStartScene();
 		m_ppScenes[0]->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
@@ -483,9 +490,13 @@ void CGameFramework::BuildObjects()
 	else if (m_nCurrentScene == 1) {
 		m_ppScenes[1] = new CScene();
 		m_ppScenes[1]->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
-		CTerrainPlayer* pPlayer = new CTerrainPlayer(m_pd3dDevice, m_pd3dCommandList, m_ppScenes[1]->GetGraphicsRootSignature(), m_ppScenes[1]->m_pTerrain);
+		CTerrainPlayer* pPlayer = new CTerrainPlayer(m_pd3dDevice, m_pd3dCommandList, m_ppScenes[1]->GetGraphicsRootSignature(), NULL);
+
 		m_ppScenes[1]->SetPlayer(pPlayer);
 		m_pPlayer->SetPosition(XMFLOAT3(0,0,0));
+
+		m_ppScenes[1]->GenerateGameObjectsBoundingBox();
+		m_ppScenes[1]->InitializeCollisionSystem();
 	}
 
 //#ifdef _WITH_TERRAIN_PLAYER
@@ -572,7 +583,9 @@ void CGameFramework::AnimateObjects()
 {
 	float fTimeElapsed = m_GameTimer.GetTimeElapsed();
 
-	if (m_pScene) m_pScene->AnimateObjects(fTimeElapsed);
+	if (m_pScene) { 
+		m_pScene->AnimateObjects(fTimeElapsed); 
+	}
 
 	m_pPlayer->Animate(fTimeElapsed);
 
@@ -589,6 +602,7 @@ void CGameFramework::AnimateObjects()
 				}
 			}
 		}
+		m_pScene->m_ppOtherPlayers[0]->m_pSkinnedAnimationController->SetTrackEnable(0, true);
 	}
 }
 

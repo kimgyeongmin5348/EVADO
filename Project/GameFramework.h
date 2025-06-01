@@ -52,6 +52,10 @@ public:
 	{
 		m_ppScenes[m_nCurrentScene]->UpdateOtherPlayerPosition(clinetnum, position);
 	}
+	void UpdateOtherPlayerAnimation(int clinetnum, int animNum)
+	{
+		m_ppScenes[m_nCurrentScene]->UpdateOtherPlayerAnimation(clinetnum, animNum);
+	}
 
 	//해볼려고 했음...
 	void AddItemToScene(long long id, ITEM_TYPE type, const XMFLOAT3& position)

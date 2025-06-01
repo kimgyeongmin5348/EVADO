@@ -37,27 +37,7 @@ std::mutex g_item_mutex;
 //                      네트워크 코어 로직
 // =================================================================
 
-<<<<<<< Updated upstream
-        if (!result || bytesTransferred == 0) {
-            int error_code = result ? WSAGetLastError() : WSAECONNRESET;
-            std::cerr << "[클라] 연결 종료. 오류 코드: " << error_code << std::endl;
 
-            // 1. 소켓 정리
-            if (ConnectSocket != INVALID_SOCKET) {
-                closesocket(ConnectSocket);
-                ConnectSocket = INVALID_SOCKET;
-            }
-
-            // 2. 다른 플레이어 데이터 초기화
-            g_other_players.clear();
-            g_myid = 0;
-
-            // 3. 서버에 연결 종료 알림 (옵션)
-            //PostQuitMessage(0); // GUI 애플리케이션인 경우
-
-            delete overlapped;
-            continue;
-=======
 void SendThread() {
     while (g_running) {
         std::vector<char> packet;
@@ -67,7 +47,6 @@ void SendThread() {
             if (!g_running) break;
             packet = std::move(g_sendQueue.front());
             g_sendQueue.pop();
->>>>>>> Stashed changes
         }
 
         WSABUF wsaBuf = { static_cast<ULONG>(packet.size()), packet.data() };
@@ -160,29 +139,10 @@ void send_packet(void* packet) {
     unsigned char* p = static_cast<unsigned char*>(packet);
     size_t packet_size = p[0];
 
-<<<<<<< Updated upstream
-    if (ConnectSocket == INVALID_SOCKET) return;
-    unsigned char* p = reinterpret_cast<unsigned char*>(packet);
-    int packet_size = p[0];
-
-    OverlappedEx* overlapped = new OverlappedEx{};
-    overlapped->operation = IO_SEND;
-    memcpy(overlapped->buffer, packet, packet_size);
-
-    overlapped->wsaBuf.buf = overlapped->buffer;
-    overlapped->wsaBuf.len = packet_size;
-
-    int result = WSASend(ConnectSocket, &overlapped->wsaBuf, 1, nullptr, 0, reinterpret_cast<LPWSAOVERLAPPED>(overlapped), nullptr);
-
-    if (result == SOCKET_ERROR && WSAGetLastError() != WSA_IO_PENDING) {
-        std::cerr << "WSASend 오류: " << WSAGetLastError() << std::endl;
-        delete overlapped;
-=======
     std::vector<char> buf(p, p + packet_size);
     {
         std::lock_guard<std::mutex> lock(g_sendMutex);
         g_sendQueue.push(std::move(buf));
->>>>>>> Stashed changes
     }
     g_sendCV.notify_one();
 }
@@ -196,32 +156,18 @@ void InitializeNetwork() {
     // 비동기 연결 설정
     sockaddr_in serverAddr{};
     serverAddr.sin_family = AF_INET;
-<<<<<<< Updated upstream
-    inet_pton(AF_INET, "127.0.0.1", &serverAddr.sin_addr);
-=======
->>>>>>> Stashed changes
     serverAddr.sin_port = htons(SERVER_PORT);
     inet_pton(AF_INET, "127.0.0.1", &serverAddr.sin_addr);
 
     WSAOVERLAPPED connectOverlapped{};
     connectOverlapped.hEvent = WSACreateEvent();
 
-<<<<<<< Updated upstream
-    if (connectResult == SOCKET_ERROR) {
-        int err = WSAGetLastError();
-        if (err != WSAEWOULDBLOCK) {
-            std::cerr << "연결 실패: " << err << std::endl;
-            closesocket(ConnectSocket);
-            WSACleanup();
-            exit(1);
-        }
-=======
+
     if (connect(ConnectSocket, (sockaddr*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR) {
         std::cerr << "연결 실패: " << WSAGetLastError() << std::endl;
         closesocket(ConnectSocket);
         WSACleanup();
         exit(1);
->>>>>>> Stashed changes
     }
 
     WSACloseEvent(connectOverlapped.hEvent);
@@ -229,24 +175,18 @@ void InitializeNetwork() {
     std::thread(RecvThread).detach();
     std::thread(SendThread).detach();
 
-<<<<<<< Updated upstream
-    std::cout << "서버에 성공적으로 연결되었습니다." << std::endl;
+    std::cout << "Sever Connect" << std::endl;
 
-    // 9. 로그인 패킷 전송
-    cs_packet_login p;
-=======
+
     // 로그인 패킷 전송
     cs_packet_login p{};
->>>>>>> Stashed changes
     p.size = sizeof(p);
     p.type = CS_P_LOGIN;
     strcpy_s(p.name, sizeof(p.name), user_name.c_str());
     send_packet(&p);
-<<<<<<< Updated upstream
+  
+    std::cout << "[Client] Login Packet Send : Name=" << p.name << std::endl;
 
-    std::cout << "[클라] 로그인 패킷 전송: 이름=" << p.name << std::endl;
-=======
->>>>>>> Stashed changes
 }
 
 
@@ -307,16 +247,18 @@ void ProcessPacket(char* ptr)
         if (other_id == g_myid) break;
 
         // OtherPlayer의 위치를 반영한다
-        if (!gGameFramework.isLoading && !gGameFramework.isStartScene)
+        if (!gGameFramework.isLoading && !gGameFramework.isStartScene) {
             gGameFramework.UpdateOtherPlayerPosition(0, packet->position);
+            gGameFramework.UpdateOtherPlayerAnimation(0, packet->animState);
+        }
 
 
-        std::cout << "[Client] New Player Information Recv "
-            << " Position(" << packet->position.x << "," << packet->position.y << "," << packet->position.z << ")"
-            << " Look(" << packet->look.x << "," << packet->look.y << "," << packet->look.z << ")"
-            << " Right(" << packet->right.x << "," << packet->right.y << "," << packet->right.z << ")"
-            << "Animation : " << static_cast<int>(packet->animState)
-            << std::endl;
+        //std::cout << "[Client] New Player Information Recv "
+        //    << " Position(" << packet->position.x << "," << packet->position.y << "," << packet->position.z << ")"
+        //    << " Look(" << packet->look.x << "," << packet->look.y << "," << packet->look.z << ")"
+        //    << " Right(" << packet->right.x << "," << packet->right.y << "," << packet->right.z << ")"
+        //    << "Animation : " << static_cast<int>(packet->animState)
+        //    << std::endl;
 
         break;
     }
@@ -326,7 +268,7 @@ void ProcessPacket(char* ptr)
         sc_packet_leave* packet = reinterpret_cast<sc_packet_leave*>(ptr);
         int other_id = packet->id;
 
-        std::cout << "[Client] 플레이어 제거: ID=" << other_id << std::endl;
+        std::cout << "[Client] Player Remove: ID=" << other_id << std::endl;
 
         break;
     }
@@ -388,8 +330,8 @@ void ProcessPacket(char* ptr)
 
 
     default:
-        std::cout << "알 수 없는 패킷 타입 [" << ptr[1] << "]" << std::endl;
-<<<<<<< Updated upstream
+
+        std::cout << "Unknown Packet Type [" << ptr[1] << "]" << std::endl;
     }
 }
 
@@ -416,8 +358,6 @@ void process_data(char* net_buf, size_t io_byte) {
             saved_packet_size += io_byte;
             io_byte = 0;
         }
-=======
->>>>>>> Stashed changes
     }
 }
 

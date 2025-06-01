@@ -68,8 +68,8 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 		if (dwDirection & DIR_BACKWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, -fDistance);
 		if (dwDirection & DIR_RIGHT) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, fDistance);
 		if (dwDirection & DIR_LEFT) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, -fDistance);
-		if (dwDirection & DIR_UP) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, fDistance);
-		if (dwDirection & DIR_DOWN) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, -fDistance);
+		//if (dwDirection & DIR_UP) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, fDistance);
+		//if (dwDirection & DIR_DOWN) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, -fDistance);
 
 		Move(xmf3Shift, bUpdateVelocity);
 	}
@@ -87,7 +87,7 @@ void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
 		m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Shift);
 		m_pCamera->Move(xmf3Shift);
 	}
-	
+	CalculateBoundingBox();
 }
 
 void CPlayer::Rotate(float x, float y, float z)
@@ -149,6 +149,57 @@ void CPlayer::Rotate(float x, float y, float z)
 	m_xmf3Up = Vector3::CrossProduct(m_xmf3Look, m_xmf3Right, true);
 }
 
+void CPlayer::CalculateBoundingBox()
+{
+	std::vector<CGameObject*> nodesToProcess = { this };
+	bool isFirst = true;
+	BoundingBox mergedBox;
+
+	while (!nodesToProcess.empty())
+	{
+		CGameObject* current = nodesToProcess.back();
+		nodesToProcess.pop_back();
+
+		if (current->m_pMesh)
+		{
+			BoundingBox localBox = current->m_pMesh->GetBoundingBox();
+			BoundingBox transformedBox;
+
+			localBox.Transform(transformedBox, XMLoadFloat4x4(&current->m_xmf4x4World));
+
+			if (isFirst)
+			{
+				mergedBox = transformedBox;
+				isFirst = false;
+			}
+			else
+			{
+				BoundingBox::CreateMerged(mergedBox, mergedBox, transformedBox);
+			}
+		}
+
+		if (current->m_pChild)
+		{
+			CGameObject* child = current->m_pChild;
+			nodesToProcess.push_back(child);
+
+			while (child->m_pSibling)
+			{
+				child = child->m_pSibling;
+				nodesToProcess.push_back(child);
+			}
+		}
+	}
+
+	float diameter = std::max(mergedBox.Extents.x, mergedBox.Extents.z) * 2.0f;
+	m_BoundingCylinder.Radius = diameter * 0.5f;
+	m_BoundingCylinder.Height = mergedBox.Extents.y * 2.0f;
+	m_BoundingCylinder.Center = mergedBox.Center;
+
+	// 3. ¿øÅëÀ» °¨½Î´Â AABB·Î º¯È¯
+	ConvertCylinderToAABB(m_BoundingCylinder, m_BoundingBox);
+}
+
 void CPlayer::Update(float fTimeElapsed)
 {
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, m_xmf3Gravity);
@@ -173,7 +224,7 @@ void CPlayer::Update(float fTimeElapsed)
 	DWORD nCurrentCameraMode = m_pCamera->GetMode();
 	if (nCurrentCameraMode == THIRD_PERSON_CAMERA) { 
 		m_pCamera->Update(m_xmf3Position, fTimeElapsed); 
-		m_pCamera->SetLookAt(m_xmf3Position); // ÇÃ·¹ÀÌ¾î°¡ È¸Àü ½Ã Ä«¸Þ¶óµµ È¸Àü
+		m_pCamera->SetLookAt(m_xmf3Position);
 	}
 	if (m_pCameraUpdatedContext) OnCameraUpdateCallback(fTimeElapsed);
 	if (nCurrentCameraMode == THIRD_PERSON_CAMERA) m_pCamera->SetLookAt(m_xmf3Position);
@@ -324,13 +375,13 @@ CCamera *CTerrainPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 	{
 		case FIRST_PERSON_CAMERA:
 			SetFriction(500.0f);
-			SetGravity(XMFLOAT3(0.0f, -100.0f, 0.0f));
+			SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
 			SetMaxVelocityXZ(300.0f);
 			SetMaxVelocityY(800.0f);
 			m_pCamera = OnChangeCamera(FIRST_PERSON_CAMERA, nCurrentCameraMode);
 			m_pCamera->SetTimeLag(0.0f);
-			m_pCamera->SetOffset(XMFLOAT3(0.0f, 1.5f, -0.15f));
-			m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
+			m_pCamera->SetOffset(XMFLOAT3(0.0f, 1.5f, 0.0f));
+			m_pCamera->GenerateProjectionMatrix(0.01f, 5000.0f, ASPECT_RATIO, 60.0f);
 			m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 			m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 			break;
@@ -348,12 +399,12 @@ CCamera *CTerrainPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 			break;
 		case THIRD_PERSON_CAMERA:
 			SetFriction(250.0f);
-			SetGravity(XMFLOAT3(0.0f, -250.0f, 0.0f));
+			SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
 			SetMaxVelocityXZ(300.0f);
 			SetMaxVelocityY(400.0f);
 			m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
 			m_pCamera->SetTimeLag(0.25f);
-			m_pCamera->SetOffset(XMFLOAT3(0.0f, 5.0f, -5.0f));
+			m_pCamera->SetOffset(XMFLOAT3(0.0f, 5.0f, -2.5f));
 			m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
 			m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 			m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
@@ -364,6 +415,8 @@ CCamera *CTerrainPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 	m_pCamera->SetPosition(Vector3::Add(m_xmf3Position, m_pCamera->GetOffset()));
 	Update(fTimeElapsed);
 
+	if (m_pCamera->GetMode() == THIRD_PERSON_CAMERA) ((CThirdPersonCamera*)m_pCamera)->Rotate(-90.0f, 0.0f, 0.0f);
+	
 	return(m_pCamera);
 }
 
@@ -401,6 +454,7 @@ void CTerrainPlayer::OnCameraUpdateCallback(float fTimeElapsed)
 		{
 			CThirdPersonCamera *p3rdPersonCamera = (CThirdPersonCamera *)m_pCamera;
 			p3rdPersonCamera->SetLookAt(GetPosition());
+			p3rdPersonCamera->Rotate(-90.0f, 0 , 0);
 		}
 	}
 }
@@ -409,7 +463,7 @@ void CTerrainPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVeloci
 {
 	if (dwDirection & DIR_DOWN)
 	{
-		fDistance *= 1.5f; // Shiftê°€ ?Œë¦¬ë©??´ë™ ?ë„ë¥?1.5ë°?ì¦ê?
+		fDistance *= 1.5f;
 	}
 
 	if (!isJump) {
@@ -486,7 +540,7 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 			}
 
 		}
-		if (isSwing) {
+		else if (isSwing) {
 			m_pSkinnedAnimationController->SetTrackEnable(0, false);
 			m_pSkinnedAnimationController->SetTrackEnable(1, false);
 			m_pSkinnedAnimationController->SetTrackEnable(2, false);
@@ -509,7 +563,7 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 			}
 
 		}
-		if (isCrouch) {
+		else if (isCrouch) {
 			m_pSkinnedAnimationController->SetTrackEnable(0, false);
 			m_pSkinnedAnimationController->SetTrackEnable(1, false);
 			m_pSkinnedAnimationController->SetTrackEnable(2, false);

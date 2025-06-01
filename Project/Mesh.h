@@ -78,6 +78,8 @@ protected:
 	UINT							m_nOffset = 0;
 	UINT							m_nStride = 0; // 정점배열 건뛰 접근
 
+	BoundingBox						m_BoundingBox = { XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f) };
+
 protected:
 	int								m_nVertices = 0;
 
@@ -97,6 +99,7 @@ protected:
 
 public:
 	UINT GetType() { return(m_nType); }
+	BoundingBox GetBoundingBox() { return m_BoundingBox; };
 
 	virtual void CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList) { }
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList) { }
