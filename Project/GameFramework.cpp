@@ -588,7 +588,9 @@ void CGameFramework::AnimateObjects()
 	float fTimeElapsed = m_GameTimer.GetTimeElapsed();
 
 	if (m_pScene) { 
-		m_pScene->AnimateObjects(fTimeElapsed); 
+		m_pScene->AnimateObjects(fTimeElapsed);
+		if (m_pScene->m_ppOtherPlayers) m_pScene->m_ppOtherPlayers[0]->Animate(m_pScene->m_ppOtherPlayers[0]->animation, fTimeElapsed);
+
 	}
 
 	m_pPlayer->Animate(fTimeElapsed);
@@ -606,7 +608,6 @@ void CGameFramework::AnimateObjects()
 				}
 			}
 		}
-		m_pScene->m_ppOtherPlayers[0]->m_pSkinnedAnimationController->SetTrackEnable(0, true);
 	}
 }
 
