@@ -337,8 +337,8 @@ CTerrainPlayer::CTerrainPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandLi
 	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0); // ±âº»
 	m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1); // °È±â
 	m_pSkinnedAnimationController->SetTrackAnimationSet(2, 2); // ¶Ù±â
-	m_pSkinnedAnimationController->SetTrackAnimationSet(3, 3); // ÈÖµÎ¸£±â
-	m_pSkinnedAnimationController->SetTrackAnimationSet(4, 4); // Á¡ÇÁ
+	m_pSkinnedAnimationController->SetTrackAnimationSet(3, 3); // Á¡ÇÁ
+	m_pSkinnedAnimationController->SetTrackAnimationSet(4, 4); // ÈÖµÎ¸£±â
 	m_pSkinnedAnimationController->SetTrackAnimationSet(5, 5); // ¿õÅ©¸®±â
 	m_pSkinnedAnimationController->SetTrackAnimationSet(6, 6); // ¿õÅ©¸®°í °È±â
 	m_pSkinnedAnimationController->SetTrackEnable(1, false); 
@@ -626,9 +626,9 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 
 		uint8_t currentAnimState = static_cast<uint8_t>(AnimationState::IDLE);
 		if (isJump)
-			currentAnimState = static_cast<uint8_t>(AnimationState::JUMP); // 4
+			currentAnimState = static_cast<uint8_t>(AnimationState::JUMP); // 3
 		else if (isSwing)
-			currentAnimState = static_cast<uint8_t>(AnimationState::SWING); // 3
+			currentAnimState = static_cast<uint8_t>(AnimationState::SWING); // 4
 		else if (isCrouch)
 			currentAnimState = static_cast<uint8_t>(AnimationState::CROUCH); //5
 		else if (::IsZero(fLength))
