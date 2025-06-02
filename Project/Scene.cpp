@@ -164,7 +164,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_ppHierarchicalGameObjects[0]->m_pSkinnedAnimationController->SetTrackAnimationSet(2, 2);
 	m_ppHierarchicalGameObjects[0]->m_pSkinnedAnimationController->SetTrackEnable(1, false);
 	m_ppHierarchicalGameObjects[0]->m_pSkinnedAnimationController->SetTrackEnable(2, false);
-	m_ppHierarchicalGameObjects[0]->SetPosition(-63.0f, 10.0f, -14.0f);
+	m_ppHierarchicalGameObjects[0]->SetPosition(-63.0f, 0.0f, -14.0f);
 	m_ppHierarchicalGameObjects[0]->Rotate(0, 0, 0);
 	m_ppHierarchicalGameObjects[0]->SetFrameName("Spider");
 
