@@ -151,6 +151,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_ppHierarchicalGameObjects[0]->m_pSkinnedAnimationController->SetTrackEnable(2, false);
 	m_ppHierarchicalGameObjects[0]->SetPosition(3, 0, 30);
 	m_ppHierarchicalGameObjects[0]->Rotate(0, 0, 0);
+	m_ppHierarchicalGameObjects[0]->SetFrameName("Spider");
 
 	if (pSpiderModel) delete pSpiderModel;
 
@@ -639,8 +640,21 @@ void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera
 		}
 	}
 
+	if (m_pPlayer->isSwing)
+	{
+		//Shovel* shovel = dynamic_cast<Shovel*>(m_ppHierarchicalGameObjects[2]);
+		//shovel->GenerateSwingBoundingBox(m_pPlayer->GetPosition(), m_pPlayer->GetLookVector());
+		m_pPlayer->GenerateShovelAttackBoundingBox();
+		m_CollisionManager.Update(m_pPlayer);
+	}
+	else if (!m_pPlayer->isSwing)
+	{
+		//Shovel* shovel = dynamic_cast<Shovel*>(m_ppHierarchicalGameObjects[2]);
+		//shovel->DeleteSwingBoundingBox();
+	}
+
 	m_CollisionManager.Update(m_pPlayer);
-  
+
 	for (int i = 0; i < m_nOtherPlayers; ++i) 
 	{
 		//if (m_ppOtherPlayers[i]->isConnedted)
@@ -689,7 +703,8 @@ void CScene::AddItem(long long id, ITEM_TYPE type, const XMFLOAT3& position) {
 	}
 }
 
-
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 
 void CStartScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);

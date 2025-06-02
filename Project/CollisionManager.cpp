@@ -44,7 +44,37 @@ void CCollisionManager::Update(CPlayer* player)
     // 충돌 검사 및 처리
     for (CGameObject* obj : m_collisions)
     {
+        std::string ObjectFrameName = obj->GetFrameName();
+
         if (obj != player && player->GetBoundingBox().Intersects(obj->GetBoundingBox()))
+        {
+            HandleCollision(player, obj);
+        }
+        if (std::string::npos != ObjectFrameName.find("Spider") && obj != player && player->GetShovelAttackBoundingBox().Intersects(obj->GetBoundingBox()))
+        {
+            HandleCollision(player, obj);
+        }
+    }
+}
+
+void CCollisionManager::Update(CPlayer* player, Shovel* shovel)
+{
+    // 플레이어가 속한 노드 탐색
+    QuadTreeNode* playerNode = m_pQuadTree->FindNode(m_pQuadTree->root, player->GetBoundingBox());
+    if (!playerNode) return;
+
+    //if (frameCounter % 60 == 0) // 60 프레임마다 출력
+    //    cout << playerNode->bounds.Center.x << ", " << playerNode->bounds.Center.z << endl;
+
+    // 근처 오브젝트 수집
+    m_collisions.clear();
+    CollectNearbyObjects(playerNode, player->GetBoundingBox(), m_collisions);
+
+    // 충돌 검사 및 처리
+    for (CGameObject* obj : m_collisions)
+    {
+        std::string ObjectFrameName = obj->GetFrameName();
+        if (std::string::npos != ObjectFrameName.find("Spider") && obj != player && shovel->GetattackBoundingBox().Intersects(obj->GetBoundingBox()))
         {
             HandleCollision(player, obj);
         }
@@ -240,5 +270,17 @@ void CCollisionManager::HandleCollision(CPlayer* player, CGameObject* obj)
         player->SetVelocity({ 0.0f, 0.0f, 0.0f }); // 속도 정지
         player->CalculateBoundingBox();
         playerBox = player->GetBoundingBox();
+    }
+
+    if (std::string::npos != ObjectFrameName.find("Spider"))
+    {
+        // 몬스터와 충돌 시 처리
+    }
+
+    if (player->isSwing
+        && std::string::npos != ObjectFrameName.find("Spider"))
+    {
+        // 몬스터와 플레이어의 공격 충돌 시 처리
+        cout << "Hit!" << endl;
     }
 }

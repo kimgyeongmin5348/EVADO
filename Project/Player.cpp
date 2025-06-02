@@ -200,6 +200,16 @@ void CPlayer::CalculateBoundingBox()
 	ConvertCylinderToAABB(m_BoundingCylinder, m_BoundingBox);
 }
 
+void CPlayer::GenerateShovelAttackBoundingBox()
+{
+	// 바운딩 박스의 중심: 플레이어 위치에서 전방(Look) 방향으로 0.5f 이동
+	XMFLOAT3 forwardOffset = Vector3::ScalarProduct(Vector3::Normalize(m_xmf3Look), 0.5f);
+	m_shovelAttackBoundingBox.Center = Vector3::Add(m_xmf3Position, forwardOffset);
+
+	// 바운딩 박스의 크기
+	m_shovelAttackBoundingBox.Extents = XMFLOAT3(0.5f, 0.5f, 1.0f);
+}
+
 void CPlayer::Update(float fTimeElapsed)
 {
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, m_xmf3Gravity);
