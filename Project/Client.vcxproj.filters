@@ -19,6 +19,9 @@
     <Filter Include="소스 파일\Collision">
       <UniqueIdentifier>{ee167bbf-1128-4f07-8927-718522db6919}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\Items">
+      <UniqueIdentifier>{2321b200-dee1-4319-86c4-14d5bad260dc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">
@@ -73,9 +76,6 @@
     <ClCompile Include="Map.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Object_Items.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="Network.cpp">
       <Filter>Network</Filter>
     </ClCompile>
@@ -87,6 +87,9 @@
     </ClCompile>
     <ClCompile Include="QuadTree.cpp">
       <Filter>소스 파일\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="Object_Items.cpp">
+      <Filter>소스 파일\Items</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -132,9 +135,6 @@
     <ClInclude Include="Map.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Object_Items.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="Network.h">
       <Filter>Network</Filter>
     </ClInclude>
@@ -149,6 +149,9 @@
     </ClInclude>
     <ClInclude Include="QuadTree.h">
       <Filter>소스 파일\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="Object_Items.h">
+      <Filter>소스 파일\Items</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

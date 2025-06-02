@@ -20,6 +20,17 @@ class Shovel : public Item
 public:
 	Shovel(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel);
 	virtual ~Shovel();
+
+	int				m_damage = 1;
+	bool			m_bIsSwingActive = false;
+	BoundingBox		m_attackBoundingBox;
+
+	BoundingBox GetattackBoundingBox() { return m_attackBoundingBox; };
+
+	void ProccessSwing();
+	void GenerateSwingBoundingBox(XMFLOAT3 playerPos, XMFLOAT3 playerLook);  // 휘두를 시 바운딩 박스 생성
+	void UpdateSwingBoundingBox(); // 바운딩 박스 업데이트
+	void DeleteSwingBoundingBox(); // 바운딩 박스 삭제
 };
 
 class Handmap : public Item
