@@ -57,8 +57,8 @@ void OtherPlayer::Animate(int animation, float fTimeElapsed)
 	}
 	else if (animation == 3) {
 		m_pSkinnedAnimationController->SetTrackSpeed(animation, 2.0f);
-		float currentPos = m_pSkinnedAnimationController->m_pAnimationTracks[3].m_fPosition;
-		int animSetIndex = m_pSkinnedAnimationController->m_pAnimationTracks[3].m_nAnimationSet;
+		float currentPos = m_pSkinnedAnimationController->m_pAnimationTracks[4].m_fPosition;
+		int animSetIndex = m_pSkinnedAnimationController->m_pAnimationTracks[4].m_nAnimationSet;
 		float length = m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[animSetIndex]->m_fLength;
 
 		if (currentPos >= 1.5)
@@ -68,9 +68,9 @@ void OtherPlayer::Animate(int animation, float fTimeElapsed)
 		}
 	}
 	else if (animation == 4) {
-		m_pSkinnedAnimationController->SetTrackSpeed(4, 2.0f);
-		float currentPos = m_pSkinnedAnimationController->m_pAnimationTracks[4].m_fPosition;
-		int animSetIndex = m_pSkinnedAnimationController->m_pAnimationTracks[4].m_nAnimationSet;
+		m_pSkinnedAnimationController->SetTrackSpeed(animation, 2.0f);
+		float currentPos = m_pSkinnedAnimationController->m_pAnimationTracks[3].m_fPosition;
+		int animSetIndex = m_pSkinnedAnimationController->m_pAnimationTracks[3].m_nAnimationSet;
 		float length = m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[animSetIndex]->m_fLength;
 
 		if (currentPos >= 1.5)

@@ -5,7 +5,7 @@
 
 Hpbar::Hpbar(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) : CGameObject(1)
 {
-	CRectMesh* pMesh = new CRectMesh(pd3dDevice, pd3dCommandList, 8.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	CRectMesh* pMesh = new CRectMesh(pd3dDevice, pd3dCommandList, 6.0f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f);
 	SetMesh(pMesh);
 
     CreateShaderVariables(pd3dDevice, pd3dCommandList);
