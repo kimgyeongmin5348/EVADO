@@ -493,7 +493,7 @@ void CGameFramework::BuildObjects()
 		CTerrainPlayer* pPlayer = new CTerrainPlayer(m_pd3dDevice, m_pd3dCommandList, m_ppScenes[1]->GetGraphicsRootSignature(), NULL);
 
 		m_ppScenes[1]->SetPlayer(pPlayer);
-		m_pPlayer->SetPosition(XMFLOAT3(0,0,0));
+		m_pPlayer->SetPosition(XMFLOAT3(3, 0, 20));
 
 		m_ppScenes[1]->GenerateGameObjectsBoundingBox();
 		m_ppScenes[1]->InitializeCollisionSystem();
@@ -589,7 +589,7 @@ void CGameFramework::AnimateObjects()
 
 	m_pPlayer->Animate(fTimeElapsed);
 
-	if (m_nCurrentScene == 0) m_pPlayer->SetPosition(XMFLOAT3(0, 0, 0));
+	if (m_nCurrentScene == 0) m_pPlayer->SetPosition(XMFLOAT3(3, 0, 20));
 	if (m_nCurrentScene == 1) {
 		for (int i = 0; i < 4; ++i)
 		{
@@ -597,7 +597,7 @@ void CGameFramework::AnimateObjects()
 			{	
 				if (m_pScene->m_ppHierarchicalGameObjects[i]) {
 					XMFLOAT3 pos = m_pScene->m_ppHierarchicalGameObjects[i]->GetPosition();
-					if (pos.y > 0.0f) pos.y -= 0.1;
+					if (pos.y > 0.1f) pos.y -= 0.1;
 					m_pScene->m_ppHierarchicalGameObjects[i]->SetPosition(pos);
 				}
 			}
