@@ -282,5 +282,10 @@ void CCollisionManager::HandleCollision(CPlayer* player, CGameObject* obj)
     {
         // 몬스터와 플레이어의 공격 충돌 시 처리
         cout << "Hit!" << endl;
+        player->m_isMonsterHit = true;
+    }
+    else if (player->isSwing)
+    {
+        player->m_isMonsterHit = false;
     }
 }
