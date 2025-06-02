@@ -295,7 +295,11 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 				flashlightToggle = !flashlightToggle;
 				m_pScene->BuildDefaultLightsAndMaterials(flashlightToggle);
 			}
-			if (m_pPlayer->items[2]) m_pPlayer->isSwing = true;
+			if (m_pPlayer->items[2]) { 
+				m_pPlayer->isSwing = true; 
+				m_pScene->m_pEffect->Activate(m_pScene->m_ppHierarchicalGameObjects[2]->GetPosition());
+				//m_pScene->m_pEffect->Activate();
+			}
 			::SetCapture(hWnd);
 			::GetCursorPos(&m_ptOldCursorPos);
 			break;
@@ -584,7 +588,9 @@ void CGameFramework::AnimateObjects()
 	float fTimeElapsed = m_GameTimer.GetTimeElapsed();
 
 	if (m_pScene) { 
-		m_pScene->AnimateObjects(fTimeElapsed); 
+		m_pScene->AnimateObjects(fTimeElapsed);
+		if (m_pScene->m_ppOtherPlayers) m_pScene->m_ppOtherPlayers[0]->Animate(m_pScene->m_ppOtherPlayers[0]->animation, fTimeElapsed);
+
 	}
 
 	m_pPlayer->Animate(fTimeElapsed);
@@ -602,7 +608,6 @@ void CGameFramework::AnimateObjects()
 				}
 			}
 		}
-		m_pScene->m_ppOtherPlayers[0]->m_pSkinnedAnimationController->SetTrackEnable(0, true);
 	}
 }
 
@@ -704,8 +709,8 @@ void CGameFramework::FrameAdvance()
 
 	m_GameTimer.GetFrameRate(m_pszFrameRate + 7, 37);
 	size_t nLength = _tcslen(m_pszFrameRate);
-	XMFLOAT3 xmf3Position = m_pPlayer->GetPosition();
-	_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%4f, %4f, %4f)"), xmf3Position.x, xmf3Position.y, xmf3Position.z);
+	std::wstring w_user_name(user_name.begin(), user_name.end());
+	_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%s)"), w_user_name.c_str());
 	::SetWindowText(m_hWnd, m_pszFrameRate);
 }
 

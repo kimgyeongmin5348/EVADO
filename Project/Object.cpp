@@ -6,6 +6,7 @@
 #include "Object.h"
 #include "Shader.h"
 #include "Scene.h"
+#include "Hpbar.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -1545,6 +1546,9 @@ CSpider::CSpider(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dComman
 
 	SetChild(pSpiderModel->m_pModelRootObject, true);
 	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, nAnimationTracks, pSpiderModel);
+
+	Hpbar *pHpbar = new Hpbar(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	m_pHpbar = pHpbar;
 }
 
 CSpider::~CSpider()
@@ -1553,7 +1557,6 @@ CSpider::~CSpider()
 
 void CSpider::Animate(float fTimeElapsed)
 {
-
 	XMFLOAT3 enemyPos = GetPosition();
 	XMFLOAT3 playerPos = pPlayer->GetPosition(); // 플레이어 위치 받아오기
 
@@ -1599,6 +1602,17 @@ void CSpider::Animate(float fTimeElapsed)
 	}
 
 	CGameObject::Animate(fTimeElapsed);
+}
+
+void CSpider::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	XMFLOAT3 hpbarPos = GetPosition();
+	hpbarPos.x += 2.5f;
+	hpbarPos.y += 3.0f;
+	m_pHpbar->SetPosition(hpbarPos);
+	m_pHpbar->Render(pd3dCommandList, pCamera);
+
+	CGameObject::Render(pd3dCommandList, pCamera);
 }
 
 void CGameObject::CalculateBoundingBox()

@@ -164,7 +164,7 @@ void InitializeNetwork() {
 
 
     if (connect(ConnectSocket, (sockaddr*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR) {
-        std::cerr << "연결 실패: " << WSAGetLastError() << std::endl;
+        std::cerr << "Connect Fail: " << WSAGetLastError() << std::endl;
         closesocket(ConnectSocket);
         WSACleanup();
         exit(1);
