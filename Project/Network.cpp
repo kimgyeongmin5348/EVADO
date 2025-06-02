@@ -32,11 +32,9 @@ std::unordered_map<long long, Item*> g_items;
 std::mutex g_item_mutex;
 
 
-
 // =================================================================
 //                      네트워크 코어 로직
 // =================================================================
-
 
 void SendThread() {
     while (g_running) {
@@ -151,13 +149,19 @@ void InitializeNetwork() {
     
     WSAStartup(MAKEWORD(2, 2), &wsaData);
 
+    char serverIP[16];
+    std::cout << "server IP : ";
+    std::cin >> serverIP;
+   
+
     ConnectSocket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, nullptr, 0, WSA_FLAG_OVERLAPPED);
 
     // 비동기 연결 설정
     sockaddr_in serverAddr{};
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_port = htons(SERVER_PORT);
-    inet_pton(AF_INET, "127.0.0.1", &serverAddr.sin_addr);
+    inet_pton(AF_INET, serverIP, &serverAddr.sin_addr);  //serverIP.c_str()
+ 
 
     WSAOVERLAPPED connectOverlapped{};
     connectOverlapped.hEvent = WSACreateEvent();
@@ -188,8 +192,6 @@ void InitializeNetwork() {
     std::cout << "[Client] Login Packet Send : Name=" << p.name << std::endl;
 
 }
-
-
 
 void ProcessPacket(char* ptr)
 {
