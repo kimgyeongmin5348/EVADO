@@ -166,6 +166,11 @@ public:
 	{
 		m_ppOtherPlayers[clinetnum]->animation = animNum;
 	}
+	void UpdateOtherPlayerRotate(int clinetnum, XMFLOAT3 right, XMFLOAT3 look)
+	{
+		m_ppOtherPlayers[clinetnum]->m_xmf3Look = look;
+		m_ppOtherPlayers[clinetnum]->m_xmf3Right = right;
+	}
 };
 
 class CMainScene : public CScene

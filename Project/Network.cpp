@@ -252,6 +252,7 @@ void ProcessPacket(char* ptr)
         if (!gGameFramework.isLoading && !gGameFramework.isStartScene) {
             gGameFramework.UpdateOtherPlayerPosition(0, packet->position);
             gGameFramework.UpdateOtherPlayerAnimation(0, packet->animState);
+            gGameFramework.UpdateOtherPlayerRotate(0, packet->right, packet->look);
         }
 
 
