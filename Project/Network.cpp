@@ -255,12 +255,12 @@ void ProcessPacket(char* ptr)
         }
 
 
-        //std::cout << "[Client] New Player Information Recv "
-        //    << " Position(" << packet->position.x << "," << packet->position.y << "," << packet->position.z << ")"
-        //    << " Look(" << packet->look.x << "," << packet->look.y << "," << packet->look.z << ")"
-        //    << " Right(" << packet->right.x << "," << packet->right.y << "," << packet->right.z << ")"
-        //    << "Animation : " << static_cast<int>(packet->animState)
-        //    << std::endl;
+        std::cout << "[Client] New Player Information Recv "
+            << " Position(" << packet->position.x << "," << packet->position.y << "," << packet->position.z << ")"
+            << " Look(" << packet->look.x << "," << packet->look.y << "," << packet->look.z << ")"
+            << " Right(" << packet->right.x << "," << packet->right.y << "," << packet->right.z << ")"
+            << "Animation : " << static_cast<int>(packet->animState)
+            << std::endl;
 
         break;
     }
