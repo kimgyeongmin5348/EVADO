@@ -63,7 +63,7 @@ struct sc_packet_user_info {
 	XMFLOAT3		look;
 	XMFLOAT3		right;
 	uint8_t			animState;
-	//short			hp;
+	short			hp;
 };
 
 struct sc_packet_move {
@@ -84,6 +84,7 @@ struct sc_packet_enter {
 	XMFLOAT3		look;
 	XMFLOAT3		right;
 	uint8_t			animState;
+	short			hp;
 };
 
 struct sc_packet_leave {
