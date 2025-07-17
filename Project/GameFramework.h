@@ -65,6 +65,18 @@ public:
 		}
 	}
 
+	// 몬스터(NPC) 스폰 랜더링 부분
+	void OnMonsterSpawned(int64_t monsterID, const XMFLOAT3& pos, uint8_t state)
+	{
+
+	}
+
+	// 몬트서(NPC) 움직임 랜더링 부분
+	void UpdateMonsterPosition(int64_t monsterID, const XMFLOAT3& pos, uint8_t state)
+	{
+
+	}
+
 	bool isLoading = false;
 	bool isStartScene = true;
 

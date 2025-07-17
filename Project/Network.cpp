@@ -31,6 +31,46 @@ std::mutex g_player_mutex;
 std::unordered_map<long long, Item*> g_items;
 std::mutex g_item_mutex;
 
+// =================================================================
+//           몬스터 렌더링을 위한 몬스터 오브젝트 및 관리 
+// =================================================================
+struct MonsterObject {
+    int64_t monsterID;
+    XMFLOAT3 position;
+    uint8_t state;
+
+    MonsterObject(int64_t id, XMFLOAT3 pos, uint8_t st)
+        : monsterID(id), position(pos), state(st) {
+    }
+
+    void SetPosition(const XMFLOAT3& pos) { position = pos; }
+    void SetState(uint8_t st) { state = st; }
+
+};
+
+std::unordered_map<int64_t, MonsterObject*> g_monsters;
+std::mutex g_monster_mutex;
+
+
+// 몬스터 생성
+void OnMonsterSpawned(int64_t monsterID, const XMFLOAT3& pos, uint8_t state) {
+    std::lock_guard<std::mutex> lock(g_monster_mutex);
+    if (g_monsters.count(monsterID) == 0) {
+        g_monsters[monsterID] = new MonsterObject(monsterID, pos, state);
+    }
+}
+// 몬스터 위치, 상태 업데이트
+void UpdateMonsterPosition(int64_t monsterID, const XMFLOAT3& pos, uint8_t state) {
+    std::lock_guard<std::mutex> lock(g_monster_mutex);
+    auto it = g_monsters.find(monsterID);
+    if (it != g_monsters.end()) {
+        it->second->SetPosition(pos);
+        it->second->SetState(state);
+    }
+   
+}
+
+
 
 // =================================================================
 //                      네트워크 코어 로직
@@ -313,7 +353,9 @@ void ProcessPacket(char* ptr)
             << " State: " << static_cast<int>(pkt->state) << std::endl;
 
         // 몬스터 생성
-        // 예시 -> gGameFramework.OnMonsterSpawned(pkt->monsterID, pkt->position);
+        OnMonsterSpawned(pkt->monsterID, pkt->position, pkt->state);
+
+        // 랜더링 예시 -> gGameFramework.OnMonsterSpawned(pkt->monsterID, pkt->position);
         break;
     }
 
@@ -325,8 +367,9 @@ void ProcessPacket(char* ptr)
             << " New Position(" << pkt->position.x << ", " << pkt->position.z << ")"
             << " State: " << static_cast<int>(pkt->state) << std::endl;
 
-        //몬스터 위치 업데이트 로직
-        // 예시 ->  gGameFramework.UpdateMonsterPosition(pkt->monsterID, pkt->position, pkt->state);
+        UpdateMonsterPosition(pkt->monsterID, pkt->position, pkt->state);
+
+        // 랜더링 예시 ->  gGameFramework.UpdateMonsterPosition(pkt->monsterID, pkt->position, pkt->state);
         break;
     }
 
