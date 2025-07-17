@@ -173,24 +173,25 @@ public:
 	}
 };
 
-class CMainScene : public CScene
-{
-public:
-	CMainScene() {}
-	~CMainScene(){}
-
-	//virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
-	//virtual void ReleaseObjects();
-
-	//virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
-
-};
-
 class CStartScene : public CScene
 {
 public:
 	CStartScene(){}
 	~CStartScene(){}
+
+	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void ReleaseObjects();
+
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+
+	virtual void OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
+};
+
+class CEndScene : public CScene
+{
+public:
+	CEndScene(){}
+	~CEndScene(){}
 
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void ReleaseObjects();

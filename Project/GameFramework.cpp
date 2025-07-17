@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "GameFramework.h"
 #include "Network.h"
+#include "Hpbar.h"
 
 CGameFramework::CGameFramework()
 {
@@ -295,10 +296,23 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 				flashlightToggle = !flashlightToggle;
 				m_pScene->BuildDefaultLightsAndMaterials(flashlightToggle);
 			}
-			if (m_pPlayer->items[2]) { 
+			if (m_pPlayer->items[2]) {
 				m_pPlayer->isSwing = true;
-				if (m_pPlayer->m_isMonsterHit)
-					m_pScene->m_pEffect->Activate(m_pScene->m_ppHierarchicalGameObjects[2]->GetPosition());
+				if (m_pPlayer->m_isMonsterHit) {
+				m_pScene->m_pEffect->Activate(m_pScene->m_ppHierarchicalGameObjects[2]->GetPosition());
+				CSpider* pSpider = dynamic_cast<CSpider*>(m_pScene->m_ppHierarchicalGameObjects[0]);
+				if (pSpider) {
+					float currentHp = pSpider->MonsterHP;
+					currentHp -= 50.0f;
+					float hpRatio = currentHp / 100.0f;
+
+					Hpbar* pHpbar = dynamic_cast<Hpbar*>(pSpider->m_pHpbar);
+					if (pHpbar) {
+						pHpbar->SetHPRatio(hpRatio);
+						pHpbar->SetScale(0.5, 1, 1);
+					}
+				}
+				}
 				//m_pScene->m_pEffect->Activate();
 			}
 			::SetCapture(hWnd);

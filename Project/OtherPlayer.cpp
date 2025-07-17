@@ -69,7 +69,6 @@ void OtherPlayer::Animate(int animation, float fTimeElapsed)
 		}
 	}
 
-	Rotate()
 
 	CGameObject::Animate(fTimeElapsed);
 }

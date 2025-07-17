@@ -149,7 +149,7 @@ public:
 
 	bool isJump = false;
 
-
+	int debt = 10000;
 };
 
 

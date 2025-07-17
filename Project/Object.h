@@ -544,9 +544,11 @@ public:
 	virtual void SetPlayer(CPlayer* p) { pPlayer = p; }
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
 
+	float MonsterHP = 100.0f;
+	float hpRatio = MonsterHP / 100.0f;
+	CGameObject* m_pHpbar = NULL;
 private:
 	CPlayer* pPlayer = NULL;
-	CGameObject* m_pHpbar = NULL;
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

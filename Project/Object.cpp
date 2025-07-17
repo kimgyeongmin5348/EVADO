@@ -1605,6 +1605,8 @@ void CSpider::Animate(float fTimeElapsed)
 	m_pSkinnedAnimationController->SetTrackEnable(1, true);
 	m_pSkinnedAnimationController->SetTrackEnable(2, false);
 
+
+
 	CGameObject::Animate(fTimeElapsed);
 }	
 

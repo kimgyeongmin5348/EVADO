@@ -6,7 +6,8 @@
 Hpbar::Hpbar(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) : CGameObject(1)
 {
 	CRectMesh* pMesh = new CRectMesh(pd3dDevice, pd3dCommandList, 6.0f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f);
-	SetMesh(pMesh);
+    //CRectMesh* pMesh = new CRectMesh(pd3dDevice, pd3dCommandList, 6.0f, 0.5f, -3.0f, 0.25f, 0.0f, 0.0f);
+    SetMesh(pMesh);
 
     CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
@@ -32,4 +33,10 @@ void Hpbar::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* camera)
     LookAt(xmf3CameraPosition, XMFLOAT3(0.0f, 1.0f, 0.0f));
 
     CGameObject::Render(pd3dCommandList, camera);
+}
+
+void Hpbar::SetHPRatio(float ratio)
+{
+    m_fHPRatio = max(0.0f, min(1.0f, ratio));
+    SetScale(m_fHPRatio * 6.0f, 0.5f, 1.0f);
 }
