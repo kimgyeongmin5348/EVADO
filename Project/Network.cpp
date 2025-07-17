@@ -259,7 +259,8 @@ void ProcessPacket(char* ptr)
             << std::endl;
         break;
     }
-
+    
+    // 랜더링 해야함(시선처리 랜더링 해야함)
     case SC_P_ENTER: // 새로 들어온 플레이어의 정보를 포함하고 있는 패킷 타입
     {
         sc_packet_enter* packet = reinterpret_cast<sc_packet_enter*>(ptr);
@@ -281,6 +282,7 @@ void ProcessPacket(char* ptr)
         break;
     }
 
+    // 랜더링 해야함(시선처리 랜더링 해야함)
     case SC_P_MOVE: // 상대 플레이어 (움직이면) 좌표 받기
     {
         sc_packet_move* packet = reinterpret_cast<sc_packet_move*>(ptr);
@@ -315,6 +317,7 @@ void ProcessPacket(char* ptr)
         break;
     }
 
+    // 랜더링 해야함
     case SC_P_ITEM_SPAWN:
     {
         sc_packet_item_spawn* pkt = reinterpret_cast<sc_packet_item_spawn*>(ptr);
@@ -330,6 +333,7 @@ void ProcessPacket(char* ptr)
         break;
     }
 
+    // 여긴 일단 흠... 사라지는건 update부분에서 해도 되지 않을까...?
     case SC_P_ITEM_DESPAWN:
     {
         sc_packet_item_despawn* pkt = reinterpret_cast<sc_packet_item_despawn*>(ptr);
@@ -337,6 +341,7 @@ void ProcessPacket(char* ptr)
         break;
     }
 
+    // 랜더링 해야함
     case SC_P_ITEM_MOVE:
     {
         sc_packet_item_move* pkt = reinterpret_cast<sc_packet_item_move*>(ptr);
@@ -345,6 +350,7 @@ void ProcessPacket(char* ptr)
         break;
     }
 
+    // 랜더링 해야함
     case SC_P_MONSTER_SPAWN:
     {
         sc_packet_monster_spawn* pkt = reinterpret_cast<sc_packet_monster_spawn*>(ptr);
@@ -358,7 +364,8 @@ void ProcessPacket(char* ptr)
         // 랜더링 예시 -> gGameFramework.OnMonsterSpawned(pkt->monsterID, pkt->position);
         break;
     }
-
+    
+    // 랜더링 해야함
     case SC_P_MONSTER_MOVE:
     {
         sc_packet_monster_move* pkt = reinterpret_cast<sc_packet_monster_move*>(ptr);
