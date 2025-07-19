@@ -364,6 +364,8 @@ public:
 public:
 	char							m_pstrFrameName[64];
 
+	bool visible = true;
+
 	CMesh* m_pMesh = NULL;
 
 	int								m_nMaterials = 0;
@@ -437,6 +439,9 @@ public:
 	CGameObject* GetChild() { return(m_pChild); }
 	CGameObject* GetSibling() { return(m_pSibling); }
 	BoundingBox GetBoundingBox() const { return m_BoundingBox; }
+
+	bool GetVisible() { return visible; }
+	void SetVisible(bool b) { visible = b; }
 
 	void Move(XMFLOAT3 xmf3Offset);
 
@@ -543,6 +548,7 @@ public:
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
+class Hpbar;
 class CSpider : public CGameObject
 {
 public:
@@ -555,7 +561,7 @@ public:
 
 	float MonsterHP = 100.0f;
 	float hpRatio = MonsterHP / 100.0f;
-	CGameObject* m_pHpbar = NULL;
+	Hpbar* m_pHpbar = NULL;
 private:
 	CPlayer* pPlayer = NULL;
 };

@@ -18,8 +18,6 @@ cbuffer cbGameObjectInfo : register(b2)
 	matrix					gmtxGameObject : packoffset(c0);
 	MATERIAL				gMaterial : packoffset(c4);
 	uint					gnTexturesMask : packoffset(c8);
-    float					g_hpRatio : packoffset(c8.y);
-    float2					padding : packoffset(c8.z);
 };
 
 #include "Light.hlsl"
@@ -197,7 +195,6 @@ VS_TEXTURED_OUTPUT VSTextured(VS_TEXTURED_INPUT input)
 
     output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
     output.uv = input.uv;
-
     return (output);
 }
 

@@ -302,13 +302,13 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 					m_pScene->m_pEffect->Activate(m_pScene->m_ppHierarchicalGameObjects[2]->GetPosition());
 					CSpider* pSpider = dynamic_cast<CSpider*>(m_pScene->m_ppHierarchicalGameObjects[0]);
 					if (pSpider) {
-						float currentHp = pSpider->MonsterHP;
-						currentHp -= 25.0f;
-						float hpRatio = currentHp / 100.0f;
+						pSpider->MonsterHP -= 25.0f;
+						float hpRatio = pSpider->MonsterHP / 100.0f;
 
 						Hpbar* pHpbar = dynamic_cast<Hpbar*>(pSpider->m_pHpbar);
 						if (pHpbar) {
-							pHpbar->SetHPRatio(m_pd3dDevice, m_pd3dCommandList, m_ppScenes[1]->GetGraphicsRootSignature(), hpRatio);
+							pHpbar->SetHpbar(hpRatio);
+							cout << pSpider->MonsterHP << endl;
 						}
 					}
 				}
