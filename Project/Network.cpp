@@ -145,13 +145,13 @@ void send_packet(void* packet) {
     g_sendCV.notify_one();
 }
 
-void InitializeNetwork() {
+void InitializeNetwork(char serverIP[]) {
     
     WSAStartup(MAKEWORD(2, 2), &wsaData);
 
-    char serverIP[16];
-    std::cout << "server IP : ";
-    std::cin >> serverIP;
+    //char serverIP[16];
+    //std::cout << "server IP : ";
+    //std::cin >> serverIP;
    
 
     ConnectSocket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, nullptr, 0, WSA_FLAG_OVERLAPPED);

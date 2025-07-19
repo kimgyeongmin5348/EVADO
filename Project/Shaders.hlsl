@@ -18,6 +18,8 @@ cbuffer cbGameObjectInfo : register(b2)
 	matrix					gmtxGameObject : packoffset(c0);
 	MATERIAL				gMaterial : packoffset(c4);
 	uint					gnTexturesMask : packoffset(c8);
+    float					g_hpRatio : packoffset(c8.y);
+    float2					padding : packoffset(c8.z);
 };
 
 #include "Light.hlsl"
@@ -204,7 +206,6 @@ float4 PSTextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
     float4 cColor = gtxtTexture.Sample(gssWrap, input.uv);
     cColor.a = 0.25f;
     return (cColor);
-    //return float4(1.0, 0.0, 0.0, 1.0);
 }
 
 VS_TEXTURED_OUTPUT VSTextureToScreen(VS_TEXTURED_INPUT input)

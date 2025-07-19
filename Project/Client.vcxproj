@@ -151,6 +151,7 @@
     <ClCompile Include="Client.cpp" />
     <ClCompile Include="CRectMesh.cpp" />
     <ClCompile Include="Hpbar.cpp" />
+    <ClCompile Include="HpbarMesh.cpp" />
     <ClCompile Include="Map.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Network.cpp" />
@@ -178,6 +179,7 @@
     <ClInclude Include="Client.h" />
     <ClInclude Include="CRectMesh.h" />
     <ClInclude Include="Hpbar.h" />
+    <ClInclude Include="HpbarMesh.h" />
     <ClInclude Include="Map.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Network.h" />

@@ -173,6 +173,8 @@ public:
 	}
 };
 
+enum class InputStep { EnterID, EnterIP, Done };
+
 class CStartScene : public CScene
 {
 public:
@@ -185,6 +187,18 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 
 	virtual void OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
+
+	void RenderText();
+	void DrawTextToScreen(const std::string& text, int x = 20, int y = 20);
+
+	HWND m_hWnd = nullptr;
+	void SetWindowHandle(HWND hWnd) { m_hWnd = hWnd; }
+
+private:
+	InputStep m_inputStep = InputStep::EnterID;
+	std::string m_inputID;
+	std::string m_inputIP;
+	bool m_networkInitialized = false;
 };
 
 class CEndScene : public CScene

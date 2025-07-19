@@ -21,7 +21,7 @@ INT_PTR CALLBACK About(HWND, UINT, WPARAM, LPARAM);
 
 std::string user_name;
 
-void InitializeNetwork();
+void InitializeNetwork(char serverIP[]);
 
 //// Overlapped 구조체 정의
 //struct ClientOverlapped : public WSAOVERLAPPED {
@@ -52,10 +52,10 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 
 	// ----------------- 네트워크 초기화 및 서버 연결 -----------------
 	
-	wcout.imbue(locale("korean"));
+	/*wcout.imbue(locale("korean"));
 	std::cout << "유저 ID를 입력하세요 : ";
 	std::cin >> user_name;
-	InitializeNetwork();
+	InitializeNetwork();*/
 
 	//----------------------------------------------------------------
 

@@ -115,6 +115,9 @@
     <ClCompile Include="CCubeShader.cpp">
       <Filter>소스 파일\Shader</Filter>
     </ClCompile>
+    <ClCompile Include="HpbarMesh.cpp">
+      <Filter>소스 파일\Mesh</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -191,6 +194,9 @@
     </ClInclude>
     <ClInclude Include="Shader.h">
       <Filter>소스 파일\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="HpbarMesh.h">
+      <Filter>소스 파일\Mesh</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

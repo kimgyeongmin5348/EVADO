@@ -298,22 +298,20 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 			}
 			if (m_pPlayer->items[2]) {
 				m_pPlayer->isSwing = true;
-				if (m_pPlayer->m_isMonsterHit) {
-				m_pScene->m_pEffect->Activate(m_pScene->m_ppHierarchicalGameObjects[2]->GetPosition());
-				CSpider* pSpider = dynamic_cast<CSpider*>(m_pScene->m_ppHierarchicalGameObjects[0]);
-				if (pSpider) {
-					float currentHp = pSpider->MonsterHP;
-					currentHp -= 50.0f;
-					float hpRatio = currentHp / 100.0f;
+				if (m_pPlayer->m_isMonsterHit && m_pScene) {
+					m_pScene->m_pEffect->Activate(m_pScene->m_ppHierarchicalGameObjects[2]->GetPosition());
+					CSpider* pSpider = dynamic_cast<CSpider*>(m_pScene->m_ppHierarchicalGameObjects[0]);
+					if (pSpider) {
+						float currentHp = pSpider->MonsterHP;
+						currentHp -= 25.0f;
+						float hpRatio = currentHp / 100.0f;
 
-					Hpbar* pHpbar = dynamic_cast<Hpbar*>(pSpider->m_pHpbar);
-					if (pHpbar) {
-						pHpbar->SetHPRatio(hpRatio);
-						pHpbar->SetScale(0.5, 1, 1);
+						Hpbar* pHpbar = dynamic_cast<Hpbar*>(pSpider->m_pHpbar);
+						if (pHpbar) {
+							pHpbar->SetHPRatio(m_pd3dDevice, m_pd3dCommandList, m_ppScenes[1]->GetGraphicsRootSignature(), hpRatio);
+						}
 					}
 				}
-				}
-				//m_pScene->m_pEffect->Activate();
 			}
 			::SetCapture(hWnd);
 			::GetCursorPos(&m_ptOldCursorPos);
@@ -334,46 +332,48 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
 	if (m_pScene) m_pScene->OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
-	switch (nMessageID)
-	{
-	case WM_KEYUP:
-		switch (wParam)
+	if (!isStartScene) {
+		switch (nMessageID)
 		{
-		case VK_ESCAPE:
-			exit(0);
-			break;
-		case VK_RETURN:
-			m_ppScenes[m_nScene]->ReleaseObjects();
-			m_nCurrentScene = 1;
-			BuildObjects();
-			isStartScene = false;
-			break;
-		case VK_F1:
-		case VK_F2:
-		case VK_F3:
-			m_pCamera = m_pPlayer->ChangeCamera((DWORD)(wParam - VK_F1 + 1), m_GameTimer.GetTimeElapsed());
-			break;
-		case VK_F9:
-			ChangeSwapChainState();
-			break;
-		case '1':
-		case '2':
-		case '3':
-		{
-			int itemIndex = wParam - '0';
-			int shaderIndex = wParam - '1';
-			if (itemIndex < m_pScene->m_nHierarchicalGameObjects) {
-				ItemToHand(itemIndex);
-				m_pPlayer->items[itemIndex] = !m_pPlayer->items[itemIndex];
-				dynamic_cast<CTextureToScreenShader*>(m_pScene->m_ppShaders[shaderIndex])->IsInventory[shaderIndex] 
-					= !dynamic_cast<CTextureToScreenShader*>(m_pScene->m_ppShaders[shaderIndex])->IsInventory[shaderIndex];
+		case WM_KEYUP:
+			switch (wParam)
+			{
+			case VK_ESCAPE:
+				exit(0);
+				break;
+			case VK_RETURN:
+				m_ppScenes[m_nScene]->ReleaseObjects();
+				m_nCurrentScene = 1;
+				BuildObjects();
+				isStartScene = false;
+				break;
+			case VK_F1:
+			case VK_F2:
+			case VK_F3:
+				m_pCamera = m_pPlayer->ChangeCamera((DWORD)(wParam - VK_F1 + 1), m_GameTimer.GetTimeElapsed());
+				break;
+			case VK_F9:
+				ChangeSwapChainState();
+				break;
+			case '1':
+			case '2':
+			case '3':
+			{
+				int itemIndex = wParam - '0';
+				int shaderIndex = wParam - '1';
+				if (itemIndex < m_pScene->m_nHierarchicalGameObjects) {
+					ItemToHand(itemIndex);
+					m_pPlayer->items[itemIndex] = !m_pPlayer->items[itemIndex];
+					dynamic_cast<CTextureToScreenShader*>(m_pScene->m_ppShaders[shaderIndex])->IsInventory[shaderIndex]
+						= !dynamic_cast<CTextureToScreenShader*>(m_pScene->m_ppShaders[shaderIndex])->IsInventory[shaderIndex];
+				}
+				break;
+			}
 			}
 			break;
+		default:
+			break;
 		}
-		}
-		break;
-	default:
-		break;
 	}
 }
 
@@ -502,6 +502,7 @@ void CGameFramework::BuildObjects()
 
 	if (m_nCurrentScene == 0) {
 		m_ppScenes[0] = new CStartScene();
+		dynamic_cast<CStartScene*>(m_ppScenes[0])->SetWindowHandle(m_hWnd);
 		m_ppScenes[0]->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
 		CTerrainPlayer* pPlayer = new CTerrainPlayer(m_pd3dDevice, m_pd3dCommandList, m_ppScenes[0]->GetGraphicsRootSignature(),NULL);
 		m_ppScenes[0]->SetPlayer(pPlayer);
@@ -652,6 +653,14 @@ void CGameFramework::MoveToNextFrame()
 	}
 }
 
+void CGameFramework::MoveToNextScene()
+{
+	m_ppScenes[m_nScene]->ReleaseObjects();
+	m_nCurrentScene = 1;
+	BuildObjects();
+	isStartScene = false;
+}
+
 //#define _WITH_PLAYER_TOP
 
 void CGameFramework::FrameAdvance()
@@ -719,6 +728,11 @@ void CGameFramework::FrameAdvance()
 	m_pdxgiSwapChain->Present(0, 0);
 #endif
 #endif
+	if (isStartScene)
+	{
+		auto* startScene = dynamic_cast<CStartScene*>(m_pScene);
+		if (startScene) startScene->RenderText();
+	}
 
 	MoveToNextFrame();
 

@@ -3,6 +3,9 @@
 //-----------------------------------------------------------------------------
 #include "stdafx.h"
 #include "Scene.h"
+#include "GameFramework.h"
+
+extern CGameFramework gGameFramework;
 
 ID3D12DescriptorHeap *CScene::m_pd3dCbvSrvDescriptorHeap = NULL;
 
@@ -15,7 +18,6 @@ D3D12_CPU_DESCRIPTOR_HANDLE	CScene::m_d3dCbvCPUDescriptorNextHandle;
 D3D12_GPU_DESCRIPTOR_HANDLE	CScene::m_d3dCbvGPUDescriptorNextHandle;
 D3D12_CPU_DESCRIPTOR_HANDLE	CScene::m_d3dSrvCPUDescriptorNextHandle;
 D3D12_GPU_DESCRIPTOR_HANDLE	CScene::m_d3dSrvGPUDescriptorNextHandle;
-
 
 CScene::CScene()
 {
@@ -139,7 +141,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 350);
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 100, 400);
 
 	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature); 
 
@@ -724,7 +726,6 @@ void CStartScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 	m_ppShaders[0] = pTextureToScreenShader;
 
-
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
@@ -756,27 +757,82 @@ void CStartScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
 
-	/*EnterCriticalSection(&m_csRemotePlayers);
-	for (auto& [id, pPlayer] : m_remotePlayers) {
-		pPlayer->Render(pd3dCommandList, pCamera);
-	}
-	LeaveCriticalSection(&m_csRemotePlayers);*/
+	RenderText();
 }
 
 void CStartScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
+	if (m_networkInitialized) return;
+
 	switch (nMessageID)
 	{
 	case WM_KEYDOWN:
-		switch (wParam)
-		{
-		case VK_RETURN:
+		if (m_inputStep == InputStep::EnterID) {
+			if (wParam == VK_RETURN) {
+				m_inputStep = InputStep::EnterIP;
+				::user_name = m_inputID;
+			}
+			else if (wParam == VK_BACK && !m_inputID.empty()) {
+				m_inputID.pop_back();
+			}
+			else if (isprint(wParam) && m_inputID.length() < MAX_ID_LENGTH - 1) {
+				m_inputID.push_back((char)wParam);
+			}
 			break;
 		}
-		break;
-	default:
+		if (m_inputStep == InputStep::EnterIP) {
+			if (isdigit(wParam) && m_inputIP.length() < 15) {
+				m_inputIP.push_back((char)wParam);
+			}
+			else if (wParam == 190)
+				m_inputIP.push_back('.');
+
+			else if (wParam == VK_RETURN) {
+				m_inputStep = InputStep::Done;
+				m_networkInitialized = true;
+
+				char serverIP[16];
+				strcpy(serverIP, m_inputIP.c_str());
+				std::cout << "Connecting to: " << serverIP << std::endl;
+				InitializeNetwork(serverIP); // server IP 전달
+				gGameFramework.MoveToNextScene();
+			}
+			else if (wParam == VK_BACK && !m_inputIP.empty()) {
+				m_inputIP.pop_back();
+			}
+		}
 		break;
 	}
+}
+
+void CStartScene::RenderText()
+{
+	std::string msg;
+	if (!m_networkInitialized) {
+		if (m_inputStep == InputStep::EnterID)
+			msg = "Enter ID: " + m_inputID + "_";
+		else if (m_inputStep == InputStep::EnterIP)
+			msg = "Enter Server IP: " + m_inputIP + "_";
+	}
+	else {
+		msg = "Connecting...";
+	}
+	//DrawTextToScreen(msg, 40, 40);
+	HDC hDC = GetDC(m_hWnd);
+	SetTextColor(hDC, RGB(255, 255, 255));
+	SetBkMode(hDC, TRANSPARENT);
+	TextOutA(hDC, 40, 40, msg.c_str(), (int)msg.length());
+	ReleaseDC(m_hWnd, hDC);
+}
+
+void CStartScene::DrawTextToScreen(const std::string& text, int x, int y)
+{
+	if (!m_hWnd) return;
+	HDC hDC = GetDC(m_hWnd);
+	SetTextColor(hDC, RGB(255, 255, 255));
+	SetBkMode(hDC, TRANSPARENT);
+	TextOutA(hDC, x, y, text.c_str(), (int)text.length());
+	ReleaseDC(m_hWnd, hDC);
 }
 
 //server
