@@ -1,9 +1,6 @@
 #pragma once
 
-#include "Common.h"
-
-#include <DirectXMath.h>
-using namespace DirectX;
+#include "stdafx.h"
 
 //#define SET_DATA_FROM_DATABASE
 #define SERVER_STRESS_TEST
@@ -13,6 +10,7 @@ using namespace DirectX;
 #define NUM_WORKER_THREADS 4
 #define MAX_USER 5000
 
+#define BUF_SIZE 1024
 #define MAX_BUFFER 8192
 
 constexpr char SC_P_USER_INFO = 1;
@@ -55,8 +53,8 @@ enum class AnimationState : uint8_t {
 	IDLE,         // 0
 	WALK,         // 1
 	RUN,          // 2 
-	SWING,        // 3
-	JUMP,         // 4
+	JUMP,         // 3
+	SWING,        // 4
 	CROUCH,       // 5
 	CROUCH_WALK   // 6
 };
