@@ -52,10 +52,10 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 
 	// ----------------- 네트워크 초기화 및 서버 연결 -----------------
 	
-	//wcout.imbue(locale("korean"));
-	//std::cout << "유저 ID를 입력하세요 : ";
-	//std::cin >> user_name;
-	//InitializeNetwork();
+	wcout.imbue(locale("korean"));
+	std::cout << "유저 ID를 입력하세요 : ";
+	std::cin >> user_name;
+	InitializeNetwork();
 
 	//----------------------------------------------------------------
 
