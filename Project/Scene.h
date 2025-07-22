@@ -158,13 +158,17 @@ public:
 		}
 	}
 
-	void UpdateOtherPlayerPosition(int clinetnum, XMFLOAT3 position)
+	void UpdateOtherPlayerPosition(int clientnum, XMFLOAT3 position)
 	{
-		m_ppOtherPlayers[clinetnum]->SetPosition(position);
+		m_ppOtherPlayers[clientnum]->SetPosition(position);
 	}
-	void UpdateOtherPlayerAnimation(int clinetnum, int animNum)
+	void UpdateOtherPlayerLook(int clientnum, XMFLOAT3 look, XMFLOAT3 right)
 	{
-		m_ppOtherPlayers[clinetnum]->animation = animNum;
+		m_ppOtherPlayers[clientnum]->Rotate(look, right);
+	}
+	void UpdateOtherPlayerAnimation(int clientnum, int animNum)
+	{
+		m_ppOtherPlayers[clientnum]->animation = animNum;
 	}
 };
 

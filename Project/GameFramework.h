@@ -52,6 +52,10 @@ public:
 	{
 		m_ppScenes[m_nCurrentScene]->UpdateOtherPlayerPosition(clinetnum, position);
 	}
+	void UpdateOtherPlayerLook(int clientnum, XMFLOAT3 look, XMFLOAT3 right)
+	{
+		m_ppScenes[m_nCurrentScene]->UpdateOtherPlayerLook(clientnum, look, right);
+	}
 	void UpdateOtherPlayerAnimation(int clinetnum, int animNum)
 	{
 		m_ppScenes[m_nCurrentScene]->UpdateOtherPlayerAnimation(clinetnum, animNum);

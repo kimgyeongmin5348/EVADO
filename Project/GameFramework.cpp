@@ -298,7 +298,10 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 			if (m_pPlayer->items[2]) { 
 				m_pPlayer->isSwing = true;
 				if (m_pPlayer->m_isMonsterHit)
+				{
 					m_pScene->m_pEffect->Activate(m_pScene->m_ppHierarchicalGameObjects[2]->GetPosition());
+					m_pPlayer->m_isMonsterHit = false;
+				}
 				//m_pScene->m_pEffect->Activate();
 			}
 			::SetCapture(hWnd);

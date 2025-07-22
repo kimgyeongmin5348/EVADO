@@ -211,10 +211,10 @@ void InitializeNetwork() {
     
     WSAStartup(MAKEWORD(2, 2), &wsaData);
 
-    char serverIP[16];
-    std::cout << "server IP : ";
-    std::cin >> serverIP;
-   
+    char serverIP[16] = "127.0.0.1";
+    std::cout << "server IP : " << serverIP[16];
+    //std::cin >> serverIP;
+    // 임시로 개발 도중 변경
 
     ConnectSocket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, nullptr, 0, WSA_FLAG_OVERLAPPED);
 
@@ -272,14 +272,13 @@ void ProcessPacket(char* ptr)
         g_myid = packet->id;
         //player.SetPosition(packet->position);
 
-
-        std::cout << "[Client] My Player : " << packet->id << std::endl;
-        std::cout << "[Client] My Player Information ID:" << packet->id
-            << " Positino(" << packet->position.x << "," << packet->position.y << "," << packet->position.z << ")"
-            << " Look(" << packet->look.x << "," << packet->look.y << "," << packet->look.z << ")"
-            << " Right(" << packet->right.x << "," << packet->right.y << "," << packet->right.z << ")"
-            << "Animation : " << static_cast<int>(packet->animState) << ", HP : " << packet->hp << ", CASH : " << packet->cash
-            << std::endl;
+        //std::cout << "[Client] My Player : " << packet->id << std::endl;
+        //std::cout << "[Client] My Player Information ID:" << packet->id
+        //    << " Positino(" << packet->position.x << "," << packet->position.y << "," << packet->position.z << ")"
+        //    << " Look(" << packet->look.x << "," << packet->look.y << "," << packet->look.z << ")"
+        //    << " Right(" << packet->right.x << "," << packet->right.y << "," << packet->right.z << ")"
+        //    << "Animation : " << static_cast<int>(packet->animState) << ", HP : " << packet->hp
+        //    << std::endl;
         break;
     }
     
@@ -291,13 +290,13 @@ void ProcessPacket(char* ptr)
 
         if (id == g_myid) break;
 
-        std::cout << "[Client] New Player " << id << "Connect " << "\n";
-        std::cout << "[Client] New Player Information Recv "
-            << " Position(" << packet->position.x << "," << packet->position.y << "," << packet->position.z << ")"
-            << " Look(" << packet->look.x << "," << packet->look.y << "," << packet->look.z << ")"
-            << " Right(" << packet->right.x << "," << packet->right.y << "," << packet->right.z << ")"
-            << "Animation : " << static_cast<int>(packet->animState) << "HP : " << packet->hp << ", CASH : " << packet->cash
-            << std::endl;
+        //std::cout << "[Client] New Player " << id << "Connect " << "\n";
+        //std::cout << "[Client] New Player Information Recv "
+        //    << " Position(" << packet->position.x << "," << packet->position.y << "," << packet->position.z << ")"
+        //    << " Look(" << packet->look.x << "," << packet->look.y << "," << packet->look.z << ")"
+        //    << " Right(" << packet->right.x << "," << packet->right.y << "," << packet->right.z << ")"
+        //    << "Animation : " << static_cast<int>(packet->animState) << "HP : " << packet->hp
+        //    << std::endl;
 
         // 씬에 OtherPlayer가 딱 나타난다
         gGameFramework.OnOtherClientConnected();
@@ -316,9 +315,9 @@ void ProcessPacket(char* ptr)
         // OtherPlayer의 위치를 반영한다
         if (!gGameFramework.isLoading && !gGameFramework.isStartScene) {
             gGameFramework.UpdateOtherPlayerPosition(0, packet->position);
+            gGameFramework.UpdateOtherPlayerLook(0, packet->look, packet->right);
             gGameFramework.UpdateOtherPlayerAnimation(0, packet->animState);
         }
-
 
         std::cout << "[Client] New Player Information Recv "
             << " Position(" << packet->position.x << "," << packet->position.y << "," << packet->position.z << ")"
