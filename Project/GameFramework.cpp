@@ -300,6 +300,7 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 				m_pPlayer->isSwing = true;
 				if (m_pPlayer->m_isMonsterHit)
 				{
+					// 야매 vector 인덱스 직접 접근
 					m_pScene->m_pEffect->Activate(m_pScene->m_ppHierarchicalGameObjects[2]->GetPosition());
 					m_pPlayer->m_isMonsterHit = false;
 				}
@@ -523,6 +524,7 @@ void CGameFramework::BuildObjects()
 
 	if (m_nCurrentScene == 1)
 	{ 
+
 		m_pScene->m_ppHierarchicalGameObjects[0]->SetPlayer(m_pPlayer);
 	}
 

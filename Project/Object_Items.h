@@ -9,6 +9,9 @@ public:
 	virtual ~Item() {};
 
 	virtual void Animate(float fTimeElapsed);
+	void ChangeExistState(bool isExist);
+
+	bool is_exist = false;
 
 protected:
 	float m_fFallingSpeed; // ³«ÇÏ ¼Óµµ

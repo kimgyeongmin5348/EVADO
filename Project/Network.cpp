@@ -282,7 +282,6 @@ void ProcessPacket(char* ptr)
         break;
     }
     
-    // 랜더링 해야함(시선처리 랜더링 해야함)
     case SC_P_ENTER: // 새로 들어온 플레이어의 정보를 포함하고 있는 패킷 타입
     {
         sc_packet_enter* packet = reinterpret_cast<sc_packet_enter*>(ptr);
@@ -304,7 +303,6 @@ void ProcessPacket(char* ptr)
         break;
     }
 
-    // 랜더링 해야함(시선처리 랜더링 해야함)
     case SC_P_MOVE: // 상대 플레이어 (움직이면) 좌표 받기
     {
         sc_packet_move* packet = reinterpret_cast<sc_packet_move*>(ptr);
@@ -319,12 +317,12 @@ void ProcessPacket(char* ptr)
             gGameFramework.UpdateOtherPlayerAnimation(0, packet->animState);
         }
 
-        std::cout << "[Client] New Player Information Recv "
-            << " Position(" << packet->position.x << "," << packet->position.y << "," << packet->position.z << ")"
-            << " Look(" << packet->look.x << "," << packet->look.y << "," << packet->look.z << ")"
-            << " Right(" << packet->right.x << "," << packet->right.y << "," << packet->right.z << ")"
-            << "Animation : " << static_cast<int>(packet->animState)
-            << std::endl;
+        //std::cout << "[Client] New Player Information Recv "
+        //    << " Position(" << packet->position.x << "," << packet->position.y << "," << packet->position.z << ")"
+        //    << " Look(" << packet->look.x << "," << packet->look.y << "," << packet->look.z << ")"
+        //    << " Right(" << packet->right.x << "," << packet->right.y << "," << packet->right.z << ")"
+        //    << "Animation : " << static_cast<int>(packet->animState)
+        //    << std::endl;
 
         break;
     }
@@ -351,6 +349,8 @@ void ProcessPacket(char* ptr)
             << " Postion(" << pkt->position.x << ", "
             << pkt->position.y << ", " << pkt->position.z << ")"
             << " Type: " << pkt->item_type << " Cash: " << pkt->cash << std::endl;
+
+        gGameFramework.InitItemToScene(pkt->item_id, static_cast<ITEM_TYPE>(pkt->item_type), pkt->position);
 
         break;
     }

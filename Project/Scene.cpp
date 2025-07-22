@@ -171,20 +171,23 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_ppHierarchicalGameObjects[1] = new FlashLight(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFlashlightModel);
 	m_ppHierarchicalGameObjects[1]->SetScale(3, 3, 3);
 	m_ppHierarchicalGameObjects[1]->Rotate(90, 0, 0);
-	m_ppHierarchicalGameObjects[1]->SetPosition(3, 2, 10);
+	//m_ppHierarchicalGameObjects[1]->SetPosition(3, 2, 10);
+	m_ppHierarchicalGameObjects[1]->SetFrameName("FlashLight");
 	if (pFlashlightModel) delete pFlashlightModel;
 
 	CLoadedModelInfo* pShovelModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Shovel.bin", NULL);
 	m_ppHierarchicalGameObjects[2] = new Shovel(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShovelModel);
 	m_ppHierarchicalGameObjects[2]->SetScale(1, 1, 1);
 	m_ppHierarchicalGameObjects[2]->Rotate(0, 0, 90);
-	m_ppHierarchicalGameObjects[2]->SetPosition(3, 2, 12);
+	//m_ppHierarchicalGameObjects[2]->SetPosition(3, 2, 12);
+	m_ppHierarchicalGameObjects[2]->SetFrameName("Shovel");
 	if (pShovelModel) delete pShovelModel;
 
 	CLoadedModelInfo* pWhistleModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Whistle.bin", NULL);
 	m_ppHierarchicalGameObjects[3] = new Whistle(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pWhistleModel);
 	m_ppHierarchicalGameObjects[3]->SetScale(1, 1, 1);
-	m_ppHierarchicalGameObjects[3]->SetPosition(3, 2, 13);
+	//m_ppHierarchicalGameObjects[3]->SetPosition(3, 2, 13);
+	m_ppHierarchicalGameObjects[3]->SetFrameName("Whistle");
 	if (pWhistleModel) delete pWhistleModel;
 
 	m_nOtherPlayers = 1;
@@ -667,26 +670,24 @@ void CScene::AddItem(long long id, ITEM_TYPE type, const XMFLOAT3& position) {
 	switch (type)
 	{
 	case ITEM_TYPE_SHOVEL:
-		pModel = CGameObject::LoadGeometryAndAnimationFromFile(g_pd3dDevice, g_pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Shovel.bin", NULL);
-		pNewItem = new Shovel(g_pd3dDevice, g_pd3dCommandList, m_pd3dGraphicsRootSignature, pModel);
+		dynamic_cast<Shovel*>(m_ppHierarchicalGameObjects[2])->ChangeExistState(true);
+		dynamic_cast<Shovel*>(m_ppHierarchicalGameObjects[2])->SetPosition(position);
 		break;
 	case ITEM_TYPE_HANDMAP:
-		pModel = CGameObject::LoadGeometryAndAnimationFromFile(g_pd3dDevice, g_pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Flashlight.bin", NULL);
-		pNewItem = new FlashLight(g_pd3dDevice, g_pd3dCommandList, m_pd3dGraphicsRootSignature, pModel);
 		break;
 	case ITEM_TYPE_FLASHLIGHT:
-		pModel = CGameObject::LoadGeometryAndAnimationFromFile(g_pd3dDevice, g_pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Flashlight.bin", NULL);
-		pNewItem = new FlashLight(g_pd3dDevice, g_pd3dCommandList, m_pd3dGraphicsRootSignature, pModel);
+		dynamic_cast<FlashLight*>(m_ppHierarchicalGameObjects[1])->ChangeExistState(true);
+		dynamic_cast<FlashLight*>(m_ppHierarchicalGameObjects[1])->SetPosition(position);
 		break;
-
 	case ITEM_TYPE_WHISTLE:
-		pModel = CGameObject::LoadGeometryAndAnimationFromFile(g_pd3dDevice, g_pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Whistle.bin", NULL);
-		pNewItem = new Whistle(g_pd3dDevice, g_pd3dCommandList, m_pd3dGraphicsRootSignature, pModel);
+		dynamic_cast<Whistle*>(m_ppHierarchicalGameObjects[3])->ChangeExistState(true);
+		dynamic_cast<Whistle*>(m_ppHierarchicalGameObjects[3])->SetPosition(position);
 		break;
 	default:
 		std::cerr << "[Error] Unknown item type: " << static_cast<int>(type) << std::endl;
 		return;
 	}
+
 	if (pModel && pNewItem) {
 		pNewItem->SetPosition(position);
 		pNewItem->SetScale(1.0f, 1.0f, 1.0f); // 기본 스케일 설정
