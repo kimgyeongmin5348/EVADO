@@ -351,7 +351,7 @@ void ProcessPacket(char* ptr)
         std::cout << "[Client] Item Create - ID: " << pkt->item_id
             << " Postion(" << pkt->position.x << ", "
             << pkt->position.y << ", " << pkt->position.z << ")"
-            << " Type: " << pkt->item_type << std::endl;
+            << " Type: " << pkt->item_type << " Cash: " << pkt->cash << std::endl;
 
         break;
     }
