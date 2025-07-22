@@ -72,3 +72,5 @@ void send_position_to_server(const XMFLOAT3& position, const XMFLOAT3& look, con
 void InitializeNetwork();
 void CleanupNetwork();
 
+void LoadingDoneToServer();
+

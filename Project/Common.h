@@ -52,7 +52,15 @@ constexpr char CS_P_SHOP_SELL = 22;
 constexpr char SC_P_SHOP_BUY_ACK = 23;
 constexpr char SC_P_SHOP_SELL_ACK = 24;
 
+constexpr char CS_P_LOADING_DONE = 25;
+
 #pragma pack (push, 1)
+
+struct cs_packet_loading_done
+{
+	unsigned char	size;
+	char			type;
+};
 
 enum class AnimationState : uint8_t {
 	IDLE,         // 0
