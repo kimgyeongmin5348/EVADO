@@ -215,7 +215,7 @@ void ProcessPacket(char* ptr)
             << " Positino(" << packet->position.x << "," << packet->position.y << "," << packet->position.z << ")"
             << " Look(" << packet->look.x << "," << packet->look.y << "," << packet->look.z << ")"
             << " Right(" << packet->right.x << "," << packet->right.y << "," << packet->right.z << ")"
-            << "Animation : " << static_cast<int>(packet->animState) << ", HP : " << packet->hp
+            << "Animation : " << static_cast<int>(packet->animState) << ", HP : " << packet->hp << ", CASH : " << packet->cash
             << std::endl;
         break;
     }
@@ -232,7 +232,7 @@ void ProcessPacket(char* ptr)
             << " Position(" << packet->position.x << "," << packet->position.y << "," << packet->position.z << ")"
             << " Look(" << packet->look.x << "," << packet->look.y << "," << packet->look.z << ")"
             << " Right(" << packet->right.x << "," << packet->right.y << "," << packet->right.z << ")"
-            << "Animation : " << static_cast<int>(packet->animState) << "HP : " << packet->hp
+            << "Animation : " << static_cast<int>(packet->animState) << "HP : " << packet->hp << ", CASH : " << packet->cash
             << std::endl;
 
         // 씬에 OtherPlayer가 딱 나타난다

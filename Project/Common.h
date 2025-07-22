@@ -1,6 +1,9 @@
 #pragma once
 
-#include "stdafx.h"
+#include "Common.h"
+
+#include <DirectXMath.h>
+using namespace DirectX;
 
 //#define SET_DATA_FROM_DATABASE
 #define SERVER_STRESS_TEST
@@ -10,7 +13,6 @@
 #define NUM_WORKER_THREADS 4
 #define MAX_USER 5000
 
-#define BUF_SIZE 1024
 #define MAX_BUFFER 8192
 
 constexpr char SC_P_USER_INFO = 1;
@@ -22,8 +24,12 @@ constexpr char CS_P_MOVE = 6;
 constexpr char SC_P_LOGIN_FAIL = 7;
 
 
-constexpr unsigned short MAP_HEIGHT = 8;
-constexpr unsigned short MAP_WIDTH = 8;
+constexpr float TILE_SIZE = 1.0f;
+constexpr float MAP_ORIGIN_X = -100.0f;
+constexpr float MAP_ORIGIN_Z = -100.0f;
+
+constexpr unsigned short MAP_WIDTH = 200;  // 전에는 8이었음.
+constexpr unsigned short MAP_HEIGHT = 200;
 
 constexpr char SC_P_ITEM_SPAWN = 9;
 constexpr char SC_P_ITEM_DESPAWN = 10;
@@ -42,15 +48,15 @@ constexpr char SC_P_MONSTER_SPAWN = 14;
 constexpr char SC_P_MONSTER_MOVE = 15;
 constexpr char SC_P_MONSTER_DIE = 16;
 
-#pragma pack (push, 1)
 
+#pragma pack (push, 1)
 
 enum class AnimationState : uint8_t {
 	IDLE,         // 0
 	WALK,         // 1
 	RUN,          // 2 
-	JUMP,        // 3
-	SWING,         // 4
+	SWING,        // 3
+	JUMP,         // 4
 	CROUCH,       // 5
 	CROUCH_WALK   // 6
 };
@@ -64,55 +70,57 @@ struct sc_packet_user_info {
 	XMFLOAT3		right;
 	uint8_t			animState;
 	short			hp;
+	short			cash;
 };
 
 struct sc_packet_move {
-	unsigned char	size;
-	char			type;
-	long long		id;
-	XMFLOAT3		position;
-	XMFLOAT3		look;
-	XMFLOAT3		right;
-	uint8_t			animState;
+	unsigned char		size;
+	char				type;
+	long long			id;
+	XMFLOAT3			position;
+	XMFLOAT3			look;
+	XMFLOAT3			right;
+	uint8_t				animState;
 };
 
 struct sc_packet_enter {
-	unsigned char	size;
-	char			type;
-	long long		id;
-	XMFLOAT3		position;
-	XMFLOAT3		look;
-	XMFLOAT3		right;
-	uint8_t			animState;
-	short			hp;
+	unsigned char		size;
+	char				type;
+	long long			id;
+	XMFLOAT3			position;
+	XMFLOAT3			look;
+	XMFLOAT3			right;
+	uint8_t				animState;
+	short				hp;
+	short				cash;
 };
 
 struct sc_packet_leave {
-	unsigned char	size;
-	char			type;
-	long long		id;
+	unsigned char		size;
+	char				type;
+	long long			id;
 };
 
 struct cs_packet_login {
-	unsigned char	size;
-	char			type;
-	//XMFLOAT3		position;
-	char			name[MAX_ID_LENGTH];
+	unsigned char		size;
+	char				type;
+	//XMFLOAT3			position;
+	char				name[MAX_ID_LENGTH];
 
 };
 
 struct sc_packet_login_fail {
-	unsigned char	size;
-	char			type;
+	unsigned char		size;
+	char				type;
 };
 
 struct cs_packet_move {
-	unsigned char	size;
-	char			type;
-	XMFLOAT3		position;
-	XMFLOAT3		look;
-	XMFLOAT3		right;
-	uint8_t			animState;
+	unsigned char		size;
+	char				type;
+	XMFLOAT3			position;
+	XMFLOAT3			look;
+	XMFLOAT3			right;
+	uint8_t				animState;
 };
 
 // 아이템
@@ -125,39 +133,73 @@ enum ITEM_TYPE : int {
 };
 
 struct sc_packet_item_spawn {
-	unsigned char	size;
-	char			type;
-	long long		item_id;
-	XMFLOAT3		position;
-	int				item_type;
+	unsigned char		size;
+	char				type;
+	long long			item_id;
+	XMFLOAT3			position;
+	int					item_type;
+	short				cash;
 };
 
 struct sc_packet_item_despawn {
-	unsigned char	size;
-	char			type;
-	long long		item_id;
+	unsigned char		size;
+	char				type;
+	long long			item_id;
 };
 
 struct cs_packet_item_pickup {
-	unsigned char	size;
-	char			type;
-	long long		item_id;
-	long long		player_id;
+	unsigned char		size;
+	char				type;
+	long long			item_id;
+	long long			player_id;
 };
 
 struct cs_packet_item_move {
-	unsigned char	size;
-	char			type;
-	long long		item_id;
-	XMFLOAT3		position;
+	unsigned char		size;
+	char				type;
+	long long			item_id;
+	XMFLOAT3			position;
 };
 
 struct sc_packet_item_move {
-	unsigned char	size;
-	char			type;
-	long long		item_id;
-	XMFLOAT3		position;
-	long long		holder_id; // 소유자 ID (0 = 지면에 있음)
+	unsigned char		size;
+	char				type;
+	long long			item_id;
+	XMFLOAT3			position;
+	long long			holder_id; // 소유자 ID (0 = 지면에 있음)
+};
+
+// 상점
+struct cs_packet_shop_buy
+{
+	unsigned char size;
+	unsigned char type; // CS_P_SHOP_BUY
+	int item_type;
+};
+
+struct sc_packet_shop_buy_ack
+{
+	unsigned char size;
+	unsigned char type;
+	bool success;
+	int new_cash;          // 남은 금액
+	int bought_item_type;  // 지급된 아이템 번호(또는 실패시 -1)
+};
+
+struct cs_packet_shop_sell
+{
+	unsigned char size;
+	unsigned char type; // CS_P_SHOP_SELL
+	int item_type;      // 팔 아이템 번호
+};
+
+struct sc_packet_shop_sell_ack
+{
+	unsigned char size;
+	unsigned char type;
+	bool success;
+	int new_cash;          // 갱신된 금액
+	int sold_item_type;    // 판매 성공시 해당 번호
 };
 
 // Monster
@@ -185,6 +227,9 @@ struct sc_packet_monster_move
 	XMFLOAT3			position;
 	uint8_t				state;
 };
+
+
+
 
 #pragma pack (pop)
 
