@@ -6,6 +6,7 @@
 #include "Object.h"
 #include "Shader.h"
 #include "Scene.h"
+#include "Hpbar.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -1545,6 +1546,9 @@ CSpider::CSpider(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dComman
 
 	SetChild(pSpiderModel->m_pModelRootObject, true);
 	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, nAnimationTracks, pSpiderModel);
+
+	Hpbar *pHpbar = new Hpbar(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	m_pHpbar = pHpbar;
 }
 
 CSpider::~CSpider()
@@ -1553,52 +1557,66 @@ CSpider::~CSpider()
 
 void CSpider::Animate(float fTimeElapsed)
 {
-
 	XMFLOAT3 enemyPos = GetPosition();
 	XMFLOAT3 playerPos = pPlayer->GetPosition(); // 플레이어 위치 받아오기
 
 	XMFLOAT3 delta = Vector3::Subtract(playerPos, enemyPos);
 	float distance = Vector3::Length(delta);
 
-	if (distance <= 50.0f)
-	{
-		if (distance > 15.0f)
-		{
-			// 걷는 애니메이션 활성화
-			m_pSkinnedAnimationController->SetTrackEnable(0, true); // walk
-			m_pSkinnedAnimationController->SetTrackEnable(1, false); // idle
-			m_pSkinnedAnimationController->SetTrackEnable(2, false); // attack
-			m_pSkinnedAnimationController->SetTrackSpeed(0, 5.f);
+	//if (distance <= 50.0f)
+	//{
+	//	if (distance > 15.0f)
+	//	{
+	//		// 걷는 애니메이션 활성화
+	//		m_pSkinnedAnimationController->SetTrackEnable(0, true); // walk
+	//		m_pSkinnedAnimationController->SetTrackEnable(1, false); // idle
+	//		m_pSkinnedAnimationController->SetTrackEnable(2, false); // attack
+	//		m_pSkinnedAnimationController->SetTrackSpeed(0, 5.f);
 
-			// 이동 처리
-			XMFLOAT3 direction = Vector3::Normalize(delta);
-			XMFLOAT3 velocity = Vector3::ScalarProduct(direction, 2.5f * fTimeElapsed, false);
-			LookAt(playerPos, XMFLOAT3(0.0f, 1.0f, 0.0f));
+	//		// 이동 처리
+	//		XMFLOAT3 direction = Vector3::Normalize(delta);
+	//		XMFLOAT3 velocity = Vector3::ScalarProduct(direction, 2.5f * fTimeElapsed, false);
+	//		LookAt(playerPos, XMFLOAT3(0.0f, 1.0f, 0.0f));
 
-			XMFLOAT3 pos = Vector3::Add(GetPosition(), velocity);
-			SetPosition(pos);
-		}
-		else
-		{
-			// 공격 애니메이션
-			m_pSkinnedAnimationController->SetTrackEnable(0, false);
-			m_pSkinnedAnimationController->SetTrackEnable(1, false);
-			m_pSkinnedAnimationController->SetTrackEnable(2, true);
-			m_pSkinnedAnimationController->SetTrackSpeed(2, 5.f);
+	//		//XMFLOAT3 pos = Vector3::Add(GetPosition(), velocity);
+	//		//SetPosition(pos);
+	//	}
+	//	else
+	//	{
+	//		// 공격 애니메이션
+	//		m_pSkinnedAnimationController->SetTrackEnable(0, false);
+	//		m_pSkinnedAnimationController->SetTrackEnable(1, false);
+	//		m_pSkinnedAnimationController->SetTrackEnable(2, true);
+	//		m_pSkinnedAnimationController->SetTrackSpeed(2, 5.f);
 
-			// 단순히 공격만 하고 이동은 하지 않음
-			LookAt(playerPos, XMFLOAT3(0.0f, 1.0f, 0.0f));
-		}
-	}
-	else
-	{
-		// 범위 벗어나면 idle
-		m_pSkinnedAnimationController->SetTrackEnable(0, false);
-		m_pSkinnedAnimationController->SetTrackEnable(1, true);
-		m_pSkinnedAnimationController->SetTrackEnable(2, false);
-	}
+	//		// 단순히 공격만 하고 이동은 하지 않음
+	//		LookAt(playerPos, XMFLOAT3(0.0f, 1.0f, 0.0f));
+	//	}
+	//}
+	//else
+	//{
+	//	// 범위 벗어나면 idle
+	//	m_pSkinnedAnimationController->SetTrackEnable(0, false);
+	//	m_pSkinnedAnimationController->SetTrackEnable(1, true);
+	//	m_pSkinnedAnimationController->SetTrackEnable(2, false);
+	//}
+
+	m_pSkinnedAnimationController->SetTrackEnable(0, false);
+	m_pSkinnedAnimationController->SetTrackEnable(1, true);
+	m_pSkinnedAnimationController->SetTrackEnable(2, false);
 
 	CGameObject::Animate(fTimeElapsed);
+}	
+
+void CSpider::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	XMFLOAT3 hpbarPos = GetPosition();
+	hpbarPos.x += 5.0f;	
+	hpbarPos.y += 3.0f;
+	m_pHpbar->SetPosition(hpbarPos);
+	m_pHpbar->Render(pd3dCommandList, pCamera);
+
+	CGameObject::Render(pd3dCommandList, pCamera);
 }
 
 void CGameObject::CalculateBoundingBox()

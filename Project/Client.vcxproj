@@ -142,10 +142,15 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="CCubeMesh.cpp" />
+    <ClCompile Include="CCubeShader.cpp" />
     <ClCompile Include="CollisionManager.cpp" />
+    <ClCompile Include="CParticle.cpp" />
     <ClCompile Include="DDSTextureLoader12.cpp" />
     <ClCompile Include="GameFramework.cpp" />
     <ClCompile Include="Client.cpp" />
+    <ClCompile Include="CRectMesh.cpp" />
+    <ClCompile Include="Hpbar.cpp" />
     <ClCompile Include="Map.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Network.cpp" />
@@ -162,12 +167,17 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="CCubeMesh.h" />
+    <ClInclude Include="CCubeShader.h" />
     <ClInclude Include="CollisionManager.h" />
     <ClInclude Include="Common.h" />
+    <ClInclude Include="CParticle.h" />
     <ClInclude Include="d3dx12.h" />
     <ClInclude Include="DDSTextureLoader12.h" />
     <ClInclude Include="GameFramework.h" />
     <ClInclude Include="Client.h" />
+    <ClInclude Include="CRectMesh.h" />
+    <ClInclude Include="Hpbar.h" />
     <ClInclude Include="Map.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Network.h" />

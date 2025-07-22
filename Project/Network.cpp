@@ -31,8 +31,7 @@ std::mutex g_player_mutex;
 std::unordered_map<long long, Item*> g_items;
 std::mutex g_item_mutex;
 
-<<<<<<< Updated upstream
-=======
+
 // =================================================================
 //           몬스터 렌더링을 위한 몬스터 오브젝트 및 관리 
 // =================================================================
@@ -94,8 +93,6 @@ void SendShopSellRequest(int item_type)
     pkt.item_type = item_type;
     send_packet(&pkt);
 }
-
->>>>>>> Stashed changes
 
 // =================================================================
 //                      네트워크 코어 로직
@@ -233,7 +230,7 @@ void InitializeNetwork() {
 
 
     if (connect(ConnectSocket, (sockaddr*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR) {
-        std::cerr << "연결 실패: " << WSAGetLastError() << std::endl;
+        std::cerr << "Connect Fail: " << WSAGetLastError() << std::endl;
         closesocket(ConnectSocket);
         WSACleanup();
         exit(1);
@@ -285,7 +282,8 @@ void ProcessPacket(char* ptr)
             << std::endl;
         break;
     }
-
+    
+    // 랜더링 해야함(시선처리 랜더링 해야함)
     case SC_P_ENTER: // 새로 들어온 플레이어의 정보를 포함하고 있는 패킷 타입
     {
         sc_packet_enter* packet = reinterpret_cast<sc_packet_enter*>(ptr);
@@ -307,6 +305,7 @@ void ProcessPacket(char* ptr)
         break;
     }
 
+    // 랜더링 해야함(시선처리 랜더링 해야함)
     case SC_P_MOVE: // 상대 플레이어 (움직이면) 좌표 받기
     {
         sc_packet_move* packet = reinterpret_cast<sc_packet_move*>(ptr);
@@ -341,6 +340,7 @@ void ProcessPacket(char* ptr)
         break;
     }
 
+    // 랜더링 해야함
     case SC_P_ITEM_SPAWN:
     {
         sc_packet_item_spawn* pkt = reinterpret_cast<sc_packet_item_spawn*>(ptr);
@@ -356,6 +356,7 @@ void ProcessPacket(char* ptr)
         break;
     }
 
+    // 여긴 일단 흠... 사라지는건 update부분에서 해도 되지 않을까...?
     case SC_P_ITEM_DESPAWN:
     {
         sc_packet_item_despawn* pkt = reinterpret_cast<sc_packet_item_despawn*>(ptr);
@@ -363,6 +364,7 @@ void ProcessPacket(char* ptr)
         break;
     }
 
+    // 랜더링 해야함
     case SC_P_ITEM_MOVE:
     {
         sc_packet_item_move* pkt = reinterpret_cast<sc_packet_item_move*>(ptr);
@@ -371,6 +373,7 @@ void ProcessPacket(char* ptr)
         break;
     }
 
+    // 랜더링 해야함
     case SC_P_MONSTER_SPAWN:
     {
         sc_packet_monster_spawn* pkt = reinterpret_cast<sc_packet_monster_spawn*>(ptr);
@@ -379,10 +382,13 @@ void ProcessPacket(char* ptr)
             << " State: " << static_cast<int>(pkt->state) << std::endl;
 
         // 몬스터 생성
-        // 예시 -> gGameFramework.OnMonsterSpawned(pkt->monsterID, pkt->position);
+        OnMonsterSpawned(pkt->monsterID, pkt->position, pkt->state);
+
+        // 랜더링 예시 -> gGameFramework.OnMonsterSpawned(pkt->monsterID, pkt->position);
         break;
     }
-
+    
+    // 랜더링 해야함
     case SC_P_MONSTER_MOVE:
     {
         sc_packet_monster_move* pkt = reinterpret_cast<sc_packet_monster_move*>(ptr);
@@ -391,8 +397,9 @@ void ProcessPacket(char* ptr)
             << " New Position(" << pkt->position.x << ", " << pkt->position.z << ")"
             << " State: " << static_cast<int>(pkt->state) << std::endl;
 
-        //몬스터 위치 업데이트 로직
-        // 예시 ->  gGameFramework.UpdateMonsterPosition(pkt->monsterID, pkt->position, pkt->state);
+        UpdateMonsterPosition(pkt->monsterID, pkt->position, pkt->state);
+
+        // 랜더링 예시 ->  gGameFramework.UpdateMonsterPosition(pkt->monsterID, pkt->position, pkt->state);
         break;
     }
 

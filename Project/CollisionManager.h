@@ -5,6 +5,7 @@
 
 class CGameObject;
 class CPlayer;
+class Shovel;
 
 class CCollisionManager
 {
@@ -20,7 +21,10 @@ public:
     void Build(const BoundingBox& worldBounds, int maxObjectsPerNode, int maxDepth);
     void InsertObject(CGameObject* object);
     void PrintTree();
+
     void Update(CPlayer* player);
+    void Update(CPlayer* player, Shovel* shovel);
+
     bool IsColliding(const BoundingBox& box1, const BoundingBox& box2);
 
 private:

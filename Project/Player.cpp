@@ -200,6 +200,16 @@ void CPlayer::CalculateBoundingBox()
 	ConvertCylinderToAABB(m_BoundingCylinder, m_BoundingBox);
 }
 
+void CPlayer::GenerateShovelAttackBoundingBox()
+{
+	// 바운딩 박스의 중심: 플레이어 위치에서 전방(Look) 방향으로 0.5f 이동
+	XMFLOAT3 forwardOffset = Vector3::ScalarProduct(Vector3::Normalize(m_xmf3Look), 0.5f);
+	m_shovelAttackBoundingBox.Center = Vector3::Add(m_xmf3Position, forwardOffset);
+
+	// 바운딩 박스의 크기
+	m_shovelAttackBoundingBox.Extents = XMFLOAT3(0.5f, 0.5f, 1.0f);
+}
+
 void CPlayer::Update(float fTimeElapsed)
 {
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, m_xmf3Gravity);
@@ -224,10 +234,10 @@ void CPlayer::Update(float fTimeElapsed)
 	DWORD nCurrentCameraMode = m_pCamera->GetMode();
 	if (nCurrentCameraMode == THIRD_PERSON_CAMERA) { 
 		m_pCamera->Update(m_xmf3Position, fTimeElapsed); 
-		m_pCamera->SetLookAt(m_xmf3Position);
+		//m_pCamera->SetLookAt(m_xmf3Position);
 	}
 	if (m_pCameraUpdatedContext) OnCameraUpdateCallback(fTimeElapsed);
-	if (nCurrentCameraMode == THIRD_PERSON_CAMERA) m_pCamera->SetLookAt(m_xmf3Position);
+	//if (nCurrentCameraMode == THIRD_PERSON_CAMERA) m_pCamera->SetLookAt(m_xmf3Position);
 	m_pCamera->RegenerateViewMatrix();
 
 	fLength = Vector3::Length(m_xmf3Velocity);
@@ -327,8 +337,8 @@ CTerrainPlayer::CTerrainPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandLi
 	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0); // 기본
 	m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1); // 걷기
 	m_pSkinnedAnimationController->SetTrackAnimationSet(2, 2); // 뛰기
-	m_pSkinnedAnimationController->SetTrackAnimationSet(3, 3); // 휘두르기
-	m_pSkinnedAnimationController->SetTrackAnimationSet(4, 4); // 점프
+	m_pSkinnedAnimationController->SetTrackAnimationSet(3, 3); // 점프
+	m_pSkinnedAnimationController->SetTrackAnimationSet(4, 4); // 휘두르기
 	m_pSkinnedAnimationController->SetTrackAnimationSet(5, 5); // 웅크리기
 	m_pSkinnedAnimationController->SetTrackAnimationSet(6, 6); // 웅크리고 걷기
 	m_pSkinnedAnimationController->SetTrackEnable(1, false); 
@@ -357,7 +367,7 @@ CTerrainPlayer::CTerrainPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandLi
 	SetCameraUpdatedContext(pContext);
 
 	CHeightMapTerrain *pTerrain = (CHeightMapTerrain *)pContext;
-	SetPosition(XMFLOAT3(0, 0, 0));
+	SetPosition(XMFLOAT3(3, 0, 20));
 	//SetScale(XMFLOAT3(10.0f, 10.0f, 10.0f));
 
 	if (pPlayerModel) delete pPlayerModel;
@@ -404,7 +414,7 @@ CCamera *CTerrainPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 			SetMaxVelocityY(400.0f);
 			m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
 			m_pCamera->SetTimeLag(0.25f);
-			m_pCamera->SetOffset(XMFLOAT3(0.0f, 5.0f, -2.5f));
+			m_pCamera->SetOffset(XMFLOAT3(0.0f, 3.0f, -3.5f));
 			m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
 			m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 			m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
@@ -616,9 +626,9 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 
 		uint8_t currentAnimState = static_cast<uint8_t>(AnimationState::IDLE);
 		if (isJump)
-			currentAnimState = static_cast<uint8_t>(AnimationState::JUMP); // 4
+			currentAnimState = static_cast<uint8_t>(AnimationState::JUMP); // 3
 		else if (isSwing)
-			currentAnimState = static_cast<uint8_t>(AnimationState::SWING); // 3
+			currentAnimState = static_cast<uint8_t>(AnimationState::SWING); // 4
 		else if (isCrouch)
 			currentAnimState = static_cast<uint8_t>(AnimationState::CROUCH); //5
 		else if (::IsZero(fLength))

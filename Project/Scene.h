@@ -10,6 +10,7 @@
 #include "OtherPlayer.h"
 #include "Map.h"
 #include "CollisionManager.h"
+#include "CParticle.h"
 
 #define MAX_LIGHTS						16 
 
@@ -142,6 +143,8 @@ public:
 	LIGHTS								*m_pcbMappedLights = NULL;
 
 	CCollisionManager					m_CollisionManager;
+
+	CParticle							*m_pEffect = NULL;
 	//server
 	
 public:

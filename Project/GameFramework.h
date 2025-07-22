@@ -65,6 +65,8 @@ public:
 		}
 	}
 
+
+
 	bool isLoading = false;
 	bool isStartScene = true;
 

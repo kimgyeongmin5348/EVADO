@@ -48,10 +48,13 @@ protected:
 	XMFLOAT3			m_lastPushDirection; // 마지막 충돌 방향 저장
 	BoundingCylinder	m_BoundingCylinder;
 
+	BoundingBox			m_shovelAttackBoundingBox;
+
 public:
 	bool	isSwing = false;
 	bool	isCrouch = false;
 	bool	items[4] = { false,false,false,false };
+	bool	m_isMonsterHit = false;
 
 public:
 	CPlayer();
@@ -62,6 +65,7 @@ public:
 	XMFLOAT3 GetUpVector() { return(m_xmf3Up); }
 	XMFLOAT3 GetRightVector() { return(m_xmf3Right); }
 	XMFLOAT3 GetPushDirection() const { return m_lastPushDirection; }
+	BoundingBox GetShovelAttackBoundingBox() { return m_shovelAttackBoundingBox; }
 
 	void SetFriction(float fFriction) { m_fFriction = fFriction; }
 	void SetGravity(const XMFLOAT3& xmf3Gravity) { m_xmf3Gravity = xmf3Gravity; }
@@ -70,6 +74,7 @@ public:
 	void SetVelocity(const XMFLOAT3& xmf3Velocity) { m_xmf3Velocity = xmf3Velocity; }
 	void SetPosition(const XMFLOAT3& xmf3Position) { Move(XMFLOAT3(xmf3Position.x - m_xmf3Position.x, xmf3Position.y - m_xmf3Position.y, xmf3Position.z - m_xmf3Position.z), false); }
 	void SetPushDirection(const XMFLOAT3& direction) { m_lastPushDirection = direction; }
+	void SetShovelAttadckBoundingBox(const BoundingBox& bbShovelAttack) { m_shovelAttackBoundingBox = bbShovelAttack; }
 
 	void SetScale(XMFLOAT3& xmf3Scale) { m_xmf3Scale = xmf3Scale; }
 
@@ -92,6 +97,7 @@ public:
 		outBox.Center = cylinder.Center;
 		outBox.Extents = XMFLOAT3(cylinder.Radius, cylinder.Height * 0.5f, cylinder.Radius);
 	}
+	void GenerateShovelAttackBoundingBox();
 
 	virtual void Update(float fTimeElapsed);
 

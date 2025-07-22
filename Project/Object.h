@@ -435,6 +435,9 @@ public:
 	virtual void SetPosition(XMFLOAT3 xmf3Position);
 	void SetScale(float x, float y, float z);
 	void SetScale(XMFLOAT3 xmf3Scale);
+	void SetFrameName(const char* framename) {
+		strncpy_s(m_pstrFrameName, sizeof(m_pstrFrameName), framename, _TRUNCATE);
+	}
 
 	void MoveStrafe(float fDistance = 1.0f);
 	void MoveUp(float fDistance = 1.0f);
@@ -539,9 +542,11 @@ public:
 
 	virtual void Animate(float fTimeElapsed);
 	virtual void SetPlayer(CPlayer* p) { pPlayer = p; }
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
 
 private:
 	CPlayer* pPlayer = NULL;
+	CGameObject* m_pHpbar = NULL;
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
