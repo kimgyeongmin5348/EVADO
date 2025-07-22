@@ -53,6 +53,18 @@ extern std::queue<std::vector<char>> g_sendQueue;
 extern std::mutex g_sendMutex;
 extern std::condition_variable g_sendCV;
 
+
+// Monster
+void OnMonsterSpawned(int64_t monsterID, const XMFLOAT3& pos, uint8_t state);
+void UpdateMonsterPosition(int64_t monsterID, const XMFLOAT3& pos, uint8_t state);
+
+
+// Shop
+void SendShopBuyRequest(int item_type);
+void SendShopSellRequest(int item_type);
+
+
+
 void ProcessPacket(char* ptr);
 //void process_data(char* net_buf, size_t io_byte); // ???
 void send_packet(void* packet);

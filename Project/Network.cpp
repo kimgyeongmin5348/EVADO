@@ -31,6 +31,71 @@ std::mutex g_player_mutex;
 std::unordered_map<long long, Item*> g_items;
 std::mutex g_item_mutex;
 
+<<<<<<< Updated upstream
+=======
+// =================================================================
+//           몬스터 렌더링을 위한 몬스터 오브젝트 및 관리 
+// =================================================================
+struct MonsterObject {
+    int64_t monsterID;
+    XMFLOAT3 position;
+    uint8_t state;
+
+    MonsterObject(int64_t id, XMFLOAT3 pos, uint8_t st)
+        : monsterID(id), position(pos), state(st) {
+    }
+
+    void SetPosition(const XMFLOAT3& pos) { position = pos; }
+    void SetState(uint8_t st) { state = st; }
+
+};
+
+std::unordered_map<int64_t, MonsterObject*> g_monsters;
+std::mutex g_monster_mutex;
+
+
+// 몬스터 생성
+void OnMonsterSpawned(int64_t monsterID, const XMFLOAT3& pos, uint8_t state) {
+    std::lock_guard<std::mutex> lock(g_monster_mutex);
+    if (g_monsters.count(monsterID) == 0) {
+        g_monsters[monsterID] = new MonsterObject(monsterID, pos, state);
+    }
+}
+// 몬스터 위치, 상태 업데이트
+void UpdateMonsterPosition(int64_t monsterID, const XMFLOAT3& pos, uint8_t state) {
+    std::lock_guard<std::mutex> lock(g_monster_mutex);
+    auto it = g_monsters.find(monsterID);
+    if (it != g_monsters.end()) {
+        it->second->SetPosition(pos);
+        it->second->SetState(state);
+    }
+   
+}
+
+
+// =================================================================
+//                           상점 관리
+// =================================================================
+
+void SendShopBuyRequest(int item_type)
+{
+    cs_packet_shop_buy pkt{};
+    pkt.size = sizeof(pkt);
+    pkt.type = CS_P_SHOP_BUY;
+    pkt.item_type = item_type;
+    send_packet(&pkt);
+}
+
+void SendShopSellRequest(int item_type)
+{
+    cs_packet_shop_sell pkt{};
+    pkt.size = sizeof(pkt);
+    pkt.type = CS_P_SHOP_SELL;
+    pkt.item_type = item_type;
+    send_packet(&pkt);
+}
+
+>>>>>>> Stashed changes
 
 // =================================================================
 //                      네트워크 코어 로직
@@ -202,6 +267,7 @@ void ProcessPacket(char* ptr)
 
     switch (packet_type)
     {
+    // 서버 : 인벤토리 관련된거 만들게 되면 여기에도 정보 추가 해야함
     case SC_P_USER_INFO: // 클라이언트의 정보를 가지고 있는 패킷 타입
     {
         sc_packet_user_info* packet = reinterpret_cast<sc_packet_user_info*>(ptr);
@@ -327,6 +393,42 @@ void ProcessPacket(char* ptr)
 
         //몬스터 위치 업데이트 로직
         // 예시 ->  gGameFramework.UpdateMonsterPosition(pkt->monsterID, pkt->position, pkt->state);
+        break;
+    }
+
+    case SC_P_SHOP_BUY_ACK:
+    {
+        auto* pkt = reinterpret_cast<sc_packet_shop_buy_ack*>(ptr);
+        if (pkt->success)
+        {
+            std::cout << "[Shop] 구매 성공! 아이템 타입: " << pkt->item_type
+                << " 남은 캐시: " << pkt->left_cash << std::endl;
+
+            //  예시 : gGameFramework.OnItemBought(pkt->item_type, pkt->left_cash);
+        }
+        else
+        {
+            std::cout << "[Shop] 구매 실패! (잔액 부족/보유중 등)" << std::endl;
+            // UI 띄우면 좋음
+        }
+        break;
+    }
+
+    case SC_P_SHOP_SELL_ACK:
+    {
+        auto* pkt = reinterpret_cast<sc_packet_shop_sell_ack*>(ptr);
+        if (pkt->success)
+        {
+            std::cout << "[Shop] 판매 성공! 아이템 타입: " << pkt->item_type
+                << " 남은 캐시: " << pkt->left_cash << std::endl;
+
+            // 예시 : gGameFramework.OnItemSold(pkt->item_type, pkt->left_cash);
+        }
+        else
+        {
+            std::cout << "[Shop] 판매 실패! (보유하지 않은 아이템)" << std::endl;
+            // UI 띄우면 좋음
+        }
         break;
     }
 
