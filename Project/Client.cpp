@@ -21,7 +21,6 @@ INT_PTR CALLBACK About(HWND, UINT, WPARAM, LPARAM);
 
 std::string user_name;
 
-void InitializeNetwork();
 
 //// Overlapped 구조체 정의
 //struct ClientOverlapped : public WSAOVERLAPPED {

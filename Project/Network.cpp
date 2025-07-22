@@ -491,3 +491,12 @@ void CleanupNetwork() {
     WSACleanup();
     g_sendCV.notify_all(); // 송신 스레드 깨우기
 }
+
+void LoadingDoneToServer()
+{
+    cs_packet_loading_done pkt{};
+    pkt.size = sizeof(pkt);
+    pkt.type = CS_P_LOADING_DONE;
+    send_packet(&pkt);
+    std::cout << "[Client] LodingDone ! " << std::endl;
+}
