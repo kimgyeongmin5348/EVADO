@@ -42,6 +42,11 @@ public:
 	LRESULT CALLBACK OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 
 
+	//long long FindNearestItemInRange(float range, XMFLOAT3 playerPos);
+	//void CheckNearbyItemPrompt();
+	//void ItemToHand(Item* pItem);
+	//void ItemDropFromHand(Item* pItem);
+
 	void ItemToHand(int objectIndex);
 
 	void OnOtherClientConnected()
@@ -61,12 +66,28 @@ public:
 		m_ppScenes[m_nCurrentScene]->UpdateOtherPlayerAnimation(clinetnum, animNum);
 	}
 
+
+	void AddItemToScene(long long id, ITEM_TYPE type, const XMFLOAT3& position)
+
+	const float Recognized_Range = 2.0f;
+
 	void InitItemToScene(long long id, ITEM_TYPE type, const XMFLOAT3& position)
+
+
 	{
-		if (m_ppScenes && m_ppScenes[m_nCurrentScene]) {
-			m_ppScenes[m_nCurrentScene]->AddItem(id, type, position);
+		if (m_pScene) {
+			m_pScene->AddItem(id, type, position);
 		}
 	}
+
+
+
+	/*void UpdateItemPosition(long long id, const XMFLOAT3& position)
+	{
+		if (m_ppScenes && m_ppScenes[m_nCurrentScene]) {
+			m_ppScenes[m_nCurrentScene]->UpdateItemPosition(id, position);
+		}
+	}*/
 
 
 
@@ -127,7 +148,7 @@ private:
 	bool flashlightToggle = false;
 
 	//server
-	//float m_fLastPositionSendTime = 0.0f;  // 위치 전송 시간 추적
+	//float m_fLastPositionSendTime = 0.0f; 
 };
 
 

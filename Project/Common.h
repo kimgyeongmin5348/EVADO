@@ -177,7 +177,7 @@ struct sc_packet_item_move {
 	char				type;
 	long long			item_id;
 	XMFLOAT3			position;
-	long long			holder_id; // 소유자 ID (0 = 지면에 있음)
+	//long long			holder_id; // 소유자 ID (0 = 지면에 있음)
 };
 
 // 상점

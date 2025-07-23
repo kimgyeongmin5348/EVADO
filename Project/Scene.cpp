@@ -662,41 +662,120 @@ void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera
 	for (int i = 0; i < m_nShaders; i++) if (dynamic_cast<CTextureToScreenShader*>(m_ppShaders[i])->IsInventory[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
 }
 
-// 아이템 생성 server
+// 아이템 생성 server(민상.ver AddItem)
+
+//void CScene::AddItem(long long id, ITEM_TYPE type, const XMFLOAT3& position) {
+//	CLoadedModelInfo* pModel = nullptr;
+//	Item* pNewItem = nullptr;
+//
+//	switch (type)
+//	{
+//	case ITEM_TYPE_SHOVEL:
+//		dynamic_cast<Shovel*>(m_ppHierarchicalGameObjects[2])->ChangeExistState(true);
+//		dynamic_cast<Shovel*>(m_ppHierarchicalGameObjects[2])->SetPosition(position);
+//		break;
+//	case ITEM_TYPE_HANDMAP:
+//		break;
+//	case ITEM_TYPE_FLASHLIGHT:
+//		dynamic_cast<FlashLight*>(m_ppHierarchicalGameObjects[1])->ChangeExistState(true);
+//		dynamic_cast<FlashLight*>(m_ppHierarchicalGameObjects[1])->SetPosition(position);
+//		break;
+//	case ITEM_TYPE_WHISTLE:
+//		dynamic_cast<Whistle*>(m_ppHierarchicalGameObjects[3])->ChangeExistState(true);
+//		dynamic_cast<Whistle*>(m_ppHierarchicalGameObjects[3])->SetPosition(position);
+//		break;
+//	default:
+//		std::cerr << "[Error] Unknown item type: " << static_cast<int>(type) << std::endl;
+//		return;
+//	}
+//
+//	if (pModel && pNewItem) {
+//		pNewItem->SetPosition(position);
+//		pNewItem->SetScale(1.0f, 1.0f, 1.0f); // 기본 스케일 설정
+//
+//		std::lock_guard<std::mutex> lock(g_item_mutex);
+//		g_items[id] = pNewItem;
+//		delete pModel; // 모델 데이터는 복제되었으므로 삭제
+//	}
+//}
+
 void CScene::AddItem(long long id, ITEM_TYPE type, const XMFLOAT3& position) {
-	CLoadedModelInfo* pModel = nullptr;
-	Item* pNewItem = nullptr;
+    Item* pNewItem = nullptr;
 
-	switch (type)
-	{
-	case ITEM_TYPE_SHOVEL:
-		dynamic_cast<Shovel*>(m_ppHierarchicalGameObjects[2])->ChangeExistState(true);
-		dynamic_cast<Shovel*>(m_ppHierarchicalGameObjects[2])->SetPosition(position);
-		break;
-	case ITEM_TYPE_HANDMAP:
-		break;
-	case ITEM_TYPE_FLASHLIGHT:
-		dynamic_cast<FlashLight*>(m_ppHierarchicalGameObjects[1])->ChangeExistState(true);
-		dynamic_cast<FlashLight*>(m_ppHierarchicalGameObjects[1])->SetPosition(position);
-		break;
-	case ITEM_TYPE_WHISTLE:
-		dynamic_cast<Whistle*>(m_ppHierarchicalGameObjects[3])->ChangeExistState(true);
-		dynamic_cast<Whistle*>(m_ppHierarchicalGameObjects[3])->SetPosition(position);
-		break;
-	default:
-		std::cerr << "[Error] Unknown item type: " << static_cast<int>(type) << std::endl;
-		return;
-	}
+    switch (type) {
+    case ITEM_TYPE_SHOVEL:
+        pNewItem = dynamic_cast<Shovel*>(m_ppHierarchicalGameObjects[2]);
+        break;
+    case ITEM_TYPE_HANDMAP:
+        break;
+    case ITEM_TYPE_FLASHLIGHT:
+        pNewItem = dynamic_cast<FlashLight*>(m_ppHierarchicalGameObjects[1]);
+        break;
+    case ITEM_TYPE_WHISTLE:
+        pNewItem = dynamic_cast<Whistle*>(m_ppHierarchicalGameObjects[3]);
+        break;
+    default:
+        std::cerr << "[Error] Unknown item type: " << static_cast<int>(type) << std::endl;
+        return;
+    }
 
-	if (pModel && pNewItem) {
-		pNewItem->SetPosition(position);
-		pNewItem->SetScale(1.0f, 1.0f, 1.0f); // 기본 스케일 설정
+    if (pNewItem) {
+        // 고유아이디 세팅 (Item 클래스에 SetUniqueID 추가되어 있어야 함)
+        //pNewItem->SetUniqueID(id);
 
-		std::lock_guard<std::mutex> lock(g_item_mutex);
-		g_items[id] = pNewItem;
-		delete pModel; // 모델 데이터는 복제되었으므로 삭제
-	}
+        pNewItem->ChangeExistState(true);
+        pNewItem->SetPosition(position);
+        pNewItem->SetScale(1.0f, 1.0f, 1.0f);
+
+        std::lock_guard<std::mutex> lock(g_item_mutex);
+        g_items[id] = pNewItem;
+    }
 }
+
+// server 추가해봄 UpdateItemPosition
+
+//void CScene::UpdateItemPosition(long long id, const XMFLOAT3& worldPosition)
+//{
+//	std::lock_guard<std::mutex> lock(g_item_mutex);
+//
+//	auto it = g_items.find(id);
+//	if (it != g_items.end()) {
+//		Item* item = it->second;
+//
+//		// 아이템이 손에 들려 있다면 일단 부모를 뗄 수도 있음 (필요 시)
+//		if (item->GetParent()) {
+//			// 손에서 떨어뜨리기
+//			// 부모->자식 연결 해제, item->부모 null 설정
+//			CGameObject* parent = item->GetParent();
+//			// 부모 자식 연결 리스트에서 item 제거하는 로직 필요
+//			// 예: 부모의 첫 자식이 item일 경우 처리를 다르게 해야 함.
+//			// 간단히 아래처럼 가능 (주의: 정확한 연결 해제로 게임 로직 맞춰야 함)
+//			if (parent->GetChild() == item)
+//				parent->SetChild(item->GetSibling());
+//			else {
+//				CGameObject* sibling = parent->GetChild();
+//				while (sibling && sibling->GetSibling() != item) {
+//					sibling = sibling->GetSibling();
+//				}
+//				if (sibling)
+//					sibling->m_pSibling = item->GetSibling();
+//			}
+//			item->m_pParent = nullptr;
+//			item->m_pSibling = nullptr;
+//		}
+//
+//		// 일단 부모 없는 상태로 월드좌표를 로컬좌표로 변환없이 직접 세팅하는 경우 가능
+//		item->SetPosition(worldPosition);
+//
+//		// 월드 변환 갱신
+//		item->UpdateTransform();
+//
+//	}
+//	else {
+//		std::cerr << "[Warning] UpdateItemPosition: Item ID " << id << " not found." << std::endl;
+//	}
+//}
+
 
 
 void CStartScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)

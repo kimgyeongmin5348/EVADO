@@ -148,8 +148,10 @@ public:
 	//server
 	
 public:
-	void AddItem(long long id, ITEM_TYPE type, const XMFLOAT3& position);
 
+	void AddItem(long long id, ITEM_TYPE type, const XMFLOAT3& position);
+	void UpdateItemPosition(long long id, const XMFLOAT3& position);
+	
 	void OnOtherClientConnedted()
 	{
 		for (int i = 0; i < m_nOtherPlayers; ++i)
