@@ -95,6 +95,20 @@ void SendShopSellRequest(int item_type)
 }
 
 // =================================================================
+//                          아이템 관리
+// =================================================================
+
+void SendItemMove(long long item_id, XMFLOAT3& position)
+{
+    cs_packet_item_move itm;
+    itm.size = sizeof(itm);
+    itm.type = CS_P_ITEM_MOVE;
+    itm.item_id = item_id;
+    itm.position = position;
+    send_packet(&itm);
+}
+
+// =================================================================
 //                      네트워크 코어 로직
 // =================================================================
 
@@ -345,9 +359,6 @@ void ProcessPacket(char* ptr)
     {
         sc_packet_item_spawn* pkt = reinterpret_cast<sc_packet_item_spawn*>(ptr);
 
-        // 에시
-        // gGameFramework.AddItemToScene(pkt->item_id, static_cast<ITEM_TYPE>(pkt->item_type), pkt->position);
-
         std::cout << "[Client] Item Create - ID: " << pkt->item_id
             << " Postion(" << pkt->position.x << ", "
             << pkt->position.y << ", " << pkt->position.z << ")"
@@ -369,6 +380,12 @@ void ProcessPacket(char* ptr)
     {
         sc_packet_item_move* pkt = reinterpret_cast<sc_packet_item_move*>(ptr);
 
+        std::cout << "[Client] Item Move - ID: " << pkt->item_id
+            << " Position(" << pkt->position.x << ", "
+            << pkt->position.y << ", " << pkt->position.z << ")"
+            << std::endl;
+
+        //gGameFramework.UpdateItemPosition(pkt->item_id, pkt->position);
 
         break;
     }

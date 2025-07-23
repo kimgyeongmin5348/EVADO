@@ -63,6 +63,8 @@ void UpdateMonsterPosition(int64_t monsterID, const XMFLOAT3& pos, uint8_t state
 void SendShopBuyRequest(int item_type);
 void SendShopSellRequest(int item_type);
 
+// Item
+void SendItemMove(long long item_id, XMFLOAT3& position);
 
 
 void ProcessPacket(char* ptr);
@@ -73,4 +75,5 @@ void InitializeNetwork();
 void CleanupNetwork();
 
 void LoadingDoneToServer();
+
 

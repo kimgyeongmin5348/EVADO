@@ -4,11 +4,24 @@
 
 class Item : public CGameObject
 {
+//private:
+//	long long m_id = -1;  // 고유 ID저장
+//	bool m_bIsHeld = false;
+
 public:
+	//Item(int nMaterials = 0) : CGameObject(nMaterials), m_id(-1) {}
+
 	Item() {};
 	virtual ~Item() {};
 
 	virtual void Animate(float fTimeElapsed);
+
+	//// 고유 ID 설정
+	//void SetUniqueID(long long id) { m_id = id; }
+	//// 고유 ID 반환
+	//long long GetUniqueID() const { return m_id; }
+	//void SetHeld(bool held) { m_bIsHeld = held; }
+	//bool IsHeld() const { return m_bIsHeld; }
 
 protected:
 	float m_fFallingSpeed; // 낙하 속도

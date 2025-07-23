@@ -352,11 +352,49 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			int shaderIndex = wParam - '1';
 			if (itemIndex < m_pScene->m_nHierarchicalGameObjects) {
 				ItemToHand(itemIndex);
+
+
+				CGameObject* pItem = m_pScene->m_ppHierarchicalGameObjects[itemIndex];
+				SendItemMove(itemIndex, pItem->GetPosition());
+				cout << "변경된 아이템 좌표 전송 완료" << endl;
+
+
 				m_pPlayer->items[itemIndex] = !m_pPlayer->items[itemIndex];
 				dynamic_cast<CTextureToScreenShader*>(m_pScene->m_ppShaders[shaderIndex])->IsInventory[shaderIndex] 
 					= !dynamic_cast<CTextureToScreenShader*>(m_pScene->m_ppShaders[shaderIndex])->IsInventory[shaderIndex];
 			}
 			break;
+		}
+
+		case 'F':
+		case'f':
+		{
+			//XMFLOAT3 playerPos = m_pPlayer->GetPosition();
+			//long long nearestItemID = FindNearestItemInRange(Recognized_Range, playerPos);
+			//if (nearestItemID != -1) {
+			//	Item* pItem = nullptr;
+			//	{
+			//		std::lock_guard<std::mutex> lock(g_item_mutex);
+			//		auto it = g_items.find(nearestItemID);
+			//		if (it != g_items.end())
+			//			pItem = it->second;
+			//	}
+			//	if (pItem) {
+			//		if (!pItem->IsHeld()) {
+			//			// 들기
+			//			ItemToHand(pItem);
+			//			pItem->SetHeld(true);
+			//			std::cout << "아이템을 집었습니다." << std::endl;
+			//		}
+			//		else {
+			//			// 떨어뜨리기
+			//			ItemDropFromHand(pItem);
+			//			pItem->SetHeld(false);
+			//			std::cout << "아이템을 떨어뜨렸습니다." << std::endl;
+			//		}
+			//	}
+			//}
+			//break;
 		}
 		}
 		break;
@@ -394,6 +432,143 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 	return(0);
 }
 
+// server 추가해봄....  경민.ver --------------------------------------------------------------
+
+//long long CGameFramework::FindNearestItemInRange(float range, XMFLOAT3 playerPos) {
+//	std::lock_guard<std::mutex> lock(g_item_mutex);
+//	long long nearestId = -1;
+//	float nearestDistSqr = range * range;
+//
+//	for (const auto& pair : g_items) {
+//		Item* pItem = pair.second;
+//		if (!pItem) continue;
+//
+//		XMFLOAT3 itemPos = pItem->GetPosition();
+//		float dx = itemPos.x - playerPos.x;
+//		float dy = itemPos.y - playerPos.y;
+//		float dz = itemPos.z - playerPos.z;
+//		float distSqr = dx * dx + dy * dy + dz * dz;
+//
+//		if (distSqr < nearestDistSqr) {
+//			nearestDistSqr = distSqr;
+//			nearestId = pair.first;
+//		}
+//	}
+//	return nearestId;
+//}
+//
+//void CGameFramework::CheckNearbyItemPrompt()
+//{
+//	XMFLOAT3 playerPos = m_pPlayer->GetPosition();
+//	long long nearestItemID = FindNearestItemInRange(Recognized_Range, playerPos);
+//	if (nearestItemID != -1) {
+//		std::cout << "물건을 잡으세요(F)" << std::endl;
+//	}
+//}
+//
+//void CGameFramework::ItemToHand(Item* pItem)
+//{
+//	if (!pItem) return;
+//
+//	long long targetID = pItem->GetUniqueID();
+//
+//	CGameObject* pRightHand = m_pPlayer->FindFrame("hand_r");
+//
+//	// 이미 들고 있는지 검사 (고유 ID 기준)
+//	CGameObject* pCurr = pRightHand->GetChild();
+//	CGameObject* pPrev = nullptr;
+//	bool alreadyHeld = false;
+//
+//	while (pCurr) {
+//		Item* pCurrItem = dynamic_cast<Item*>(pCurr);
+//		if (pCurrItem && pCurrItem->GetUniqueID() == targetID) {
+//			alreadyHeld = true;
+//			break;
+//		}
+//		pPrev = pCurr;
+//		pCurr = pCurr->GetSibling();
+//	}
+//
+//	if (!alreadyHeld) {
+//		// 들기
+//		if (pRightHand->GetChild() == nullptr) {
+//			pRightHand->SetChild(pItem);
+//		}
+//		else {
+//			CGameObject* last = pRightHand->GetChild();
+//			while (last->GetSibling()) last = last->GetSibling();
+//			last->m_pSibling = pItem;
+//		}
+//		pItem->m_pParent = pRightHand;
+//		pItem->m_pSibling = nullptr;
+//
+//		// 포지션 조정
+//		pItem->SetPosition(0.05f, -0.05f, 0.1f);
+//
+//		m_pPlayer->UpdateTransform(nullptr);
+//
+//		// 수정된 위치로 서버에 전송
+//		SendItemMove(targetID, pItem->GetPosition());
+//	}
+//	else {
+//		// 놓기
+//		if (pPrev) {
+//			pPrev->m_pSibling = pItem->GetSibling();
+//		}
+//		else {
+//			pRightHand->SetChild(pItem->GetSibling());
+//		}
+//		pItem->m_pParent = nullptr;
+//		pItem->m_pSibling = nullptr;
+//
+//		// 필요하면 아이템 놓인 위치 서버에 전송
+//		SendItemMove(targetID, pItem->GetPosition());
+//	}
+//}
+//
+//void CGameFramework::ItemDropFromHand(Item* pItem)
+//{
+//	if (!pItem) return;
+//
+//	CGameObject* pRightHand = m_pPlayer->FindFrame("hand_r");
+//
+//	// 손에서 아이템 분리
+//	CGameObject* pCurr = pRightHand->GetChild();
+//	CGameObject* pPrev = nullptr;
+//	while (pCurr) {
+//		if (pCurr == pItem) break;
+//		pPrev = pCurr;
+//		pCurr = pCurr->GetSibling();
+//	}
+//	if (!pCurr) return;
+//
+//	if (pPrev) {
+//		pPrev->m_pSibling = pItem->GetSibling();
+//	}
+//	else {
+//		pRightHand->SetChild(pItem->GetSibling());
+//	}
+//	pItem->m_pParent = nullptr;
+//	pItem->m_pSibling = nullptr;
+//
+//	// 땅에 놓는 위치로 이동 (예: 플레이어 앞쪽 1m 지점, 높이는 아이템 바닥에 맞게 조절)
+//	XMFLOAT3 playerPos = m_pPlayer->GetPosition();
+//	XMFLOAT3 forward = m_pPlayer->GetLook();  // 플레이어가 보는 방향
+//	XMFLOAT3 dropPos = XMFLOAT3(playerPos.x + forward.x, playerPos.y, playerPos.z + forward.z);
+//
+//	pItem->SetPosition(dropPos);
+//	pItem->UpdateTransform();
+//
+//	m_pPlayer->UpdateTransform(nullptr);
+//
+//	// 서버에도 위치 갱신 전송 필요하면 호출
+//	SendItemMove(pItem->GetUniqueID(), dropPos);
+//}
+
+
+// -------------------------------------------------------------------------------------------
+
+
 void CGameFramework::ItemToHand(int objectIndex)
 {
 	CGameObject* pItem = m_pScene->m_ppHierarchicalGameObjects[objectIndex];
@@ -426,8 +601,12 @@ void CGameFramework::ItemToHand(int objectIndex)
 		pItem->m_pParent = pRightHand;
 		pItem->m_pSibling = nullptr;
 
-		if (objectIndex == 2)pItem->SetPosition(0.05f, -0.05f, 1.f);
-		else pItem->SetPosition(0.05f, -0.05f, 0.1f);
+		if (objectIndex == 2) {
+			pItem->SetPosition(0.05f, -0.05f, 1.f); 
+		}
+		else { 
+			pItem->SetPosition(0.05f, -0.05f, 0.1f); 
+		}
 
 		m_pPlayer->UpdateTransform(nullptr);
 	}
