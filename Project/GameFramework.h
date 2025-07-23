@@ -67,7 +67,7 @@ public:
 	}
 
 
-	void AddItemToScene(long long id, ITEM_TYPE type, const XMFLOAT3& position)
+	void AddItemToScene(long long id, ITEM_TYPE type, const XMFLOAT3& position);
 
 	const float Recognized_Range = 2.0f;
 
