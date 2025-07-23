@@ -1,6 +1,11 @@
 #include "stdafx.h"
 #include "Object_Items.h"
 
+void Item::ChangeExistState(bool isExist)
+{
+	is_exist = isExist;
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 
 Shovel::Shovel(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel)

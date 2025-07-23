@@ -284,8 +284,4 @@ void CCollisionManager::HandleCollision(CPlayer* player, CGameObject* obj)
         cout << "Hit!" << endl;
         player->m_isMonsterHit = true;
     }
-    else if (player->isSwing)
-    {
-        player->m_isMonsterHit = false;
-    }
 }

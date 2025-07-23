@@ -15,6 +15,9 @@ public:
 	virtual ~Item() {};
 
 	virtual void Animate(float fTimeElapsed);
+	void ChangeExistState(bool isExist);
+
+	bool is_exist = false;
 
 	//// 고유 ID 설정
 	//void SetUniqueID(long long id) { m_id = id; }

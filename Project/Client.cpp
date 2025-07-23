@@ -53,7 +53,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	
 	wcout.imbue(locale("korean"));
 	std::cout << "유저 ID를 입력하세요 : ";
-	std::cin >> user_name;
+	//std::cin >> user_name;
+	user_name = "temp";
 	InitializeNetwork();
 
 	//----------------------------------------------------------------

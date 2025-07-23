@@ -171,20 +171,23 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_ppHierarchicalGameObjects[1] = new FlashLight(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFlashlightModel);
 	m_ppHierarchicalGameObjects[1]->SetScale(3, 3, 3);
 	m_ppHierarchicalGameObjects[1]->Rotate(90, 0, 0);
-	m_ppHierarchicalGameObjects[1]->SetPosition(3, 2, 10);
+	//m_ppHierarchicalGameObjects[1]->SetPosition(3, 2, 10);
+	m_ppHierarchicalGameObjects[1]->SetFrameName("FlashLight");
 	if (pFlashlightModel) delete pFlashlightModel;
 
 	CLoadedModelInfo* pShovelModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Shovel.bin", NULL);
 	m_ppHierarchicalGameObjects[2] = new Shovel(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShovelModel);
 	m_ppHierarchicalGameObjects[2]->SetScale(1, 1, 1);
 	m_ppHierarchicalGameObjects[2]->Rotate(0, 0, 90);
-	m_ppHierarchicalGameObjects[2]->SetPosition(3, 2, 12);
+	//m_ppHierarchicalGameObjects[2]->SetPosition(3, 2, 12);
+	m_ppHierarchicalGameObjects[2]->SetFrameName("Shovel");
 	if (pShovelModel) delete pShovelModel;
 
 	CLoadedModelInfo* pWhistleModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Whistle.bin", NULL);
 	m_ppHierarchicalGameObjects[3] = new Whistle(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pWhistleModel);
 	m_ppHierarchicalGameObjects[3]->SetScale(1, 1, 1);
-	m_ppHierarchicalGameObjects[3]->SetPosition(3, 2, 13);
+	//m_ppHierarchicalGameObjects[3]->SetPosition(3, 2, 13);
+	m_ppHierarchicalGameObjects[3]->SetFrameName("Whistle");
 	if (pWhistleModel) delete pWhistleModel;
 
 	m_nOtherPlayers = 1;
@@ -697,57 +700,36 @@ void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera
 //}
 
 void CScene::AddItem(long long id, ITEM_TYPE type, const XMFLOAT3& position) {
-	Item* pNewItem = nullptr;
+    Item* pNewItem = nullptr;
 
-	switch (type) {
-	case ITEM_TYPE_SHOVEL:
-<<<<<<< Updated upstream
-		pModel = CGameObject::LoadGeometryAndAnimationFromFile(g_pd3dDevice, g_pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Shovel.bin", NULL);
-		pNewItem = new Shovel(g_pd3dDevice, g_pd3dCommandList, m_pd3dGraphicsRootSignature, pModel);
-=======
-		pNewItem = dynamic_cast<Shovel*>(m_ppHierarchicalGameObjects[2]);
->>>>>>> Stashed changes
-		break;
-	case ITEM_TYPE_HANDMAP:
-		pModel = CGameObject::LoadGeometryAndAnimationFromFile(g_pd3dDevice, g_pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Flashlight.bin", NULL);
-		pNewItem = new FlashLight(g_pd3dDevice, g_pd3dCommandList, m_pd3dGraphicsRootSignature, pModel);
-		break;
-	case ITEM_TYPE_FLASHLIGHT:
-<<<<<<< Updated upstream
-		pModel = CGameObject::LoadGeometryAndAnimationFromFile(g_pd3dDevice, g_pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Flashlight.bin", NULL);
-		pNewItem = new FlashLight(g_pd3dDevice, g_pd3dCommandList, m_pd3dGraphicsRootSignature, pModel);
-=======
-		pNewItem = dynamic_cast<FlashLight*>(m_ppHierarchicalGameObjects[1]);
->>>>>>> Stashed changes
-		break;
+    switch (type) {
+    case ITEM_TYPE_SHOVEL:
+        pNewItem = dynamic_cast<Shovel*>(m_ppHierarchicalGameObjects[2]);
+        break;
+    case ITEM_TYPE_HANDMAP:
+        break;
+    case ITEM_TYPE_FLASHLIGHT:
+        pNewItem = dynamic_cast<FlashLight*>(m_ppHierarchicalGameObjects[1]);
+        break;
+    case ITEM_TYPE_WHISTLE:
+        pNewItem = dynamic_cast<Whistle*>(m_ppHierarchicalGameObjects[3]);
+        break;
+    default:
+        std::cerr << "[Error] Unknown item type: " << static_cast<int>(type) << std::endl;
+        return;
+    }
 
-	case ITEM_TYPE_WHISTLE:
-<<<<<<< Updated upstream
-		pModel = CGameObject::LoadGeometryAndAnimationFromFile(g_pd3dDevice, g_pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Whistle.bin", NULL);
-		pNewItem = new Whistle(g_pd3dDevice, g_pd3dCommandList, m_pd3dGraphicsRootSignature, pModel);
-=======
-		pNewItem = dynamic_cast<Whistle*>(m_ppHierarchicalGameObjects[3]);
->>>>>>> Stashed changes
-		break;
-	default:
-		std::cerr << "[Error] Unknown item type: " << static_cast<int>(type) << std::endl;
-		return;
-	}
-<<<<<<< Updated upstream
-	if (pModel && pNewItem) {
-=======
+    if (pNewItem) {
+        // 고유아이디 세팅 (Item 클래스에 SetUniqueID 추가되어 있어야 함)
+        //pNewItem->SetUniqueID(id);
 
-	if (pNewItem) {
-		//pNewItem->SetUniqueID(id);
-		pNewItem->ChangeExistState(true);
->>>>>>> Stashed changes
-		pNewItem->SetPosition(position);
-		pNewItem->SetScale(1.0f, 1.0f, 1.0f);
-		{
-			std::lock_guard<std::mutex> lock(g_item_mutex);
-			g_items[id] = pNewItem;
-		}
-	}
+        pNewItem->ChangeExistState(true);
+        pNewItem->SetPosition(position);
+        pNewItem->SetScale(1.0f, 1.0f, 1.0f);
+
+        std::lock_guard<std::mutex> lock(g_item_mutex);
+        g_items[id] = pNewItem;
+    }
 }
 
 // server 추가해봄 UpdateItemPosition

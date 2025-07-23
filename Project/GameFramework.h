@@ -41,7 +41,6 @@ public:
 	void OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	LRESULT CALLBACK OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 
-	//경민.ver
 
 	//long long FindNearestItemInRange(float range, XMFLOAT3 playerPos);
 	//void CheckNearbyItemPrompt();
@@ -58,27 +57,30 @@ public:
 	{
 		m_ppScenes[m_nCurrentScene]->UpdateOtherPlayerPosition(clinetnum, position);
 	}
+	void UpdateOtherPlayerLook(int clientnum, XMFLOAT3 look, XMFLOAT3 right)
+	{
+		m_ppScenes[m_nCurrentScene]->UpdateOtherPlayerLook(clientnum, look, right);
+	}
 	void UpdateOtherPlayerAnimation(int clinetnum, int animNum)
 	{
 		m_ppScenes[m_nCurrentScene]->UpdateOtherPlayerAnimation(clinetnum, animNum);
 	}
 
-<<<<<<< Updated upstream
-	//해볼려고 했음...
+
 	void AddItemToScene(long long id, ITEM_TYPE type, const XMFLOAT3& position)
-=======
+
 	const float Recognized_Range = 2.0f;
 
 	void InitItemToScene(long long id, ITEM_TYPE type, const XMFLOAT3& position)
->>>>>>> Stashed changes
+
+
 	{
 		if (m_pScene) {
 			m_pScene->AddItem(id, type, position);
-			// AddItem에서 g_items 등록 완료하므로 별도 등록 불필요
 		}
 	}
 
-	// 경민.ver
+
 
 	/*void UpdateItemPosition(long long id, const XMFLOAT3& position)
 	{
@@ -146,7 +148,7 @@ private:
 	bool flashlightToggle = false;
 
 	//server
-	//float m_fLastPositionSendTime = 0.0f;  // 위치 전송 시간 추적
+	//float m_fLastPositionSendTime = 0.0f; 
 };
 
 
