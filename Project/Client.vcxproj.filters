@@ -115,7 +115,13 @@
     <ClCompile Include="CCubeShader.cpp">
       <Filter>소스 파일\Shader</Filter>
     </ClCompile>
-    <ClCompile Include="HpbarMesh.cpp">
+    <ClCompile Include="CFontShader.cpp">
+      <Filter>소스 파일\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="CText.cpp">
+      <Filter>소스 파일\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="CFontMesh.cpp">
       <Filter>소스 파일\Mesh</Filter>
     </ClCompile>
   </ItemGroup>
@@ -195,7 +201,13 @@
     <ClInclude Include="Shader.h">
       <Filter>소스 파일\Shader</Filter>
     </ClInclude>
-    <ClInclude Include="HpbarMesh.h">
+    <ClInclude Include="CFontShader.h">
+      <Filter>소스 파일\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="CText.h">
+      <Filter>소스 파일\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="CFontMesh.h">
       <Filter>소스 파일\Mesh</Filter>
     </ClInclude>
   </ItemGroup>

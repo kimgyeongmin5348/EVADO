@@ -298,7 +298,7 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 {
 	ID3D12RootSignature *pd3dGraphicsRootSignature = NULL;
 
-	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[11];
+	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[12];
 
 	pd3dDescriptorRanges[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRanges[0].NumDescriptors = 1;
@@ -362,11 +362,17 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 
 	pd3dDescriptorRanges[10].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRanges[10].NumDescriptors = 1;
-	pd3dDescriptorRanges[10].BaseShaderRegister = 0; //t: gtxTexture
+	pd3dDescriptorRanges[10].BaseShaderRegister = 0; //t0: gtxTexture
 	pd3dDescriptorRanges[10].RegisterSpace = 0;
 	pd3dDescriptorRanges[10].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-	D3D12_ROOT_PARAMETER pd3dRootParameters[16];
+	pd3dDescriptorRanges[11].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	pd3dDescriptorRanges[11].NumDescriptors = 1;
+	pd3dDescriptorRanges[11].BaseShaderRegister = 3; //t3: gFontTexture
+	pd3dDescriptorRanges[11].RegisterSpace = 0;
+	pd3dDescriptorRanges[11].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+	D3D12_ROOT_PARAMETER pd3dRootParameters[17];
 
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	pd3dRootParameters[0].Descriptor.ShaderRegister = 1; //Camera
@@ -449,7 +455,12 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 	pd3dRootParameters[15].DescriptorTable.pDescriptorRanges = &(pd3dDescriptorRanges[10]);
 	pd3dRootParameters[15].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
-	D3D12_STATIC_SAMPLER_DESC pd3dSamplerDescs[2];
+	pd3dRootParameters[16].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	pd3dRootParameters[16].DescriptorTable.NumDescriptorRanges = 1;
+	pd3dRootParameters[16].DescriptorTable.pDescriptorRanges = &(pd3dDescriptorRanges[11]);
+	pd3dRootParameters[16].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+	D3D12_STATIC_SAMPLER_DESC pd3dSamplerDescs[3];
 
 	pd3dSamplerDescs[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
 	pd3dSamplerDescs[0].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
@@ -476,6 +487,19 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 	pd3dSamplerDescs[1].ShaderRegister = 1;
 	pd3dSamplerDescs[1].RegisterSpace = 0;
 	pd3dSamplerDescs[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+	pd3dSamplerDescs[2].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+	pd3dSamplerDescs[2].AddressU = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+	pd3dSamplerDescs[2].AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+	pd3dSamplerDescs[2].AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+	pd3dSamplerDescs[2].MipLODBias = 0;
+	pd3dSamplerDescs[2].MaxAnisotropy = 1;
+	pd3dSamplerDescs[2].ComparisonFunc = D3D12_COMPARISON_FUNC_ALWAYS;
+	pd3dSamplerDescs[2].MinLOD = 0;
+	pd3dSamplerDescs[2].MaxLOD = D3D12_FLOAT32_MAX;
+	pd3dSamplerDescs[2].ShaderRegister = 2;
+	pd3dSamplerDescs[2].RegisterSpace = 0;
+	pd3dSamplerDescs[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT | D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
 	D3D12_ROOT_SIGNATURE_DESC d3dRootSignatureDesc;
@@ -704,7 +728,7 @@ void CStartScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 20); 
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 100); 
 
 	m_nShaders = 1;
 	m_ppShaders = new CShader * [m_nShaders];
@@ -726,6 +750,16 @@ void CStartScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 	m_ppShaders[0] = pTextureToScreenShader;
 
+	m_nGameObjects = 2;
+	m_ppGameObjects = new CGameObject * [m_nGameObjects];
+
+	m_pFontID = new CText(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Enter ID : ", -0.5f, -0.25f);
+	m_ppGameObjects[0] = m_pFontID;
+
+	m_pFontIP = new CText(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Enter IP : ", -0.5f, -0.55f);
+	m_ppGameObjects[1] = m_pFontIP;
+
+
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
@@ -743,6 +777,12 @@ void CStartScene::ReleaseObjects()
 		}
 		delete[] m_ppShaders;
 	}
+
+	if (m_ppGameObjects)
+	{
+		for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Release();
+		delete[] m_ppGameObjects;
+	}
 }
 
 void CStartScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
@@ -756,8 +796,27 @@ void CStartScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 	UpdateShaderVariables(pd3dCommandList);
 
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
+	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Render(pd3dCommandList, pCamera);
+}
 
-	RenderText();
+void CStartScene::AnimateObjects(float fTimeElapsed)
+{
+	if (m_textDirty && m_inputStep == InputStep::EnterID)
+	{
+		wstring id;
+		id.assign(m_inputID.begin(), m_inputID.end());
+
+		m_pFontID->UpdateText(id, L"Enter ID : ");
+		m_textDirty = false;
+	}
+	if (m_textDirty && m_inputStep == InputStep::EnterIP)
+	{
+		wstring ip;
+		ip.assign(m_inputIP.begin(), m_inputIP.end());
+
+		m_pFontIP->UpdateText(ip, L"Enter IP : ");
+		m_textDirty = false;
+	}
 }
 
 void CStartScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
@@ -774,18 +833,24 @@ void CStartScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM
 			}
 			else if (wParam == VK_BACK && !m_inputID.empty()) {
 				m_inputID.pop_back();
+				m_textDirty = true;
 			}
 			else if (isprint(wParam) && m_inputID.length() < MAX_ID_LENGTH - 1) {
 				m_inputID.push_back((char)wParam);
+				m_textDirty = true;
 			}
+			
 			break;
 		}
 		if (m_inputStep == InputStep::EnterIP) {
 			if (isdigit(wParam) && m_inputIP.length() < 15) {
 				m_inputIP.push_back((char)wParam);
+				m_textDirty = true;
 			}
-			else if (wParam == 190)
+			else if (wParam == 190) {
 				m_inputIP.push_back('.');
+				m_textDirty = true;
+			}
 
 			else if (wParam == VK_RETURN) {
 				m_inputStep = InputStep::Done;
@@ -803,36 +868,6 @@ void CStartScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM
 		}
 		break;
 	}
-}
-
-void CStartScene::RenderText()
-{
-	std::string msg;
-	if (!m_networkInitialized) {
-		if (m_inputStep == InputStep::EnterID)
-			msg = "Enter ID: " + m_inputID + "_";
-		else if (m_inputStep == InputStep::EnterIP)
-			msg = "Enter Server IP: " + m_inputIP + "_";
-	}
-	else {
-		msg = "Connecting...";
-	}
-	//DrawTextToScreen(msg, 40, 40);
-	HDC hDC = GetDC(m_hWnd);
-	SetTextColor(hDC, RGB(255, 255, 255));
-	SetBkMode(hDC, TRANSPARENT);
-	TextOutA(hDC, 40, 40, msg.c_str(), (int)msg.length());
-	ReleaseDC(m_hWnd, hDC);
-}
-
-void CStartScene::DrawTextToScreen(const std::string& text, int x, int y)
-{
-	if (!m_hWnd) return;
-	HDC hDC = GetDC(m_hWnd);
-	SetTextColor(hDC, RGB(255, 255, 255));
-	SetBkMode(hDC, TRANSPARENT);
-	TextOutA(hDC, x, y, text.c_str(), (int)text.length());
-	ReleaseDC(m_hWnd, hDC);
 }
 
 //server

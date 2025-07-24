@@ -11,6 +11,7 @@
 #include "Map.h"
 #include "CollisionManager.h"
 #include "CParticle.h"
+#include "CText.h"
 
 #define MAX_LIGHTS						16 
 
@@ -63,7 +64,7 @@ public:
 	ID3D12RootSignature *GetGraphicsRootSignature() { return(m_pd3dGraphicsRootSignature); }
 
 	bool ProcessInput(UCHAR *pKeysBuffer);
-    void AnimateObjects(float fTimeElapsed);
+    virtual void AnimateObjects(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera=NULL);
 
 	void ReleaseUploadBuffers();
@@ -185,20 +186,19 @@ public:
 	virtual void ReleaseObjects();
 
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+	virtual void AnimateObjects(float fTimeElapsed);
 
 	virtual void OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
-
-	void RenderText();
-	void DrawTextToScreen(const std::string& text, int x = 20, int y = 20);
-
-	HWND m_hWnd = nullptr;
-	void SetWindowHandle(HWND hWnd) { m_hWnd = hWnd; }
 
 private:
 	InputStep m_inputStep = InputStep::EnterID;
 	std::string m_inputID;
 	std::string m_inputIP;
 	bool m_networkInitialized = false;
+	bool m_textDirty = false;
+	CText* m_pFontID = nullptr;
+	CText* m_pFontIP = nullptr;
+
 };
 
 class CEndScene : public CScene

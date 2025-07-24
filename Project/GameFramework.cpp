@@ -502,7 +502,6 @@ void CGameFramework::BuildObjects()
 
 	if (m_nCurrentScene == 0) {
 		m_ppScenes[0] = new CStartScene();
-		dynamic_cast<CStartScene*>(m_ppScenes[0])->SetWindowHandle(m_hWnd);
 		m_ppScenes[0]->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
 		CTerrainPlayer* pPlayer = new CTerrainPlayer(m_pd3dDevice, m_pd3dCommandList, m_ppScenes[0]->GetGraphicsRootSignature(),NULL);
 		m_ppScenes[0]->SetPlayer(pPlayer);
@@ -669,8 +668,6 @@ void CGameFramework::FrameAdvance()
 	
 	ProcessInput();
 
-    AnimateObjects();
-
 	HRESULT hResult = m_pd3dCommandAllocator->Reset();
 	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 
@@ -695,12 +692,14 @@ void CGameFramework::FrameAdvance()
 
 	m_pd3dCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, TRUE, &d3dDsvCPUDescriptorHandle);
 
+	AnimateObjects();
+
 	if (m_pScene) m_pScene->Render(m_pd3dCommandList, m_pCamera);
 
 #ifdef _WITH_PLAYER_TOP
 	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 #endif
-	if (m_pPlayer) m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
+	if (m_pPlayer && !isStartScene) m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
 
 	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
@@ -728,11 +727,6 @@ void CGameFramework::FrameAdvance()
 	m_pdxgiSwapChain->Present(0, 0);
 #endif
 #endif
-	if (isStartScene)
-	{
-		auto* startScene = dynamic_cast<CStartScene*>(m_pScene);
-		if (startScene) startScene->RenderText();
-	}
 
 	MoveToNextFrame();
 
