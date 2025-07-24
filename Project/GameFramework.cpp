@@ -335,85 +335,87 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
 	if (m_pScene) m_pScene->OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
-	switch (nMessageID)
-	{
-	case WM_KEYUP:
-		switch (wParam)
+	if (!isStartScene) {
+		switch (nMessageID)
 		{
-		case VK_ESCAPE:
-			exit(0);
-			break;
-		case VK_RETURN:
-			m_ppScenes[m_nScene]->ReleaseObjects();
-			m_nCurrentScene = 1;
-			BuildObjects();
-			LoadingDoneToServer();
-			isStartScene = false;
-			break;
-		case VK_F1:
-		case VK_F2:
-		case VK_F3:
-			m_pCamera = m_pPlayer->ChangeCamera((DWORD)(wParam - VK_F1 + 1), m_GameTimer.GetTimeElapsed());
-			break;
-		case VK_F9:
-			ChangeSwapChainState();
-			break;
-		case '1':
-		case '2':
-		case '3':
-		{
-			int itemIndex = wParam - '0';
-			int shaderIndex = wParam - '1';
-			if (itemIndex < m_pScene->m_nHierarchicalGameObjects) {
-				ItemToHand(itemIndex);
+		case WM_KEYUP:
+			switch (wParam)
+			{
+			case VK_ESCAPE:
+				exit(0);
+				break;
+			case VK_RETURN:
+				m_ppScenes[m_nScene]->ReleaseObjects();
+				m_nCurrentScene = 1;
+				BuildObjects();
+				LoadingDoneToServer();
+				isStartScene = false;
+				break;
+			case VK_F1:
+			case VK_F2:
+			case VK_F3:
+				m_pCamera = m_pPlayer->ChangeCamera((DWORD)(wParam - VK_F1 + 1), m_GameTimer.GetTimeElapsed());
+				break;
+			case VK_F9:
+				ChangeSwapChainState();
+				break;
+			case '1':
+			case '2':
+			case '3':
+			{
+				int itemIndex = wParam - '0';
+				int shaderIndex = wParam - '1';
+				if (itemIndex < m_pScene->m_nHierarchicalGameObjects) {
+					ItemToHand(itemIndex);
 
 
-				CGameObject* pItem = m_pScene->m_ppHierarchicalGameObjects[itemIndex];
-				SendItemMove(itemIndex, pItem->GetPosition());
-				cout << "변경된 아이템 좌표 전송 완료" << endl;
+					CGameObject* pItem = m_pScene->m_ppHierarchicalGameObjects[itemIndex];
+					SendItemMove(itemIndex, pItem->GetPosition());
+					cout << "변경된 아이템 좌표 전송 완료" << endl;
 
 
-				m_pPlayer->items[itemIndex] = !m_pPlayer->items[itemIndex];
-				dynamic_cast<CTextureToScreenShader*>(m_pScene->m_ppShaders[shaderIndex])->IsInventory[shaderIndex] 
-					= !dynamic_cast<CTextureToScreenShader*>(m_pScene->m_ppShaders[shaderIndex])->IsInventory[shaderIndex];
+					m_pPlayer->items[itemIndex] = !m_pPlayer->items[itemIndex];
+					dynamic_cast<CTextureToScreenShader*>(m_pScene->m_ppShaders[shaderIndex])->IsInventory[shaderIndex]
+						= !dynamic_cast<CTextureToScreenShader*>(m_pScene->m_ppShaders[shaderIndex])->IsInventory[shaderIndex];
+				}
+				break;
+			}
+
+			case 'F':
+			case'f':
+			{
+				//XMFLOAT3 playerPos = m_pPlayer->GetPosition();
+				//long long nearestItemID = FindNearestItemInRange(Recognized_Range, playerPos);
+				//if (nearestItemID != -1) {
+				//	Item* pItem = nullptr;
+				//	{
+				//		std::lock_guard<std::mutex> lock(g_item_mutex);
+				//		auto it = g_items.find(nearestItemID);
+				//		if (it != g_items.end())
+				//			pItem = it->second;
+				//	}
+				//	if (pItem) {
+				//		if (!pItem->IsHeld()) {
+				//			// 들기
+				//			ItemToHand(pItem);
+				//			pItem->SetHeld(true);
+				//			std::cout << "아이템을 집었습니다." << std::endl;
+				//		}
+				//		else {
+				//			// 떨어뜨리기
+				//			ItemDropFromHand(pItem);
+				//			pItem->SetHeld(false);
+				//			std::cout << "아이템을 떨어뜨렸습니다." << std::endl;
+				//		}
+				//	}
+				//}
+				//break;
+			}
 			}
 			break;
+		default:
+			break;
 		}
-
-		case 'F':
-		case'f':
-		{
-			//XMFLOAT3 playerPos = m_pPlayer->GetPosition();
-			//long long nearestItemID = FindNearestItemInRange(Recognized_Range, playerPos);
-			//if (nearestItemID != -1) {
-			//	Item* pItem = nullptr;
-			//	{
-			//		std::lock_guard<std::mutex> lock(g_item_mutex);
-			//		auto it = g_items.find(nearestItemID);
-			//		if (it != g_items.end())
-			//			pItem = it->second;
-			//	}
-			//	if (pItem) {
-			//		if (!pItem->IsHeld()) {
-			//			// 들기
-			//			ItemToHand(pItem);
-			//			pItem->SetHeld(true);
-			//			std::cout << "아이템을 집었습니다." << std::endl;
-			//		}
-			//		else {
-			//			// 떨어뜨리기
-			//			ItemDropFromHand(pItem);
-			//			pItem->SetHeld(false);
-			//			std::cout << "아이템을 떨어뜨렸습니다." << std::endl;
-			//		}
-			//	}
-			//}
-			//break;
-		}
-		}
-		break;
-	default:
-		break;
 	}
 }
 
