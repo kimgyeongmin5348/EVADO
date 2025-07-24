@@ -97,6 +97,7 @@ protected:
 	ID3D12Resource					**m_ppd3dSubSetIndexUploadBuffers = NULL;
 	D3D12_INDEX_BUFFER_VIEW			*m_pd3dSubSetIndexBufferViews = NULL;
 
+
 public:
 	UINT GetType() { return(m_nType); }
 	BoundingBox GetBoundingBox() { return m_BoundingBox; };
@@ -110,6 +111,13 @@ public:
 	virtual void OnPreRender(ID3D12GraphicsCommandList *pd3dCommandList, void *pContext);
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, int nSubSet);
 	virtual void OnPostRender(ID3D12GraphicsCommandList *pd3dCommandList, void *pContext);
+	
+	int GetVertice() { return m_nVertices; }
+	UINT GetStride() { return m_nStride; }
+	D3D12_PRIMITIVE_TOPOLOGY GetPrimitiveTopology() { return m_d3dPrimitiveTopology; }
+	//ID3D12Resource GetPositionBuffer() { return *m_pd3dPositionBuffer; }
+	//ID3D12Resource GetPositionUploadBuffer() { return *m_pd3dPositionUploadBuffer; }
+	D3D12_VERTEX_BUFFER_VIEW GetPositionBufferView() { return m_d3dPositionBufferView; }
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

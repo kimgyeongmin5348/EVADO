@@ -19,6 +19,15 @@ class CShader;
 class CStandardShader;
 struct QuadTreeNode;
 
+struct GameObjectInfo
+{
+	XMFLOAT4X4 mtxWorld;           // gmtxGameObject
+	XMFLOAT4   albedo;             // gMaterial.x
+	XMFLOAT4   specular;           // gMaterial.y
+	UINT       texturesMask;       // gnTexturesMask
+	float      hpRatio;            // g_hpRatio
+	XMFLOAT2   padding;            // 정렬 맞춤 (float2 = 8바이트)
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -126,7 +135,7 @@ public:
 	void SetShader(CShader* pShader);
 	void SetMaterialType(UINT nType) { m_nType |= nType; }
 	void SetTexture(CTexture* pTexture, UINT nTexture = 0);
-
+	int GetTexture() const { return (1 << m_nTextures) - 1; }
 	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList);
 
 	virtual void ReleaseUploadBuffers();
@@ -355,6 +364,8 @@ public:
 public:
 	char							m_pstrFrameName[64];
 
+	bool visible = true;
+
 	CMesh* m_pMesh = NULL;
 
 	int								m_nMaterials = 0;
@@ -428,6 +439,9 @@ public:
 	CGameObject* GetChild() { return(m_pChild); }
 	CGameObject* GetSibling() { return(m_pSibling); }
 	BoundingBox GetBoundingBox() const { return m_BoundingBox; }
+
+	bool GetVisible() { return visible; }
+	void SetVisible(bool b) { visible = b; }
 
 	void Move(XMFLOAT3 xmf3Offset);
 
@@ -534,6 +548,7 @@ public:
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
+class Hpbar;
 class CSpider : public CGameObject
 {
 public:
@@ -544,9 +559,11 @@ public:
 	virtual void SetPlayer(CPlayer* p) { pPlayer = p; }
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
 
+	float MonsterHP = 100.0f;
+	float hpRatio = MonsterHP / 100.0f;
+	Hpbar* m_pHpbar = NULL;
 private:
 	CPlayer* pPlayer = NULL;
-	CGameObject* m_pHpbar = NULL;
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

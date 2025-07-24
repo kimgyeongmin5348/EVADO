@@ -3,6 +3,9 @@
 //-----------------------------------------------------------------------------
 #include "stdafx.h"
 #include "Scene.h"
+#include "GameFramework.h"
+
+extern CGameFramework gGameFramework;
 
 ID3D12DescriptorHeap *CScene::m_pd3dCbvSrvDescriptorHeap = NULL;
 
@@ -15,7 +18,6 @@ D3D12_CPU_DESCRIPTOR_HANDLE	CScene::m_d3dCbvCPUDescriptorNextHandle;
 D3D12_GPU_DESCRIPTOR_HANDLE	CScene::m_d3dCbvGPUDescriptorNextHandle;
 D3D12_CPU_DESCRIPTOR_HANDLE	CScene::m_d3dSrvCPUDescriptorNextHandle;
 D3D12_GPU_DESCRIPTOR_HANDLE	CScene::m_d3dSrvGPUDescriptorNextHandle;
-
 
 CScene::CScene()
 {
@@ -139,7 +141,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 350);
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 100, 400);
 
 	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature); 
 
@@ -221,7 +223,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	CTexture* pTextureItem1 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
 	pTextureItem1->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/FlashLight_bg_ui.dds", RESOURCE_TEXTURE2D, 0);
 	CreateShaderResourceViews(pd3dDevice, pTextureItem1, 0, 15);
-	CScreenRectMeshTextured* pMesh = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, -0.5f + 0.02f, 0.225f, -0.55f, 0.4f);
+	CScreenRectMeshTextured* pMesh = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, 0.02f, 0.225f * 0.5f, -0.65f, 0.4f * 0.5f);
 	pTextureItem1Shader->SetMesh(0, pMesh);
 	pTextureItem1Shader->SetTexture(pTextureItem1);
 	m_ppShaders[0] = pTextureItem1Shader;
@@ -231,7 +233,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	CTexture* pTextureItem2 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
 	pTextureItem2->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Shovel_bg_ui.dds", RESOURCE_TEXTURE2D, 0);
 	CreateShaderResourceViews(pd3dDevice, pTextureItem2, 0, 15);
-	CScreenRectMeshTextured* pMesh1 = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, -0.25f + 0.02f, 0.225f, -0.55f, 0.4f);
+	CScreenRectMeshTextured* pMesh1 = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, 0.02f + 0.25f, 0.225f * 0.5f, -0.65f, 0.4f * 0.5f);
 	pTextureItem2Shader->SetMesh(0, pMesh1);
 	pTextureItem2Shader->SetTexture(pTextureItem2);
 	m_ppShaders[1] = pTextureItem2Shader;
@@ -241,7 +243,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	CTexture* pTextureItem3 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
 	pTextureItem3->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Whistle_bg_ui.dds", RESOURCE_TEXTURE2D, 0);
 	CreateShaderResourceViews(pd3dDevice, pTextureItem3, 0, 15);
-	CScreenRectMeshTextured* pMesh2 = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, 0.0f + 0.02f, 0.225f, -0.55f, 0.4f);
+	CScreenRectMeshTextured* pMesh2 = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, 0.02f + 0.02f + 0.25f, 0.225f * 0.5f, -0.65f, 0.4f * 0.5f);
 	pTextureItem3Shader->SetMesh(0, pMesh2);
 	pTextureItem3Shader->SetTexture(pTextureItem3);
 	m_ppShaders[2] = pTextureItem3Shader;
@@ -251,7 +253,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
 	pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Inventory.dds", RESOURCE_TEXTURE2D, 0);
 	CreateShaderResourceViews(pd3dDevice, pTexture, 0, 15);
-	CScreenRectMeshTextured* pInventoryMesh = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, -0.5f, 1.0f, -0.5f, 0.5f);
+	CScreenRectMeshTextured* pInventoryMesh = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, -0.5f + 0.5f, 1.0f * 0.5f, -0.6f, 0.5f * 0.5f);
 	pInventoryShader->SetMesh(0, pInventoryMesh);
 	pInventoryShader->SetTexture(pTexture);
 	m_ppShaders[3] = pInventoryShader;
@@ -299,7 +301,7 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 {
 	ID3D12RootSignature *pd3dGraphicsRootSignature = NULL;
 
-	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[11];
+	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[12];
 
 	pd3dDescriptorRanges[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRanges[0].NumDescriptors = 1;
@@ -363,11 +365,17 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 
 	pd3dDescriptorRanges[10].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRanges[10].NumDescriptors = 1;
-	pd3dDescriptorRanges[10].BaseShaderRegister = 0; //t: gtxTexture
+	pd3dDescriptorRanges[10].BaseShaderRegister = 0; //t0: gtxTexture
 	pd3dDescriptorRanges[10].RegisterSpace = 0;
 	pd3dDescriptorRanges[10].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-	D3D12_ROOT_PARAMETER pd3dRootParameters[16];
+	pd3dDescriptorRanges[11].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	pd3dDescriptorRanges[11].NumDescriptors = 1;
+	pd3dDescriptorRanges[11].BaseShaderRegister = 3; //t3: gFontTexture
+	pd3dDescriptorRanges[11].RegisterSpace = 0;
+	pd3dDescriptorRanges[11].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+	D3D12_ROOT_PARAMETER pd3dRootParameters[17];
 
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	pd3dRootParameters[0].Descriptor.ShaderRegister = 1; //Camera
@@ -450,7 +458,12 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 	pd3dRootParameters[15].DescriptorTable.pDescriptorRanges = &(pd3dDescriptorRanges[10]);
 	pd3dRootParameters[15].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
-	D3D12_STATIC_SAMPLER_DESC pd3dSamplerDescs[2];
+	pd3dRootParameters[16].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	pd3dRootParameters[16].DescriptorTable.NumDescriptorRanges = 1;
+	pd3dRootParameters[16].DescriptorTable.pDescriptorRanges = &(pd3dDescriptorRanges[11]);
+	pd3dRootParameters[16].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+	D3D12_STATIC_SAMPLER_DESC pd3dSamplerDescs[3];
 
 	pd3dSamplerDescs[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
 	pd3dSamplerDescs[0].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
@@ -477,6 +490,19 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 	pd3dSamplerDescs[1].ShaderRegister = 1;
 	pd3dSamplerDescs[1].RegisterSpace = 0;
 	pd3dSamplerDescs[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+	pd3dSamplerDescs[2].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+	pd3dSamplerDescs[2].AddressU = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+	pd3dSamplerDescs[2].AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+	pd3dSamplerDescs[2].AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+	pd3dSamplerDescs[2].MipLODBias = 0;
+	pd3dSamplerDescs[2].MaxAnisotropy = 1;
+	pd3dSamplerDescs[2].ComparisonFunc = D3D12_COMPARISON_FUNC_ALWAYS;
+	pd3dSamplerDescs[2].MinLOD = 0;
+	pd3dSamplerDescs[2].MaxLOD = D3D12_FLOAT32_MAX;
+	pd3dSamplerDescs[2].ShaderRegister = 2;
+	pd3dSamplerDescs[2].RegisterSpace = 0;
+	pd3dSamplerDescs[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT | D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
 	D3D12_ROOT_SIGNATURE_DESC d3dRootSignatureDesc;
@@ -782,7 +808,7 @@ void CStartScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 20); 
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 100); 
 
 	m_nShaders = 1;
 	m_ppShaders = new CShader * [m_nShaders];
@@ -804,6 +830,15 @@ void CStartScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 	m_ppShaders[0] = pTextureToScreenShader;
 
+	m_nGameObjects = 2;
+	m_ppGameObjects = new CGameObject * [m_nGameObjects];
+
+	m_pFontID = new CText(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Enter ID : ", -0.5f, -0.25f);
+	m_ppGameObjects[0] = m_pFontID;
+
+	m_pFontIP = new CText(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Enter IP : ", -0.5f, -0.55f);
+	m_ppGameObjects[1] = m_pFontIP;
+
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
@@ -822,6 +857,12 @@ void CStartScene::ReleaseObjects()
 		}
 		delete[] m_ppShaders;
 	}
+
+	if (m_ppGameObjects)
+	{
+		for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Release();
+		delete[] m_ppGameObjects;
+	}
 }
 
 void CStartScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
@@ -835,26 +876,76 @@ void CStartScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 	UpdateShaderVariables(pd3dCommandList);
 
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
+	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Render(pd3dCommandList, pCamera);
+}
 
-	/*EnterCriticalSection(&m_csRemotePlayers);
-	for (auto& [id, pPlayer] : m_remotePlayers) {
-		pPlayer->Render(pd3dCommandList, pCamera);
+void CStartScene::AnimateObjects(float fTimeElapsed)
+{
+	if (m_textDirty && m_inputStep == InputStep::EnterID)
+	{
+		wstring id;
+		id.assign(m_inputID.begin(), m_inputID.end());
+
+		m_pFontID->UpdateText(id, L"Enter ID : ");
+		m_textDirty = false;
 	}
-	LeaveCriticalSection(&m_csRemotePlayers);*/
+	if (m_textDirty && m_inputStep == InputStep::EnterIP)
+	{
+		wstring ip;
+		ip.assign(m_inputIP.begin(), m_inputIP.end());
+
+		m_pFontIP->UpdateText(ip, L"Enter IP : ");
+		m_textDirty = false;
+	}
 }
 
 void CStartScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
+	if (m_networkInitialized) return;
+
 	switch (nMessageID)
 	{
 	case WM_KEYDOWN:
-		switch (wParam)
-		{
-		case VK_RETURN:
+		if (m_inputStep == InputStep::EnterID) {
+			if (wParam == VK_RETURN) {
+				m_inputStep = InputStep::EnterIP;
+				::user_name = m_inputID;
+			}
+			else if (wParam == VK_BACK && !m_inputID.empty()) {
+				m_inputID.pop_back();
+				m_textDirty = true;
+			}
+			else if (isprint(wParam) && m_inputID.length() < MAX_ID_LENGTH - 1) {
+				m_inputID.push_back((char)wParam);
+				m_textDirty = true;
+			}
+			
 			break;
 		}
-		break;
-	default:
+		if (m_inputStep == InputStep::EnterIP) {
+			if (isdigit(wParam) && m_inputIP.length() < 15) {
+				m_inputIP.push_back((char)wParam);
+				m_textDirty = true;
+			}
+			else if (wParam == 190) {
+				m_inputIP.push_back('.');
+				m_textDirty = true;
+			}
+
+			else if (wParam == VK_RETURN) {
+				m_inputStep = InputStep::Done;
+				m_networkInitialized = true;
+
+				char serverIP[16];
+				strcpy(serverIP, m_inputIP.c_str());
+				std::cout << "Connecting to: " << serverIP << std::endl;
+				InitializeNetwork(serverIP); // server IP 전달
+				gGameFramework.MoveToNextScene();
+			}
+			else if (wParam == VK_BACK && !m_inputIP.empty()) {
+				m_inputIP.pop_back();
+			}
+		}
 		break;
 	}
 }
@@ -891,3 +982,18 @@ void CStartScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM
 //	LeaveCriticalSection(&m_csRemotePlayers);
 //}
 
+void CEndScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+}
+
+void CEndScene::ReleaseObjects()
+{
+}
+
+void CEndScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+}
+
+void CEndScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+{
+}

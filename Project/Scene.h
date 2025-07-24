@@ -11,6 +11,7 @@
 #include "Map.h"
 #include "CollisionManager.h"
 #include "CParticle.h"
+#include "CText.h"
 
 #define MAX_LIGHTS						16 
 
@@ -63,7 +64,7 @@ public:
 	ID3D12RootSignature *GetGraphicsRootSignature() { return(m_pd3dGraphicsRootSignature); }
 
 	bool ProcessInput(UCHAR *pKeysBuffer);
-    void AnimateObjects(float fTimeElapsed);
+    virtual void AnimateObjects(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera=NULL);
 
 	void ReleaseUploadBuffers();
@@ -172,26 +173,45 @@ public:
 	{
 		m_ppOtherPlayers[clientnum]->animation = animNum;
 	}
+	void UpdateOtherPlayerRotate(int clinetnum, XMFLOAT3 right, XMFLOAT3 look)
+	{
+		m_ppOtherPlayers[clinetnum]->m_xmf3Look = look;
+		m_ppOtherPlayers[clinetnum]->m_xmf3Right = right;
+	}
 };
 
-class CMainScene : public CScene
-{
-public:
-	CMainScene() {}
-	~CMainScene(){}
-
-	//virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
-	//virtual void ReleaseObjects();
-
-	//virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
-
-};
+enum class InputStep { EnterID, EnterIP, Done };
 
 class CStartScene : public CScene
 {
 public:
 	CStartScene(){}
 	~CStartScene(){}
+
+	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void ReleaseObjects();
+
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+	virtual void AnimateObjects(float fTimeElapsed);
+
+	virtual void OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
+
+private:
+	InputStep m_inputStep = InputStep::EnterID;
+	std::string m_inputID;
+	std::string m_inputIP;
+	bool m_networkInitialized = false;
+	bool m_textDirty = false;
+	CText* m_pFontID = nullptr;
+	CText* m_pFontIP = nullptr;
+
+};
+
+class CEndScene : public CScene
+{
+public:
+	CEndScene(){}
+	~CEndScene(){}
 
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void ReleaseObjects();

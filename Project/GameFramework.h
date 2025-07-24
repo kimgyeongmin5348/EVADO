@@ -36,6 +36,7 @@ public:
 
 	void WaitForGpuComplete();
 	void MoveToNextFrame();
+	void MoveToNextScene();
 
 	void OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	void OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
@@ -79,7 +80,10 @@ public:
 			m_pScene->AddItem(id, type, position);
 		}
 	}
-
+	void UpdateOtherPlayerRotate(int clinetnum, XMFLOAT3 right, XMFLOAT3 look)
+	{
+		m_ppScenes[m_nCurrentScene]->UpdateOtherPlayerRotate(clinetnum, right, look);
+	}
 
 
 	/*void UpdateItemPosition(long long id, const XMFLOAT3& position)

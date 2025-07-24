@@ -1605,14 +1605,14 @@ void CSpider::Animate(float fTimeElapsed)
 	m_pSkinnedAnimationController->SetTrackEnable(1, true);
 	m_pSkinnedAnimationController->SetTrackEnable(2, false);
 
+
+
 	CGameObject::Animate(fTimeElapsed);
 }	
 
 void CSpider::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	XMFLOAT3 hpbarPos = GetPosition();
-	hpbarPos.x += 5.0f;	
-	hpbarPos.y += 3.0f;
 	m_pHpbar->SetPosition(hpbarPos);
 	m_pHpbar->Render(pd3dCommandList, pCamera);
 

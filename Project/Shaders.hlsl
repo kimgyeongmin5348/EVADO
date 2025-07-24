@@ -195,7 +195,6 @@ VS_TEXTURED_OUTPUT VSTextured(VS_TEXTURED_INPUT input)
 
     output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
     output.uv = input.uv;
-
     return (output);
 }
 
@@ -204,7 +203,6 @@ float4 PSTextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
     float4 cColor = gtxtTexture.Sample(gssWrap, input.uv);
     cColor.a = 0.25f;
     return (cColor);
-    //return float4(1.0, 0.0, 0.0, 1.0);
 }
 
 VS_TEXTURED_OUTPUT VSTextureToScreen(VS_TEXTURED_INPUT input)
@@ -225,6 +223,36 @@ float4 PSTextureToScreen(VS_TEXTURED_OUTPUT input) : SV_TARGET
         discard;
 	
     return (cColor);
+}
+
+struct VS_FONT_INPUT
+{
+    float3 position : POSITION;
+    float2 texCoord : TEXCOORD;
+};
+
+struct VS_FONT_OUTPUT
+{
+    float4 position : SV_POSITION;
+    float2 texCoord : TEXCOORD;
+};
+
+VS_FONT_OUTPUT VSFont(VS_FONT_INPUT input)
+{
+    VS_FONT_OUTPUT output;
+    output.position = float4(input.position, 1.0f);
+    output.texCoord = input.texCoord;
+    return output;
+}
+
+Texture2D gFontTexture : register(t3);
+SamplerState gFontSampler : register(s2);
+
+float4 PSFont(VS_FONT_OUTPUT input) : SV_Target
+{
+    float4 color = gFontTexture.Sample(gFontSampler, input.texCoord);
+    clip(color.a - 0.05f);
+    return color;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "GameFramework.h"
 #include "Network.h"
+#include "Hpbar.h"
 
 CGameFramework::CGameFramework()
 {
@@ -296,15 +297,24 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 				flashlightToggle = !flashlightToggle;
 				m_pScene->BuildDefaultLightsAndMaterials(flashlightToggle);
 			}
-			if (m_pPlayer->items[2]) { 
+			if (m_pPlayer->items[2]) {
 				m_pPlayer->isSwing = true;
 				if (m_pPlayer->m_isMonsterHit)
 				{
 					// 야매 vector 인덱스 직접 접근
 					m_pScene->m_pEffect->Activate(m_pScene->m_ppHierarchicalGameObjects[2]->GetPosition());
-					m_pPlayer->m_isMonsterHit = false;
+					CSpider* pSpider = dynamic_cast<CSpider*>(m_pScene->m_ppHierarchicalGameObjects[0]);
+					if (pSpider) {
+						pSpider->MonsterHP -= 25.0f;
+						float hpRatio = pSpider->MonsterHP / 100.0f;
+
+						Hpbar* pHpbar = dynamic_cast<Hpbar*>(pSpider->m_pHpbar);
+						if (pHpbar) {
+							pHpbar->SetHpbar(hpRatio);
+							cout << pSpider->MonsterHP << endl;
+						}
+					}
 				}
-				//m_pScene->m_pEffect->Activate();
 			}
 			::SetCapture(hWnd);
 			::GetCursorPos(&m_ptOldCursorPos);
@@ -824,6 +834,14 @@ void CGameFramework::MoveToNextFrame()
 	}
 }
 
+void CGameFramework::MoveToNextScene()
+{
+	m_ppScenes[m_nScene]->ReleaseObjects();
+	m_nCurrentScene = 1;
+	BuildObjects();
+	isStartScene = false;
+}
+
 //#define _WITH_PLAYER_TOP
 
 void CGameFramework::FrameAdvance()
@@ -831,8 +849,6 @@ void CGameFramework::FrameAdvance()
 	m_GameTimer.Tick(60.0f);
 	
 	ProcessInput();
-
-    AnimateObjects();
 
 	HRESULT hResult = m_pd3dCommandAllocator->Reset();
 	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
@@ -858,12 +874,14 @@ void CGameFramework::FrameAdvance()
 
 	m_pd3dCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, TRUE, &d3dDsvCPUDescriptorHandle);
 
+	AnimateObjects();
+
 	if (m_pScene) m_pScene->Render(m_pd3dCommandList, m_pCamera);
 
 #ifdef _WITH_PLAYER_TOP
 	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 #endif
-	if (m_pPlayer) m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
+	if (m_pPlayer && !isStartScene) m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
 
 	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
