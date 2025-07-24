@@ -293,29 +293,29 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 	{
 		case WM_LBUTTONDOWN:
 		case WM_RBUTTONDOWN:
-			if (m_pPlayer->items[1]) {
-				flashlightToggle = !flashlightToggle;
-				m_pScene->BuildDefaultLightsAndMaterials(flashlightToggle);
-			}
-			if (m_pPlayer->items[2]) {
-				m_pPlayer->isSwing = true;
-				if (m_pPlayer->m_isMonsterHit)
-				{
-					// 야매 vector 인덱스 직접 접근
-					m_pScene->m_pEffect->Activate(m_pScene->m_ppHierarchicalGameObjects[2]->GetPosition());
-					CSpider* pSpider = dynamic_cast<CSpider*>(m_pScene->m_ppHierarchicalGameObjects[0]);
-					if (pSpider) {
-						pSpider->MonsterHP -= 25.0f;
-						float hpRatio = pSpider->MonsterHP / 100.0f;
+			//if (m_pPlayer->items[1]) {
+			//	flashlightToggle = !flashlightToggle;
+			//	m_pScene->BuildDefaultLightsAndMaterials(flashlightToggle);
+			//}
+			//if (m_pPlayer->items[2]) {
+			//	m_pPlayer->isSwing = true;
+			//	if (m_pPlayer->m_isMonsterHit)
+			//	{
+			//		// 야매 vector 인덱스 직접 접근
+			//		m_pScene->m_pEffect->Activate(m_pScene->m_ppGameObjects[1]->GetPosition());
+			//		CSpider* pSpider = dynamic_cast<CSpider*>(m_pScene->m_ppHierarchicalGameObjects[0]);
+			//		if (pSpider) {
+			//			pSpider->MonsterHP -= 25.0f;
+			//			float hpRatio = pSpider->MonsterHP / 100.0f;
 
-						Hpbar* pHpbar = dynamic_cast<Hpbar*>(pSpider->m_pHpbar);
-						if (pHpbar) {
-							pHpbar->SetHpbar(hpRatio);
-							cout << pSpider->MonsterHP << endl;
-						}
-					}
-				}
-			}
+			//			Hpbar* pHpbar = dynamic_cast<Hpbar*>(pSpider->m_pHpbar);
+			//			if (pHpbar) {
+			//				pHpbar->SetHpbar(hpRatio);
+			//				cout << pSpider->MonsterHP << endl;
+			//			}
+			//		}
+			//	}
+			//}
 			::SetCapture(hWnd);
 			::GetCursorPos(&m_ptOldCursorPos);
 			break;
@@ -348,7 +348,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 				m_ppScenes[m_nScene]->ReleaseObjects();
 				m_nCurrentScene = 1;
 				BuildObjects();
-				LoadingDoneToServer();
+				//LoadingDoneToServer();
 				isStartScene = false;
 				break;
 			case VK_F1:
@@ -359,31 +359,31 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			case VK_F9:
 				ChangeSwapChainState();
 				break;
-			case '1':
-			case '2':
-			case '3':
-			{
-				int itemIndex = wParam - '0';
-				int shaderIndex = wParam - '1';
-				if (itemIndex < m_pScene->m_nHierarchicalGameObjects) {
-					ItemToHand(itemIndex);
+			//case '1':
+			//case '2':
+			//case '3':
+			//{
+			//	int itemIndex = wParam - '0';
+			//	int shaderIndex = wParam - '1';
+			//	if (itemIndex < m_pScene->m_nHierarchicalGameObjects) {
+			//		ItemToHand(itemIndex);
 
 
-					CGameObject* pItem = m_pScene->m_ppHierarchicalGameObjects[itemIndex];
-					SendItemMove(itemIndex, pItem->GetPosition());
-					cout << "변경된 아이템 좌표 전송 완료" << endl;
+			//		CGameObject* pItem = m_pScene->m_ppHierarchicalGameObjects[itemIndex];
+			//		SendItemMove(itemIndex, pItem->GetPosition());
+			//		cout << "변경된 아이템 좌표 전송 완료" << endl;
 
 
-					m_pPlayer->items[itemIndex] = !m_pPlayer->items[itemIndex];
-					dynamic_cast<CTextureToScreenShader*>(m_pScene->m_ppShaders[shaderIndex])->IsInventory[shaderIndex]
-						= !dynamic_cast<CTextureToScreenShader*>(m_pScene->m_ppShaders[shaderIndex])->IsInventory[shaderIndex];
-				}
-				break;
-			}
+			//		m_pPlayer->items[itemIndex] = !m_pPlayer->items[itemIndex];
+			//		dynamic_cast<CTextureToScreenShader*>(m_pScene->m_ppShaders[shaderIndex])->IsInventory[shaderIndex]
+			//			= !dynamic_cast<CTextureToScreenShader*>(m_pScene->m_ppShaders[shaderIndex])->IsInventory[shaderIndex];
+			//	}
+			//	break;
+			//}
 
-			case 'F':
+			/*case 'F':
 			case'f':
-			{
+			{*/
 				//XMFLOAT3 playerPos = m_pPlayer->GetPosition();
 				//long long nearestItemID = FindNearestItemInRange(Recognized_Range, playerPos);
 				//if (nearestItemID != -1) {
@@ -410,7 +410,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 				//	}
 				//}
 				//break;
-			}
+			//}
 			}
 			break;
 		default:
@@ -795,19 +795,19 @@ void CGameFramework::AnimateObjects()
 	m_pPlayer->Animate(fTimeElapsed);
 
 	if (m_nCurrentScene == 0) m_pPlayer->SetPosition(XMFLOAT3(3, 0, 20));
-	if (m_nCurrentScene == 1) {
-		for (int i = 0; i < 4; ++i)
-		{
-			if (!m_pPlayer->items[i]) // 손에 들리지 않은 상태일 때만
-			{	
-				if (m_pScene->m_ppHierarchicalGameObjects[i]) {
-					XMFLOAT3 pos = m_pScene->m_ppHierarchicalGameObjects[i]->GetPosition();
-					if (pos.y > 0.1f) pos.y -= 0.1;
-					m_pScene->m_ppHierarchicalGameObjects[i]->SetPosition(pos);
-				}
-			}
-		}
-	}
+	//if (m_nCurrentScene == 1) {
+	//	for (int i = 0; i < 4; ++i)
+	//	{
+	//		if (!m_pPlayer->items[i]) // 손에 들리지 않은 상태일 때만
+	//		{	
+	//			if (m_pScene->m_ppHierarchicalGameObjects[i]) {
+	//				XMFLOAT3 pos = m_pScene->m_ppHierarchicalGameObjects[i]->GetPosition();
+	//				if (pos.y > 0.1f) pos.y -= 0.1;
+	//				m_pScene->m_ppHierarchicalGameObjects[i]->SetPosition(pos);
+	//			}
+	//		}
+	//	}
+	//}
 }
 
 void CGameFramework::WaitForGpuComplete()

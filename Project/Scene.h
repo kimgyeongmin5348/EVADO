@@ -72,6 +72,8 @@ public:
 	void InitializeCollisionSystem();
 	void GenerateGameObjectsBoundingBox();
 
+	void ItemToHand(CGameObject* pItem);
+
 	CPlayer								*m_pPlayer = NULL;
 
 	std::vector<OtherPlayer*>				m_vPlayers;
@@ -146,10 +148,10 @@ public:
 	CCollisionManager					m_CollisionManager;
 
 	CParticle							*m_pEffect = NULL;
-	//server
 	
 public:
 
+	//server
 	void AddItem(long long id, ITEM_TYPE type, const XMFLOAT3& position);
 	void UpdateItemPosition(long long id, const XMFLOAT3& position);
 	

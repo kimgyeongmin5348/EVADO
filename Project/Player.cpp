@@ -9,6 +9,15 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CPlayer
 
+void CPlayer::RemoveHeldItem(CGameObject* pItem)
+{
+	auto it = std::find(m_pHeldItems.begin(), m_pHeldItems.end(), pItem);
+	if (it != m_pHeldItems.end())
+	{
+		m_pHeldItems.erase(it);
+	}
+}
+
 CPlayer::CPlayer()
 {
 	
@@ -652,5 +661,18 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 		}
 
 	}
+
+	// item server
+	if (m_pHeldItems.size()) {
+		for(auto item : m_pHeldItems){
+
+		long long itemID = FindID(item);
+		if (itemID != -1)
+		{
+			SendItemMove(itemID, item->GetPosition());
+		}
+		}
+	}
+
 }
 

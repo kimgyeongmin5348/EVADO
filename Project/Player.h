@@ -53,9 +53,15 @@ protected:
 public:
 	bool	isSwing = false;
 	bool	isCrouch = false;
-	bool	items[4] = { false,false,false,false };
+	
 	bool	m_isMonsterHit = false;
+	bool	alreadyHeld = false;
 
+	// 아이템
+	int m_nSelectedInventoryIndex = 0;  // 기본값은 0번 (1번 슬롯)
+	std::vector<CGameObject*> m_pHeldItems;
+
+	void RemoveHeldItem(CGameObject* pItem);
 public:
 	CPlayer();
 	virtual ~CPlayer();

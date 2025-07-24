@@ -365,6 +365,7 @@ public:
 	char							m_pstrFrameName[64];
 
 	bool visible = true;
+	bool isFalling = false;
 
 	CMesh* m_pMesh = NULL;
 
@@ -442,6 +443,8 @@ public:
 
 	bool GetVisible() { return visible; }
 	void SetVisible(bool b) { visible = b; }
+
+	bool IsHeldBy(CPlayer* pPlayer);
 
 	void Move(XMFLOAT3 xmf3Offset);
 

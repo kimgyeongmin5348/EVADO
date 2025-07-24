@@ -362,7 +362,7 @@ void ProcessPacket(char* ptr)
             << pkt->position.y << ", " << pkt->position.z << ")"
             << " Type: " << pkt->item_type << " Cash: " << pkt->cash << std::endl;
 
-        gGameFramework.InitItemToScene(pkt->item_id, static_cast<ITEM_TYPE>(pkt->item_type), pkt->position);
+        //gGameFramework.InitItemToScene(pkt->item_id, static_cast<ITEM_TYPE>(pkt->item_type), pkt->position);
 
         break;
     }

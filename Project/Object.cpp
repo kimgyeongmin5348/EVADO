@@ -842,8 +842,8 @@ void CGameObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pC
 			}
 		}
 	}
-	if (m_pSibling) m_pSibling->Render(pd3dCommandList, pCamera);
-	if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera);
+	if (m_pSibling && m_pSibling->GetVisible()) m_pSibling->Render(pd3dCommandList, pCamera);
+	if (m_pChild && m_pChild->GetVisible()) m_pChild->Render(pd3dCommandList, pCamera);
 }
 
 void CGameObject::CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
@@ -907,6 +907,12 @@ void CGameObject::SetScale(float x, float y, float z)
 void CGameObject::SetScale(XMFLOAT3 xmf3Scale)
 {
 	SetScale(xmf3Scale.x, xmf3Scale.y, xmf3Scale.z);
+}
+
+bool CGameObject::IsHeldBy(CPlayer* pPlayer)
+{
+	CGameObject* pHand = pPlayer->FindFrame("hand_r");
+	return (this->GetParent() == pHand);
 }
 
 void CGameObject::Move(XMFLOAT3 xmf3Offset)

@@ -137,6 +137,11 @@ void CScene::GenerateGameObjectsBoundingBox()
 	}
 }
 
+void CScene::ItemToHand(CGameObject* pItem)
+{
+
+}
+
 void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
@@ -153,7 +158,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	m_pEffect = new CParticle(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
-	m_nHierarchicalGameObjects = 4; // spider, flashlight, shovel, whistle
+	m_nHierarchicalGameObjects = 1; // spider
 	m_ppHierarchicalGameObjects = new CGameObject * [m_nHierarchicalGameObjects];
 
 	CLoadedModelInfo* pSpiderModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Spider.bin", NULL);
@@ -169,27 +174,30 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	if (pSpiderModel) delete pSpiderModel;
 
+	m_nGameObjects = 3;
+	m_ppGameObjects = new CGameObject * [m_nGameObjects];
+
 	CLoadedModelInfo* pFlashlightModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Flashlightgold.bin", NULL);
-	m_ppHierarchicalGameObjects[1] = new FlashLight(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFlashlightModel);
-	m_ppHierarchicalGameObjects[1]->SetScale(3, 3, 3);
-	m_ppHierarchicalGameObjects[1]->Rotate(90, 0, 0);
+	m_ppGameObjects[0] = new FlashLight(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFlashlightModel);
+	m_ppGameObjects[0]->SetScale(3, 3, 3);
+	m_ppGameObjects[0]->Rotate(90, 0, 0);
 	//m_ppHierarchicalGameObjects[1]->SetPosition(3, 2, 10);
-	m_ppHierarchicalGameObjects[1]->SetFrameName("FlashLight");
+	m_ppGameObjects[0]->SetFrameName("FlashLight");
 	if (pFlashlightModel) delete pFlashlightModel;
 
 	CLoadedModelInfo* pShovelModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Shovel.bin", NULL);
-	m_ppHierarchicalGameObjects[2] = new Shovel(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShovelModel);
-	m_ppHierarchicalGameObjects[2]->SetScale(1, 1, 1);
-	m_ppHierarchicalGameObjects[2]->Rotate(0, 0, 90);
+	m_ppGameObjects[1] = new Shovel(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShovelModel);
+	m_ppGameObjects[1]->SetScale(1, 1, 1);
+	m_ppGameObjects[1]->Rotate(0, 0, 90);
 	//m_ppHierarchicalGameObjects[2]->SetPosition(3, 2, 12);
-	m_ppHierarchicalGameObjects[2]->SetFrameName("Shovel");
+	m_ppGameObjects[1]->SetFrameName("Shovel");
 	if (pShovelModel) delete pShovelModel;
 
 	CLoadedModelInfo* pWhistleModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Whistle.bin", NULL);
-	m_ppHierarchicalGameObjects[3] = new Whistle(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pWhistleModel);
-	m_ppHierarchicalGameObjects[3]->SetScale(1, 1, 1);
+	m_ppGameObjects[2] = new Whistle(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pWhistleModel);
+	m_ppGameObjects[2]->SetScale(1, 1, 1);
 	//m_ppHierarchicalGameObjects[3]->SetPosition(3, 2, 13);
-	m_ppHierarchicalGameObjects[3]->SetFrameName("Whistle");
+	m_ppGameObjects[2]->SetFrameName("Whistle");
 	if (pWhistleModel) delete pWhistleModel;
 
 	m_nOtherPlayers = 1;
@@ -620,6 +628,99 @@ void CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 	switch (nMessageID)
 	{
 	case WM_KEYDOWN:
+		switch (wParam)
+		{
+		case '1':
+		case '2':
+		case '3':
+		case '4':
+		{
+			int slotIndex = wParam - '1';
+			m_pPlayer->m_nSelectedInventoryIndex = slotIndex;
+
+			// 슬롯에 따라 visible 갱신
+			for (int i = 0; i < m_pPlayer->m_pHeldItems.size(); ++i)
+			{
+				CGameObject* item = m_pPlayer->m_pHeldItems[i];
+				item->SetVisible(i == slotIndex); // 선택된 슬롯만 true
+			}
+		}
+			break;
+		case 'F':
+		case'f':
+		{
+			for (int i = 0; i < m_nGameObjects; ++i)
+			{
+				CGameObject* pItem = m_ppGameObjects[i];
+				if (!pItem) continue;
+
+				// 오른손 프레임에 붙이기
+				CGameObject* pRightHand = m_pPlayer->FindFrame("hand_r");
+				if (!pRightHand) return;
+
+				// 이미 붙어있는지 확인
+				CGameObject* pCurr = pRightHand->GetChild();
+				CGameObject* pPrev = nullptr;
+
+				while (pCurr)
+				{
+					if (pCurr == pItem)
+					{
+						m_pPlayer->alreadyHeld = true;
+						break;
+					}
+					pPrev = pCurr;
+					pCurr = pCurr->GetSibling();
+				}
+
+				// 플레이어와 아이템 간 거리 계산
+				XMFLOAT3 playerPos = m_pPlayer->GetPosition();
+				XMFLOAT3 itemPos = pItem->GetPosition();
+				float distance = Vector3::Length(Vector3::Subtract(playerPos, itemPos));
+
+				if (!m_pPlayer->alreadyHeld && distance <= 0.5f)
+				{
+					if (!pRightHand->GetChild()) pRightHand->SetChild(pItem);
+					else
+					{
+						CGameObject* last = pRightHand->GetChild();
+						while (last->GetSibling()) last = last->GetSibling();
+						last->m_pSibling = pItem;
+					}
+
+					pItem->m_pParent = pRightHand;
+					pItem->m_pSibling = nullptr;
+					if(pItem == pItem->FindFrame("Shovel"))pItem->SetPosition(0.05f, -0.05f, 1.f);
+					else pItem->SetPosition(0.05f, -0.05f, 0.1f);
+					m_pPlayer->UpdateTransform(nullptr);
+
+					int newIndex = static_cast<int>(m_pPlayer->m_pHeldItems.size());
+					m_pPlayer->m_pHeldItems.push_back(pItem);
+
+					// 현재 선택된 슬롯만 visible
+					if (newIndex == m_pPlayer->m_nSelectedInventoryIndex)
+						pItem->SetVisible(true);
+					else
+						pItem->SetVisible(false);
+					break; // 한 개만 처리
+				}
+				if (m_pPlayer->alreadyHeld) {
+					// 놓기
+					if (pPrev) pPrev->m_pSibling = pItem->GetSibling();
+					else pRightHand->SetChild(pItem->GetSibling());
+					pItem->m_pParent = nullptr;
+					pItem->m_pSibling = nullptr;
+					m_pPlayer->alreadyHeld = false;
+					pItem->isFalling = true;
+
+					m_pPlayer->RemoveHeldItem(pItem);
+					pItem->SetVisible(true);
+					break;
+				}
+			}
+		}
+		break;
+		}
 		break;
 	default:
 		break;
@@ -633,7 +734,19 @@ bool CScene::ProcessInput(UCHAR *pKeysBuffer)
 
 void CScene::AnimateObjects(float fTimeElapsed)
 {
-	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Animate(fTimeElapsed);	
+	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) { 
+		m_ppGameObjects[i]->Animate(fTimeElapsed); 
+
+		if (m_ppGameObjects[i]->isFalling) {
+			XMFLOAT3 pos = m_ppGameObjects[i]->GetPosition();
+			if (pos.y > 0.1f)
+			{
+				pos.y -= 0.1f;
+				m_ppGameObjects[i]->SetPosition(pos);
+			}
+			else m_ppGameObjects[i]->isFalling = false;		
+		}
+	}
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);
 
 	if (m_pLights)
@@ -642,7 +755,7 @@ void CScene::AnimateObjects(float fTimeElapsed)
 		m_pLights[1].m_xmf3Direction = m_pPlayer->GetLookVector();
 	}
 
-	if (m_pEffect) m_pEffect->Animate(fTimeElapsed, m_ppHierarchicalGameObjects[2]->GetPosition());
+	if (m_pEffect) m_pEffect->Animate(fTimeElapsed, m_ppGameObjects[1]->GetPosition());
 }
 
 void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera)
@@ -662,7 +775,12 @@ void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera
 	if (m_pTerrain) m_pTerrain->Render(pd3dCommandList, pCamera);
 	if (m_pMap) m_pMap->Render(pd3dCommandList, pCamera);
 
-	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Render(pd3dCommandList, pCamera);
+	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) { 
+		if (m_ppGameObjects[i]->GetVisible())
+		{
+			m_ppGameObjects[i]->Render(pd3dCommandList, pCamera);
+		}
+	}
   
 	for (int i = 0; i < m_nHierarchicalGameObjects; i++)
 	{
@@ -690,73 +808,73 @@ void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera
 
 // 아이템 생성 server(민상.ver AddItem)
 
-//void CScene::AddItem(long long id, ITEM_TYPE type, const XMFLOAT3& position) {
-//	CLoadedModelInfo* pModel = nullptr;
-//	Item* pNewItem = nullptr;
-//
-//	switch (type)
-//	{
-//	case ITEM_TYPE_SHOVEL:
-//		dynamic_cast<Shovel*>(m_ppHierarchicalGameObjects[2])->ChangeExistState(true);
-//		dynamic_cast<Shovel*>(m_ppHierarchicalGameObjects[2])->SetPosition(position);
-//		break;
-//	case ITEM_TYPE_HANDMAP:
-//		break;
-//	case ITEM_TYPE_FLASHLIGHT:
-//		dynamic_cast<FlashLight*>(m_ppHierarchicalGameObjects[1])->ChangeExistState(true);
-//		dynamic_cast<FlashLight*>(m_ppHierarchicalGameObjects[1])->SetPosition(position);
-//		break;
-//	case ITEM_TYPE_WHISTLE:
-//		dynamic_cast<Whistle*>(m_ppHierarchicalGameObjects[3])->ChangeExistState(true);
-//		dynamic_cast<Whistle*>(m_ppHierarchicalGameObjects[3])->SetPosition(position);
-//		break;
-//	default:
-//		std::cerr << "[Error] Unknown item type: " << static_cast<int>(type) << std::endl;
-//		return;
-//	}
-//
-//	if (pModel && pNewItem) {
-//		pNewItem->SetPosition(position);
-//		pNewItem->SetScale(1.0f, 1.0f, 1.0f); // 기본 스케일 설정
-//
-//		std::lock_guard<std::mutex> lock(g_item_mutex);
-//		g_items[id] = pNewItem;
-//		delete pModel; // 모델 데이터는 복제되었으므로 삭제
-//	}
-//}
-
 void CScene::AddItem(long long id, ITEM_TYPE type, const XMFLOAT3& position) {
-    Item* pNewItem = nullptr;
+	CLoadedModelInfo* pModel = nullptr;
+	Item* pNewItem = nullptr;
 
-    switch (type) {
-    case ITEM_TYPE_SHOVEL:
-        pNewItem = dynamic_cast<Shovel*>(m_ppHierarchicalGameObjects[2]);
-        break;
-    case ITEM_TYPE_HANDMAP:
-        break;
-    case ITEM_TYPE_FLASHLIGHT:
-        pNewItem = dynamic_cast<FlashLight*>(m_ppHierarchicalGameObjects[1]);
-        break;
-    case ITEM_TYPE_WHISTLE:
-        pNewItem = dynamic_cast<Whistle*>(m_ppHierarchicalGameObjects[3]);
-        break;
-    default:
-        std::cerr << "[Error] Unknown item type: " << static_cast<int>(type) << std::endl;
-        return;
-    }
+	switch (type)
+	{
+	case ITEM_TYPE_SHOVEL:
+		dynamic_cast<Shovel*>(m_ppGameObjects[1])->ChangeExistState(true);
+		dynamic_cast<Shovel*>(m_ppGameObjects[1])->SetPosition(position);
+		break;
+	case ITEM_TYPE_HANDMAP:
+		break;
+	case ITEM_TYPE_FLASHLIGHT:
+		dynamic_cast<FlashLight*>(m_ppGameObjects[0])->ChangeExistState(true);
+		dynamic_cast<FlashLight*>(m_ppGameObjects[0])->SetPosition(position);
+		break;
+	case ITEM_TYPE_WHISTLE:
+		dynamic_cast<Whistle*>(m_ppGameObjects[2])->ChangeExistState(true);
+		dynamic_cast<Whistle*>(m_ppGameObjects[2])->SetPosition(position);
+		break;
+	default:
+		std::cerr << "[Error] Unknown item type: " << static_cast<int>(type) << std::endl;
+		return;
+	}
 
-    if (pNewItem) {
-        // 고유아이디 세팅 (Item 클래스에 SetUniqueID 추가되어 있어야 함)
-        //pNewItem->SetUniqueID(id);
+	if (pModel && pNewItem) {
+		pNewItem->SetPosition(position);
+		pNewItem->SetScale(1.0f, 1.0f, 1.0f); // 기본 스케일 설정
 
-        pNewItem->ChangeExistState(true);
-        pNewItem->SetPosition(position);
-        pNewItem->SetScale(1.0f, 1.0f, 1.0f);
-
-        std::lock_guard<std::mutex> lock(g_item_mutex);
-        g_items[id] = pNewItem;
-    }
+		std::lock_guard<std::mutex> lock(g_item_mutex);
+		g_items[id] = pNewItem;
+		delete pModel; // 모델 데이터는 복제되었으므로 삭제
+	}
 }
+
+//void CScene::AddItem(long long id, ITEM_TYPE type, const XMFLOAT3& position) {
+//    Item* pNewItem = nullptr;
+//
+//    switch (type) {
+//    case ITEM_TYPE_SHOVEL:
+//        pNewItem = dynamic_cast<Shovel*>(m_ppHierarchicalGameObjects[2]);
+//        break;
+//    case ITEM_TYPE_HANDMAP:
+//        break;
+//    case ITEM_TYPE_FLASHLIGHT:
+//        pNewItem = dynamic_cast<FlashLight*>(m_ppHierarchicalGameObjects[1]);
+//        break;
+//    case ITEM_TYPE_WHISTLE:
+//        pNewItem = dynamic_cast<Whistle*>(m_ppHierarchicalGameObjects[3]);
+//        break;
+//    default:
+//        std::cerr << "[Error] Unknown item type: " << static_cast<int>(type) << std::endl;
+//        return;
+//    }
+//
+//    if (pNewItem) {
+//        // 고유아이디 세팅 (Item 클래스에 SetUniqueID 추가되어 있어야 함)
+//        //pNewItem->SetUniqueID(id);
+//
+//        pNewItem->ChangeExistState(true);
+//        pNewItem->SetPosition(position);
+//        pNewItem->SetScale(1.0f, 1.0f, 1.0f);
+//
+//        std::lock_guard<std::mutex> lock(g_item_mutex);
+//        g_items[id] = pNewItem;
+//    }
+//}
 
 // server 추가해봄 UpdateItemPosition
 
