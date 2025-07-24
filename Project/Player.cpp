@@ -661,18 +661,5 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 		}
 
 	}
-
-	// item server
-	if (m_pHeldItems.size()) {
-		for(auto item : m_pHeldItems){
-
-		long long itemID = FindID(item);
-		if (itemID != -1)
-		{
-			SendItemMove(itemID, item->GetPosition());
-		}
-		}
-	}
-
 }
 
