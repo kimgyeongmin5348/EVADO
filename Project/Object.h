@@ -455,7 +455,6 @@ public:
 	void SetFrameName(const char* framename) {
 		strncpy_s(m_pstrFrameName, sizeof(m_pstrFrameName), framename, _TRUNCATE);
 	}
-
 	void MoveStrafe(float fDistance = 1.0f);
 	void MoveUp(float fDistance = 1.0f);
 	void MoveForward(float fDistance = 1.0f);

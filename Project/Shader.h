@@ -83,12 +83,14 @@ public:
 	int								m_nMeshes = 0;
 	CMesh							**m_ppMeshes = NULL;
 
-	CTexture* m_pTexture = NULL;
+	bool visible = true;
 
-	bool IsInventory[4] = { false, false, false, true };
+	CTexture* m_pTexture = NULL;
 
 	void SetMesh(UINT nIndex, CMesh* pMesh);
 	void SetTexture(CTexture* pTexture);
+
+	void SetVisible(bool b) { visible = b; }
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

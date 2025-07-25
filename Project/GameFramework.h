@@ -149,8 +149,6 @@ private:
 
 	_TCHAR						m_pszFrameRate[70];
 
-	bool flashlightToggle = false;
-
 	//server
 	//float m_fLastPositionSendTime = 0.0f; 
 };

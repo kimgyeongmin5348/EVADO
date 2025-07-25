@@ -316,15 +316,14 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 			//		}
 			//	}
 			//}
-			::SetCapture(hWnd);
-			::GetCursorPos(&m_ptOldCursorPos);
 			break;
 		case WM_LBUTTONUP:
 		case WM_RBUTTONUP:
-			::ReleaseCapture();
+			//::ReleaseCapture();
 			break;
 		case WM_MOUSEMOVE:
-
+			::SetCapture(hWnd);
+			::GetCursorPos(&m_ptOldCursorPos);
 			//
 			break;
 		default:
@@ -345,11 +344,11 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 				exit(0);
 				break;
 			case VK_RETURN:
-				m_ppScenes[m_nScene]->ReleaseObjects();
-				m_nCurrentScene = 1;
-				BuildObjects();
+				//m_ppScenes[m_nScene]->ReleaseObjects();
+				//m_nCurrentScene = 1;
+				//BuildObjects();
 				//LoadingDoneToServer();
-				isStartScene = false;
+				//isStartScene = false;
 				break;
 			case VK_F1:
 			case VK_F2:
@@ -841,6 +840,7 @@ void CGameFramework::MoveToNextScene()
 	m_ppScenes[m_nScene]->ReleaseObjects();
 	m_nCurrentScene = 1;
 	BuildObjects();
+	LoadingDoneToServer();
 	isStartScene = false;
 }
 
@@ -850,7 +850,6 @@ void CGameFramework::FrameAdvance()
 {    
 	m_GameTimer.Tick(60.0f);
 	
-	ProcessInput();
 
 	HRESULT hResult = m_pd3dCommandAllocator->Reset();
 	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
@@ -875,6 +874,8 @@ void CGameFramework::FrameAdvance()
 	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 
 	m_pd3dCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, TRUE, &d3dDsvCPUDescriptorHandle);
+
+	ProcessInput();
 
 	AnimateObjects();
 

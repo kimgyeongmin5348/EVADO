@@ -152,6 +152,9 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	BuildDefaultLightsAndMaterials(false);
 
+	Device = pd3dDevice;
+	Commandlist = pd3dCommandList;
+
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
 	m_pMap = new Map(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
@@ -223,38 +226,59 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	if (pOtherPlayerModel) delete pOtherPlayerModel;
 
 	// 인벤토리 UI
-	m_nShaders = 4;
+	m_nShaders = 5;
 	m_ppShaders = new CShader * [m_nShaders];
+
+	CTexture* pTextureinven = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pTextureinven->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/effect.dds", RESOURCE_TEXTURE2D, 0);
+	CreateShaderResourceViews(pd3dDevice, pTextureinven, 0, 15);
+	m_textureMap["effect"] = pTextureinven;
+
+	CTexture* pTextureItem1 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pTextureItem1->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Shovel.dds", RESOURCE_TEXTURE2D, 0);
+	CreateShaderResourceViews(pd3dDevice, pTextureItem1, 0, 15);
+	m_textureMap["Shovel"] = pTextureItem1;
+
+	CTexture* pTextureItem2 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pTextureItem2->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/FlashLight.dds", RESOURCE_TEXTURE2D, 0);
+	CreateShaderResourceViews(pd3dDevice, pTextureItem2, 0, 15);
+	m_textureMap["FlashLight"] = pTextureItem2;
+
+	CTexture* pTextureItem3 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pTextureItem3->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Whistle.dds", RESOURCE_TEXTURE2D, 0);
+	CreateShaderResourceViews(pd3dDevice, pTextureItem3, 0, 15);
+	m_textureMap["Whistle"] = pTextureItem3;
 
 	CTextureToScreenShader* pTextureItem1Shader = new CTextureToScreenShader(1);
 	pTextureItem1Shader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-	CTexture* pTextureItem1 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	pTextureItem1->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/FlashLight_bg_ui.dds", RESOURCE_TEXTURE2D, 0);
-	CreateShaderResourceViews(pd3dDevice, pTextureItem1, 0, 15);
 	CScreenRectMeshTextured* pMesh = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, 0.02f, 0.225f * 0.5f, -0.65f, 0.4f * 0.5f);
 	pTextureItem1Shader->SetMesh(0, pMesh);
-	pTextureItem1Shader->SetTexture(pTextureItem1);
+	pTextureItem1Shader->SetTexture(pTextureinven);
 	m_ppShaders[0] = pTextureItem1Shader;
 
 	CTextureToScreenShader* pTextureItem2Shader = new CTextureToScreenShader(1);
 	pTextureItem2Shader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-	CTexture* pTextureItem2 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	pTextureItem2->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Shovel_bg_ui.dds", RESOURCE_TEXTURE2D, 0);
-	CreateShaderResourceViews(pd3dDevice, pTextureItem2, 0, 15);
-	CScreenRectMeshTextured* pMesh1 = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, 0.02f + 0.25f, 0.225f * 0.5f, -0.65f, 0.4f * 0.5f);
+	CScreenRectMeshTextured* pMesh1 = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, 0.02f + 0.125f, 0.225f * 0.5f, -0.65f, 0.4f * 0.5f);
 	pTextureItem2Shader->SetMesh(0, pMesh1);
-	pTextureItem2Shader->SetTexture(pTextureItem2);
+	pTextureItem2Shader->SetTexture(pTextureinven);
 	m_ppShaders[1] = pTextureItem2Shader;
 
 	CTextureToScreenShader* pTextureItem3Shader = new CTextureToScreenShader(1);
 	pTextureItem3Shader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-	CTexture* pTextureItem3 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	pTextureItem3->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Whistle_bg_ui.dds", RESOURCE_TEXTURE2D, 0);
-	CreateShaderResourceViews(pd3dDevice, pTextureItem3, 0, 15);
-	CScreenRectMeshTextured* pMesh2 = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, 0.02f + 0.02f + 0.25f, 0.225f * 0.5f, -0.65f, 0.4f * 0.5f);
+	CScreenRectMeshTextured* pMesh2 = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, 0.02f + 0.25f, 0.225f * 0.5f, -0.65f, 0.4f * 0.5f);
 	pTextureItem3Shader->SetMesh(0, pMesh2);
-	pTextureItem3Shader->SetTexture(pTextureItem3);
+	pTextureItem3Shader->SetTexture(pTextureinven);
 	m_ppShaders[2] = pTextureItem3Shader;
+
+	CTextureToScreenShader* pTextureItem4Shader = new CTextureToScreenShader(1);
+	pTextureItem4Shader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	CTexture* pTextureItem4 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pTextureItem4->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/effect.dds", RESOURCE_TEXTURE2D, 0);
+	CreateShaderResourceViews(pd3dDevice, pTextureItem4, 0, 15);
+	CScreenRectMeshTextured* pMesh3 = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, 0.02f + 0.375f, 0.225f * 0.5f, -0.65f, 0.4f * 0.5f);
+	pTextureItem4Shader->SetMesh(0, pMesh3);
+	pTextureItem4Shader->SetTexture(pTextureinven);
+	m_ppShaders[3] = pTextureItem4Shader;
 
 	CTextureToScreenShader* pInventoryShader = new CTextureToScreenShader(1);
 	pInventoryShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
@@ -264,7 +288,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	CScreenRectMeshTextured* pInventoryMesh = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, -0.5f + 0.5f, 1.0f * 0.5f, -0.6f, 0.5f * 0.5f);
 	pInventoryShader->SetMesh(0, pInventoryMesh);
 	pInventoryShader->SetTexture(pTexture);
-	m_ppShaders[3] = pInventoryShader;
+	m_ppShaders[4] = pInventoryShader;
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
@@ -618,9 +642,45 @@ void CScene::CreateShaderResourceViews(ID3D12Device* pd3dDevice, CTexture* pText
 	for (int j = 0; j < nRootParameters; j++) pTexture->SetRootParameterIndex(j, nRootParameterStartIndex + j);
 }
 
-bool CScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+void CScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
-	return(false);
+	switch (nMessageID)
+	{
+	case WM_LBUTTONDOWN:
+	{
+		int index = m_pPlayer->m_nSelectedInventoryIndex;
+
+		// 손에 든 아이템 인덱스 유효성 검사
+		if (index < 0 || index >= 4) break;
+
+		CGameObject* pHeldItem = m_pPlayer->m_pHeldItems[index];
+		if (!pHeldItem) break;
+
+		char* frameName = pHeldItem->GetFrameName();
+
+		if (!strcmp(frameName, "FlashLight"))
+		{
+			m_pPlayer->bflashlight = !m_pPlayer->bflashlight;
+			BuildDefaultLightsAndMaterials(m_pPlayer->bflashlight);
+		}
+		else if (!strcmp(frameName, "Shovel"))
+		{
+			m_pPlayer->isSwing = true;
+
+			if (m_pPlayer->m_isMonsterHit)
+			{
+				m_pEffect->Activate(m_ppGameObjects[1]->GetPosition());
+
+				CSpider* pSpider = dynamic_cast<CSpider*>(m_ppHierarchicalGameObjects[0]);
+				if (pSpider)
+				{
+					pSpider->MonsterHP -= 25.0f;
+				}
+			}
+			break;
+		}
+	}
+	}
 }
 
 void CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
@@ -647,78 +707,116 @@ void CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 		}
 			break;
 		case 'F':
-		case'f':
+		case 'f':
 		{
+			bool bPickedUp = false;
+
+			// 1단계: 먼저 주울 수 있는 아이템 탐색
 			for (int i = 0; i < m_nGameObjects; ++i)
 			{
 				CGameObject* pItem = m_ppGameObjects[i];
 				if (!pItem) continue;
 
-				// 오른손 프레임에 붙이기
-				CGameObject* pRightHand = m_pPlayer->FindFrame("hand_r");
-				if (!pRightHand) return;
-
-				// 이미 붙어있는지 확인
-				CGameObject* pCurr = pRightHand->GetChild();
-				CGameObject* pPrev = nullptr;
-
-				while (pCurr)
-				{
-					if (pCurr == pItem)
-					{
-						m_pPlayer->alreadyHeld = true;
-						break;
-					}
-					pPrev = pCurr;
-					pCurr = pCurr->GetSibling();
-				}
-
 				// 플레이어와 아이템 간 거리 계산
 				XMFLOAT3 playerPos = m_pPlayer->GetPosition();
 				XMFLOAT3 itemPos = pItem->GetPosition();
 				float distance = Vector3::Length(Vector3::Subtract(playerPos, itemPos));
+				if (distance > 0.5f) continue;
 
-				if (!m_pPlayer->alreadyHeld && distance <= 0.5f)
+				// 이미 손에 들고 있는 경우는 스킵
+				if (pItem->GetParent() == m_pPlayer->FindFrame("hand_r")) continue;
+
+				// 들기
+				CGameObject* pRightHand = m_pPlayer->FindFrame("hand_r");
+				if (!pRightHand) return;
+
+				if (!pRightHand->GetChild()) pRightHand->SetChild(pItem);
+				else
 				{
-					if (!pRightHand->GetChild()) pRightHand->SetChild(pItem);
-					else
+					CGameObject* last = pRightHand->GetChild();
+					while (last->GetSibling()) last = last->GetSibling();
+					last->m_pSibling = pItem;
+				}
+				pItem->m_pParent = pRightHand;
+				pItem->m_pSibling = nullptr;
+
+				// 손 위치에 맞게 조정
+				if (pItem == pItem->FindFrame("Shovel")) pItem->SetPosition(0.05f, -0.05f, 1.f);
+				else pItem->SetPosition(0.05f, -0.05f, 0.1f);
+				dynamic_cast<CTerrainPlayer*>(m_pPlayer)->debt += 800;
+				m_pPlayer->UpdateTransform(nullptr);
+
+				int newIndex = static_cast<int>(m_pPlayer->m_pHeldItems.size());
+				m_pPlayer->m_pHeldItems.push_back(pItem);
+				pItem->SetVisible(newIndex == m_pPlayer->m_nSelectedInventoryIndex);
+
+				// 아이콘 표시
+				std::string frameName = pItem->m_pstrFrameName;
+				auto it = m_textureMap.find(frameName);
+				if (it != m_textureMap.end())
+				{
+					auto* pShader = dynamic_cast<CTextureToScreenShader*>(m_ppShaders[newIndex]);
+					if (pShader) {
+						pShader->SetTexture(it->second);
+					}
+				}
+
+				bPickedUp = true;
+				break; // 한 개만 주우면 종료
+			}
+
+			// 2단계: 못 주웠으면 → 선택된 인덱스의 아이템만 내려놓기
+			if (!bPickedUp) {
+				int index = m_pPlayer->m_nSelectedInventoryIndex;
+				if (index >= 0 && index < m_pPlayer->m_pHeldItems.size())
+				{
+					CGameObject* pItem = m_pPlayer->m_pHeldItems[index];
+					if (!pItem) return;
+
+					CGameObject* pRightHand = m_pPlayer->FindFrame("hand_r");
+					if (!pRightHand) return;
+
+					// 형제 연결 재조정
+					CGameObject* pCurr = pRightHand->GetChild();
+					CGameObject* pPrev = nullptr;
+
+					while (pCurr)
 					{
-						CGameObject* last = pRightHand->GetChild();
-						while (last->GetSibling()) last = last->GetSibling();
-						last->m_pSibling = pItem;
+						if (pCurr == pItem) break;
+						pPrev = pCurr;
+						pCurr = pCurr->GetSibling();
 					}
 
-					pItem->m_pParent = pRightHand;
-					pItem->m_pSibling = nullptr;
-					if(pItem == pItem->FindFrame("Shovel"))pItem->SetPosition(0.05f, -0.05f, 1.f);
-					else pItem->SetPosition(0.05f, -0.05f, 0.1f);
-					m_pPlayer->UpdateTransform(nullptr);
+					if (pCurr == pItem)
+					{
+						if (pPrev) pPrev->m_pSibling = pItem->GetSibling();
+						else pRightHand->SetChild(pItem->GetSibling());
 
-					int newIndex = static_cast<int>(m_pPlayer->m_pHeldItems.size());
-					m_pPlayer->m_pHeldItems.push_back(pItem);
-
-					// 현재 선택된 슬롯만 visible
-					if (newIndex == m_pPlayer->m_nSelectedInventoryIndex)
+						pItem->m_pParent = nullptr;
+						pItem->m_pSibling = nullptr;
+						pItem->isFalling = true;
 						pItem->SetVisible(true);
-					else
-						pItem->SetVisible(false);
-					break; // 한 개만 처리
-				}
-				if (m_pPlayer->alreadyHeld) {
-					// 놓기
-					if (pPrev) pPrev->m_pSibling = pItem->GetSibling();
-					else pRightHand->SetChild(pItem->GetSibling());
-					pItem->m_pParent = nullptr;
-					pItem->m_pSibling = nullptr;
-					m_pPlayer->alreadyHeld = false;
-					pItem->isFalling = true;
 
-					m_pPlayer->RemoveHeldItem(pItem);
-					pItem->SetVisible(true);
-					break;
+						m_pPlayer->RemoveHeldItem(pItem);
+
+						// 아이콘 숨기기
+						auto it = m_textureMap.find("effect");
+						if (it != m_textureMap.end())
+						{
+							auto* pShader = dynamic_cast<CTextureToScreenShader*>(m_ppShaders[index]);
+							if (pShader) {
+								pShader->SetTexture(it->second);
+							}
+						}
+
+						break;
+					}
 				}
 			}
+
+			break;
 		}
+
 		break;
 		}
 		break;
@@ -803,7 +901,9 @@ void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera
 		m_ppOtherPlayers[i]->Render(pd3dCommandList, pCamera);
 	}
 
-	for (int i = 0; i < m_nShaders; i++) if (dynamic_cast<CTextureToScreenShader*>(m_ppShaders[i])->IsInventory[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
+	for (int i = 0; i < m_nShaders; i++) if (dynamic_cast<CTextureToScreenShader*>(m_ppShaders[i])->visible) { 
+		m_ppShaders[i]->Render(pd3dCommandList, pCamera);
+	}
 }
 
 // 아이템 생성 server(민상.ver AddItem)

@@ -49,7 +49,7 @@ public:
     CScene();
     ~CScene();
 
-	bool OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
+	virtual void OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	virtual void OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 
 	virtual void CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList);
@@ -75,6 +75,7 @@ public:
 	void ItemToHand(CGameObject* pItem);
 
 	CPlayer								*m_pPlayer = NULL;
+	std::unordered_map<std::string, CTexture*> m_textureMap;
 
 	std::vector<OtherPlayer*>				m_vPlayers;
 	int										m_nOtherPlayers = 0;
@@ -84,6 +85,9 @@ public:
 	CPlayer* GetPlayer() { return(m_pPlayer); }
  
 	ID3D12RootSignature						*m_pd3dGraphicsRootSignature = NULL;
+	ID3D12Device* Device = NULL;
+	ID3D12GraphicsCommandList* Commandlist = NULL;
+
 
 protected:
 	//ID3D12RootSignature					*m_pd3dGraphicsRootSignature = NULL;
