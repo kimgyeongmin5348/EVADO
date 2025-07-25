@@ -60,7 +60,7 @@ public:
 	// 아이템
 	int m_nSelectedInventoryIndex = 0;  // 기본값은 0번 (1번 슬롯)
 	std::vector<CGameObject*> m_pHeldItems;
-
+	bool bflashlight = false;
 	void RemoveHeldItem(CGameObject* pItem);
 public:
 	CPlayer();

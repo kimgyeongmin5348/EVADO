@@ -642,9 +642,45 @@ void CScene::CreateShaderResourceViews(ID3D12Device* pd3dDevice, CTexture* pText
 	for (int j = 0; j < nRootParameters; j++) pTexture->SetRootParameterIndex(j, nRootParameterStartIndex + j);
 }
 
-bool CScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+void CScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
-	return(false);
+	switch (nMessageID)
+	{
+	case WM_LBUTTONDOWN:
+	{
+		int index = m_pPlayer->m_nSelectedInventoryIndex;
+
+		// 손에 든 아이템 인덱스 유효성 검사
+		if (index < 0 || index >= 4) break;
+
+		CGameObject* pHeldItem = m_pPlayer->m_pHeldItems[index];
+		if (!pHeldItem) break;
+
+		char* frameName = pHeldItem->GetFrameName();
+
+		if (!strcmp(frameName, "FlashLight"))
+		{
+			m_pPlayer->bflashlight = !m_pPlayer->bflashlight;
+			BuildDefaultLightsAndMaterials(m_pPlayer->bflashlight);
+		}
+		else if (!strcmp(frameName, "Shovel"))
+		{
+			m_pPlayer->isSwing = true;
+
+			if (m_pPlayer->m_isMonsterHit)
+			{
+				m_pEffect->Activate(m_ppGameObjects[1]->GetPosition());
+
+				CSpider* pSpider = dynamic_cast<CSpider*>(m_ppHierarchicalGameObjects[0]);
+				if (pSpider)
+				{
+					pSpider->MonsterHP -= 25.0f;
+				}
+			}
+			break;
+		}
+	}
+	}
 }
 
 void CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
