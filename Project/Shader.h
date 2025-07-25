@@ -83,7 +83,7 @@ public:
 	int								m_nMeshes = 0;
 	CMesh							**m_ppMeshes = NULL;
 
-	bool visible = false;
+	bool visible = true;
 
 	CTexture* m_pTexture = NULL;
 

@@ -226,38 +226,59 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	if (pOtherPlayerModel) delete pOtherPlayerModel;
 
 	// 인벤토리 UI
-	m_nShaders = 4;
+	m_nShaders = 5;
 	m_ppShaders = new CShader * [m_nShaders];
+
+	CTexture* pTextureinven = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pTextureinven->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/effect.dds", RESOURCE_TEXTURE2D, 0);
+	CreateShaderResourceViews(pd3dDevice, pTextureinven, 0, 15);
+	m_textureMap["effect"] = pTextureinven;
+
+	CTexture* pTextureItem1 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pTextureItem1->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Shovel.dds", RESOURCE_TEXTURE2D, 0);
+	CreateShaderResourceViews(pd3dDevice, pTextureItem1, 0, 15);
+	m_textureMap["Shovel"] = pTextureItem1;
+
+	CTexture* pTextureItem2 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pTextureItem2->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/FlashLight.dds", RESOURCE_TEXTURE2D, 0);
+	CreateShaderResourceViews(pd3dDevice, pTextureItem2, 0, 15);
+	m_textureMap["FlashLight"] = pTextureItem2;
+
+	CTexture* pTextureItem3 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pTextureItem3->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Whistle.dds", RESOURCE_TEXTURE2D, 0);
+	CreateShaderResourceViews(pd3dDevice, pTextureItem3, 0, 15);
+	m_textureMap["Whistle"] = pTextureItem3;
 
 	CTextureToScreenShader* pTextureItem1Shader = new CTextureToScreenShader(1);
 	pTextureItem1Shader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-	CTexture* pTextureItem1 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	pTextureItem1->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/FlashLight_bg_ui.dds", RESOURCE_TEXTURE2D, 0);
-	CreateShaderResourceViews(pd3dDevice, pTextureItem1, 0, 15);
 	CScreenRectMeshTextured* pMesh = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, 0.02f, 0.225f * 0.5f, -0.65f, 0.4f * 0.5f);
 	pTextureItem1Shader->SetMesh(0, pMesh);
-	pTextureItem1Shader->SetTexture(pTextureItem1);
+	pTextureItem1Shader->SetTexture(pTextureinven);
 	m_ppShaders[0] = pTextureItem1Shader;
 
 	CTextureToScreenShader* pTextureItem2Shader = new CTextureToScreenShader(1);
 	pTextureItem2Shader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-	CTexture* pTextureItem2 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	pTextureItem2->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Shovel_bg_ui.dds", RESOURCE_TEXTURE2D, 0);
-	CreateShaderResourceViews(pd3dDevice, pTextureItem2, 0, 15);
-	CScreenRectMeshTextured* pMesh1 = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, 0.02f + 0.25f, 0.225f * 0.5f, -0.65f, 0.4f * 0.5f);
+	CScreenRectMeshTextured* pMesh1 = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, 0.02f + 0.125f, 0.225f * 0.5f, -0.65f, 0.4f * 0.5f);
 	pTextureItem2Shader->SetMesh(0, pMesh1);
-	pTextureItem2Shader->SetTexture(pTextureItem2);
+	pTextureItem2Shader->SetTexture(pTextureinven);
 	m_ppShaders[1] = pTextureItem2Shader;
 
 	CTextureToScreenShader* pTextureItem3Shader = new CTextureToScreenShader(1);
 	pTextureItem3Shader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-	CTexture* pTextureItem3 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	pTextureItem3->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Whistle_bg_ui.dds", RESOURCE_TEXTURE2D, 0);
-	CreateShaderResourceViews(pd3dDevice, pTextureItem3, 0, 15);
-	CScreenRectMeshTextured* pMesh2 = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, 0.02f + 0.02f + 0.25f, 0.225f * 0.5f, -0.65f, 0.4f * 0.5f);
+	CScreenRectMeshTextured* pMesh2 = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, 0.02f + 0.25f, 0.225f * 0.5f, -0.65f, 0.4f * 0.5f);
 	pTextureItem3Shader->SetMesh(0, pMesh2);
-	pTextureItem3Shader->SetTexture(pTextureItem3);
+	pTextureItem3Shader->SetTexture(pTextureinven);
 	m_ppShaders[2] = pTextureItem3Shader;
+
+	CTextureToScreenShader* pTextureItem4Shader = new CTextureToScreenShader(1);
+	pTextureItem4Shader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	CTexture* pTextureItem4 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pTextureItem4->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/effect.dds", RESOURCE_TEXTURE2D, 0);
+	CreateShaderResourceViews(pd3dDevice, pTextureItem4, 0, 15);
+	CScreenRectMeshTextured* pMesh3 = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, 0.02f + 0.375f, 0.225f * 0.5f, -0.65f, 0.4f * 0.5f);
+	pTextureItem4Shader->SetMesh(0, pMesh3);
+	pTextureItem4Shader->SetTexture(pTextureinven);
+	m_ppShaders[3] = pTextureItem4Shader;
 
 	CTextureToScreenShader* pInventoryShader = new CTextureToScreenShader(1);
 	pInventoryShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
@@ -267,8 +288,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	CScreenRectMeshTextured* pInventoryMesh = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, -0.5f + 0.5f, 1.0f * 0.5f, -0.6f, 0.5f * 0.5f);
 	pInventoryShader->SetMesh(0, pInventoryMesh);
 	pInventoryShader->SetTexture(pTexture);
-	pInventoryShader->visible = true;
-	m_ppShaders[3] = pInventoryShader;
+	m_ppShaders[4] = pInventoryShader;
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
@@ -695,9 +715,15 @@ void CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 				pItem->SetVisible(newIndex == m_pPlayer->m_nSelectedInventoryIndex);
 
 				// 아이콘 표시
-				if (pItem == pItem->FindFrame("FlashLight")) dynamic_cast<CTextureToScreenShader*>(m_ppShaders[0])->visible = true;
-				if (pItem == pItem->FindFrame("Shovel")) dynamic_cast<CTextureToScreenShader*>(m_ppShaders[1])->visible = true;
-				if (pItem == pItem->FindFrame("Whistle")) dynamic_cast<CTextureToScreenShader*>(m_ppShaders[2])->visible = true;
+				std::string frameName = pItem->m_pstrFrameName;
+				auto it = m_textureMap.find(frameName);
+				if (it != m_textureMap.end())
+				{
+					auto* pShader = dynamic_cast<CTextureToScreenShader*>(m_ppShaders[newIndex]);
+					if (pShader) {
+						pShader->SetTexture(it->second);
+					}
+				}
 
 				bPickedUp = true;
 				break; // 한 개만 주우면 종료
@@ -738,9 +764,14 @@ void CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 						m_pPlayer->RemoveHeldItem(pItem);
 
 						// 아이콘 숨기기
-						if (pItem == pItem->FindFrame("FlashLight")) dynamic_cast<CTextureToScreenShader*>(m_ppShaders[0])->visible = false;
-						if (pItem == pItem->FindFrame("Shovel")) dynamic_cast<CTextureToScreenShader*>(m_ppShaders[1])->visible = false;
-						if (pItem == pItem->FindFrame("Whistle")) dynamic_cast<CTextureToScreenShader*>(m_ppShaders[2])->visible = false;
+						auto it = m_textureMap.find("effect");
+						if (it != m_textureMap.end())
+						{
+							auto* pShader = dynamic_cast<CTextureToScreenShader*>(m_ppShaders[index]);
+							if (pShader) {
+								pShader->SetTexture(it->second);
+							}
+						}
 
 						break;
 					}
@@ -835,11 +866,6 @@ void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera
 	}
 
 	for (int i = 0; i < m_nShaders; i++) if (dynamic_cast<CTextureToScreenShader*>(m_ppShaders[i])->visible) { 
-		//for (int j = 0; j < m_pPlayer->m_pHeldItems.size(); ++j) {
-		//CScreenRectMeshTextured* pMesh = new CScreenRectMeshTextured(Device, Commandlist, -0.5f + 0.2f * j, 0.225f * 0.5f, -0.65f, 0.4f * 0.5f);
-		//dynamic_cast<CTextureToScreenShader*>(m_ppShaders[j])->SetMesh(0, pMesh);
-		//}
-
 		m_ppShaders[i]->Render(pd3dCommandList, pCamera);
 	}
 }

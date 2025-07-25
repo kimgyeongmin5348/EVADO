@@ -75,6 +75,7 @@ public:
 	void ItemToHand(CGameObject* pItem);
 
 	CPlayer								*m_pPlayer = NULL;
+	std::unordered_map<std::string, CTexture*> m_textureMap;
 
 	std::vector<OtherPlayer*>				m_vPlayers;
 	int										m_nOtherPlayers = 0;

@@ -345,11 +345,11 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 				exit(0);
 				break;
 			case VK_RETURN:
-				m_ppScenes[m_nScene]->ReleaseObjects();
-				m_nCurrentScene = 1;
-				BuildObjects();
+				//m_ppScenes[m_nScene]->ReleaseObjects();
+				//m_nCurrentScene = 1;
+				//BuildObjects();
 				//LoadingDoneToServer();
-				isStartScene = false;
+				//isStartScene = false;
 				break;
 			case VK_F1:
 			case VK_F2:
@@ -841,6 +841,7 @@ void CGameFramework::MoveToNextScene()
 	m_ppScenes[m_nScene]->ReleaseObjects();
 	m_nCurrentScene = 1;
 	BuildObjects();
+	LoadingDoneToServer();
 	isStartScene = false;
 }
 
