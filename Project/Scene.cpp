@@ -152,6 +152,9 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	BuildDefaultLightsAndMaterials(false);
 
+	Device = pd3dDevice;
+	Commandlist = pd3dCommandList;
+
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
 	m_pMap = new Map(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
@@ -264,6 +267,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	CScreenRectMeshTextured* pInventoryMesh = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, -0.5f + 0.5f, 1.0f * 0.5f, -0.6f, 0.5f * 0.5f);
 	pInventoryShader->SetMesh(0, pInventoryMesh);
 	pInventoryShader->SetTexture(pTexture);
+	pInventoryShader->visible = true;
 	m_ppShaders[3] = pInventoryShader;
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -647,78 +651,105 @@ void CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 		}
 			break;
 		case 'F':
-		case'f':
+		case 'f':
 		{
+			bool bPickedUp = false;
+
+			// 1단계: 먼저 주울 수 있는 아이템 탐색
 			for (int i = 0; i < m_nGameObjects; ++i)
 			{
 				CGameObject* pItem = m_ppGameObjects[i];
 				if (!pItem) continue;
 
-				// 오른손 프레임에 붙이기
-				CGameObject* pRightHand = m_pPlayer->FindFrame("hand_r");
-				if (!pRightHand) return;
-
-				// 이미 붙어있는지 확인
-				CGameObject* pCurr = pRightHand->GetChild();
-				CGameObject* pPrev = nullptr;
-
-				while (pCurr)
-				{
-					if (pCurr == pItem)
-					{
-						m_pPlayer->alreadyHeld = true;
-						break;
-					}
-					pPrev = pCurr;
-					pCurr = pCurr->GetSibling();
-				}
-
 				// 플레이어와 아이템 간 거리 계산
 				XMFLOAT3 playerPos = m_pPlayer->GetPosition();
 				XMFLOAT3 itemPos = pItem->GetPosition();
 				float distance = Vector3::Length(Vector3::Subtract(playerPos, itemPos));
+				if (distance > 0.5f) continue;
 
-				if (!m_pPlayer->alreadyHeld && distance <= 0.5f)
+				// 이미 손에 들고 있는 경우는 스킵
+				if (pItem->GetParent() == m_pPlayer->FindFrame("hand_r")) continue;
+
+				// 들기
+				CGameObject* pRightHand = m_pPlayer->FindFrame("hand_r");
+				if (!pRightHand) return;
+
+				if (!pRightHand->GetChild()) pRightHand->SetChild(pItem);
+				else
 				{
-					if (!pRightHand->GetChild()) pRightHand->SetChild(pItem);
-					else
+					CGameObject* last = pRightHand->GetChild();
+					while (last->GetSibling()) last = last->GetSibling();
+					last->m_pSibling = pItem;
+				}
+				pItem->m_pParent = pRightHand;
+				pItem->m_pSibling = nullptr;
+
+				// 손 위치에 맞게 조정
+				if (pItem == pItem->FindFrame("Shovel")) pItem->SetPosition(0.05f, -0.05f, 1.f);
+				else pItem->SetPosition(0.05f, -0.05f, 0.1f);
+
+				m_pPlayer->UpdateTransform(nullptr);
+
+				int newIndex = static_cast<int>(m_pPlayer->m_pHeldItems.size());
+				m_pPlayer->m_pHeldItems.push_back(pItem);
+				pItem->SetVisible(newIndex == m_pPlayer->m_nSelectedInventoryIndex);
+
+				// 아이콘 표시
+				if (pItem == pItem->FindFrame("FlashLight")) dynamic_cast<CTextureToScreenShader*>(m_ppShaders[0])->visible = true;
+				if (pItem == pItem->FindFrame("Shovel")) dynamic_cast<CTextureToScreenShader*>(m_ppShaders[1])->visible = true;
+				if (pItem == pItem->FindFrame("Whistle")) dynamic_cast<CTextureToScreenShader*>(m_ppShaders[2])->visible = true;
+
+				bPickedUp = true;
+				break; // 한 개만 주우면 종료
+			}
+
+			// 2단계: 못 주웠으면 → 선택된 인덱스의 아이템만 내려놓기
+			if (!bPickedUp) {
+				int index = m_pPlayer->m_nSelectedInventoryIndex;
+				if (index >= 0 && index < m_pPlayer->m_pHeldItems.size())
+				{
+					CGameObject* pItem = m_pPlayer->m_pHeldItems[index];
+					if (!pItem) return;
+
+					CGameObject* pRightHand = m_pPlayer->FindFrame("hand_r");
+					if (!pRightHand) return;
+
+					// 형제 연결 재조정
+					CGameObject* pCurr = pRightHand->GetChild();
+					CGameObject* pPrev = nullptr;
+
+					while (pCurr)
 					{
-						CGameObject* last = pRightHand->GetChild();
-						while (last->GetSibling()) last = last->GetSibling();
-						last->m_pSibling = pItem;
+						if (pCurr == pItem) break;
+						pPrev = pCurr;
+						pCurr = pCurr->GetSibling();
 					}
 
-					pItem->m_pParent = pRightHand;
-					pItem->m_pSibling = nullptr;
-					if(pItem == pItem->FindFrame("Shovel"))pItem->SetPosition(0.05f, -0.05f, 1.f);
-					else pItem->SetPosition(0.05f, -0.05f, 0.1f);
-					m_pPlayer->UpdateTransform(nullptr);
+					if (pCurr == pItem)
+					{
+						if (pPrev) pPrev->m_pSibling = pItem->GetSibling();
+						else pRightHand->SetChild(pItem->GetSibling());
 
-					int newIndex = static_cast<int>(m_pPlayer->m_pHeldItems.size());
-					m_pPlayer->m_pHeldItems.push_back(pItem);
-
-					// 현재 선택된 슬롯만 visible
-					if (newIndex == m_pPlayer->m_nSelectedInventoryIndex)
+						pItem->m_pParent = nullptr;
+						pItem->m_pSibling = nullptr;
+						pItem->isFalling = true;
 						pItem->SetVisible(true);
-					else
-						pItem->SetVisible(false);
-					break; // 한 개만 처리
-				}
-				if (m_pPlayer->alreadyHeld) {
-					// 놓기
-					if (pPrev) pPrev->m_pSibling = pItem->GetSibling();
-					else pRightHand->SetChild(pItem->GetSibling());
-					pItem->m_pParent = nullptr;
-					pItem->m_pSibling = nullptr;
-					m_pPlayer->alreadyHeld = false;
-					pItem->isFalling = true;
 
-					m_pPlayer->RemoveHeldItem(pItem);
-					pItem->SetVisible(true);
-					break;
+						m_pPlayer->RemoveHeldItem(pItem);
+
+						// 아이콘 숨기기
+						if (pItem == pItem->FindFrame("FlashLight")) dynamic_cast<CTextureToScreenShader*>(m_ppShaders[0])->visible = false;
+						if (pItem == pItem->FindFrame("Shovel")) dynamic_cast<CTextureToScreenShader*>(m_ppShaders[1])->visible = false;
+						if (pItem == pItem->FindFrame("Whistle")) dynamic_cast<CTextureToScreenShader*>(m_ppShaders[2])->visible = false;
+
+						break;
+					}
 				}
 			}
+
+			break;
 		}
+
 		break;
 		}
 		break;
@@ -803,7 +834,14 @@ void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera
 		m_ppOtherPlayers[i]->Render(pd3dCommandList, pCamera);
 	}
 
-	for (int i = 0; i < m_nShaders; i++) if (dynamic_cast<CTextureToScreenShader*>(m_ppShaders[i])->IsInventory[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
+	for (int i = 0; i < m_nShaders; i++) if (dynamic_cast<CTextureToScreenShader*>(m_ppShaders[i])->visible) { 
+		//for (int j = 0; j < m_pPlayer->m_pHeldItems.size(); ++j) {
+		//CScreenRectMeshTextured* pMesh = new CScreenRectMeshTextured(Device, Commandlist, -0.5f + 0.2f * j, 0.225f * 0.5f, -0.65f, 0.4f * 0.5f);
+		//dynamic_cast<CTextureToScreenShader*>(m_ppShaders[j])->SetMesh(0, pMesh);
+		//}
+
+		m_ppShaders[i]->Render(pd3dCommandList, pCamera);
+	}
 }
 
 // 아이템 생성 server(민상.ver AddItem)

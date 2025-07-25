@@ -84,6 +84,9 @@ public:
 	CPlayer* GetPlayer() { return(m_pPlayer); }
  
 	ID3D12RootSignature						*m_pd3dGraphicsRootSignature = NULL;
+	ID3D12Device* Device = NULL;
+	ID3D12GraphicsCommandList* Commandlist = NULL;
+
 
 protected:
 	//ID3D12RootSignature					*m_pd3dGraphicsRootSignature = NULL;
