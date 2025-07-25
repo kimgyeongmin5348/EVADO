@@ -743,7 +743,7 @@ void CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 				// 손 위치에 맞게 조정
 				if (pItem == pItem->FindFrame("Shovel")) pItem->SetPosition(0.05f, -0.05f, 1.f);
 				else pItem->SetPosition(0.05f, -0.05f, 0.1f);
-
+				dynamic_cast<CTerrainPlayer*>(m_pPlayer)->debt += 800;
 				m_pPlayer->UpdateTransform(nullptr);
 
 				int newIndex = static_cast<int>(m_pPlayer->m_pHeldItems.size());

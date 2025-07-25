@@ -375,6 +375,8 @@ CTerrainPlayer::CTerrainPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandLi
 	SetPlayerUpdatedContext(pContext);
 	SetCameraUpdatedContext(pContext);
 
+	m_pText = new CText(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, L"debt : ", -0.9f, 0.9f);
+
 	CHeightMapTerrain *pTerrain = (CHeightMapTerrain *)pContext;
 	SetPosition(XMFLOAT3(3, 0, 20));
 	//SetScale(XMFLOAT3(10.0f, 10.0f, 10.0f));
@@ -528,6 +530,12 @@ void CTerrainPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVeloci
 }
 
 
+void CTerrainPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	if (m_pText) m_pText->Render(pd3dCommandList, pCamera);
+	CPlayer::Render(pd3dCommandList, pCamera);
+}
+
 void CTerrainPlayer::Update(float fTimeElapsed)
 {
 	CPlayer::Update(fTimeElapsed);
@@ -611,7 +619,7 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 		}
 	}
 
-
+	if (m_pText) { m_pText->UpdateText(std::to_wstring(debt), L"debt : "); }
 	// server
 
 	// position, look, right ------------------------------------

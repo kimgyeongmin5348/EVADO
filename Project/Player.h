@@ -10,6 +10,7 @@
 #include "Object.h"
 #include "Camera.h"
 #include "Network.h"
+#include "CText.h"
 
 struct BoundingCylinder
 {
@@ -140,6 +141,8 @@ public:
 	CTerrainPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, void *pContext=NULL);
 	virtual ~CTerrainPlayer();
 
+	CText* m_pText = nullptr;
+
 	//server
 	AnimationState m_currentAnim = AnimationState::IDLE;
 
@@ -150,6 +153,7 @@ public:
 	virtual void OnCameraUpdateCallback(float fTimeElapsed);
 
 	virtual void Move(ULONG nDirection, float fDistance, bool bVelocity = false);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
 
 	virtual void Update(float fTimeElapsed);
 
