@@ -742,6 +742,9 @@ void CGameFramework::ReleaseObjects()
 void CGameFramework::ProcessInput()
 {
 	static UCHAR pKeysBuffer[256];
+	
+	static bool bPrevSpace = false;
+
 	bool bProcessedByScene = false;
 	if (GetKeyboardState(pKeysBuffer) && m_pScene) bProcessedByScene = m_pScene->ProcessInput(pKeysBuffer);
 	if (!bProcessedByScene)
@@ -766,17 +769,59 @@ void CGameFramework::ProcessInput()
 		if (pKeysBuffer[VK_SHIFT] & 0xF0) dwDirection |= DIR_DOWN;
 		if (pKeysBuffer[VK_CONTROL] & 0xF0) dwDirection |= DIR_CROUCH;
 
-		if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
+		bool bCurrSpace = (pKeysBuffer[VK_SPACE] & 0xF0);      // jump
+
+		CTerrainPlayer* terrainPlayer = dynamic_cast<CTerrainPlayer*>(m_pPlayer);
+		if (!terrainPlayer) return;
+		AnimationState currentState = terrainPlayer->m_currentAnim;
+
+		// 점프 중이 아닐 때만 상태 전환
+		if (currentState != AnimationState::SWING && currentState != AnimationState::JUMP)
 		{
-			if (cxDelta || cyDelta)
+			bool isMoving = dwDirection & (DIR_FORWARD | DIR_BACKWARD | DIR_LEFT | DIR_RIGHT);
+			bool isCrouching = dwDirection & DIR_CROUCH;
+			bool isRunning = dwDirection & DIR_DOWN;
+
+			if (bCurrSpace && !bPrevSpace)
 			{
-				if (pKeysBuffer[VK_RBUTTON] & 0xF0)
-					m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
-				else
-					m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
+				terrainPlayer->m_currentAnim = AnimationState::JUMP;
 			}
-			if (dwDirection) m_pPlayer->Move(dwDirection, 5.0f, true);
+			
+			else if (isCrouching && isMoving)
+			{
+				terrainPlayer->m_currentAnim = AnimationState::CROUCH_WALK;
+				terrainPlayer->Move(dwDirection, 2.0f, true);
+			}
+			else if (isCrouching)
+			{
+				terrainPlayer->m_currentAnim = AnimationState::CROUCH;
+			}
+			else if (isRunning && isMoving)
+			{
+				terrainPlayer->m_currentAnim = AnimationState::RUN;
+				terrainPlayer->Move(dwDirection, 2.0f, true);
+			}
+			else if (isMoving)
+			{
+				terrainPlayer->m_currentAnim = AnimationState::WALK;
+				terrainPlayer->Move(dwDirection, 2.0f, true);
+			}
+			else
+			{
+				terrainPlayer->m_currentAnim = AnimationState::IDLE;
+			}
 		}
+
+		bPrevSpace = bCurrSpace;
+
+		if (cxDelta || cyDelta)
+		{
+			if (pKeysBuffer[VK_RBUTTON] & 0xF0)
+				m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
+			else
+				m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
+		}
+
 	}
 	m_pPlayer->Update(m_GameTimer.GetTimeElapsed());
 }
@@ -875,7 +920,7 @@ void CGameFramework::FrameAdvance()
 
 	m_pd3dCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, TRUE, &d3dDsvCPUDescriptorHandle);
 
-	ProcessInput();
+	if(!isStartScene) ProcessInput();
 
 	AnimateObjects();
 

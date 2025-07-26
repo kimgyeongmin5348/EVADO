@@ -356,6 +356,8 @@ CTerrainPlayer::CTerrainPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandLi
 	m_pSkinnedAnimationController->SetTrackEnable(4, false); 
 	m_pSkinnedAnimationController->SetTrackEnable(5, false); 
 	m_pSkinnedAnimationController->SetTrackEnable(6, false); 
+	m_pSkinnedAnimationController->SetTrackType(3, 0);
+	m_pSkinnedAnimationController->SetTrackType(4, 0);
 
 	m_pSkinnedAnimationController->SetCallbackKeys(1, 2);
 #ifdef _WITH_SOUND_RESOURCE
@@ -482,49 +484,25 @@ void CTerrainPlayer::OnCameraUpdateCallback(float fTimeElapsed)
 
 void CTerrainPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 {
-	if (dwDirection & DIR_DOWN)
-	{
-		fDistance *= 1.5f;
-	}
+	if (dwDirection & DIR_DOWN) fDistance *= 2.0f;
 
-	if (!isJump) {
-		if ((dwDirection & DIR_DOWN) && (dwDirection & (DIR_FORWARD | DIR_BACKWARD | DIR_LEFT | DIR_RIGHT)))
-		{
-			m_pSkinnedAnimationController->SetTrackEnable(0, false);
-			m_pSkinnedAnimationController->SetTrackEnable(1, false);
-			m_pSkinnedAnimationController->SetTrackEnable(2, true);
-			m_pSkinnedAnimationController->SetTrackEnable(3, false);
-			m_pSkinnedAnimationController->SetTrackEnable(4, false);
-			m_pSkinnedAnimationController->SetTrackEnable(5, false);
-			m_pSkinnedAnimationController->SetTrackEnable(6, false);
-		}
-		else if (dwDirection & (DIR_FORWARD | DIR_BACKWARD | DIR_LEFT | DIR_RIGHT))
-		{
-			m_pSkinnedAnimationController->SetTrackEnable(0, false);
-			m_pSkinnedAnimationController->SetTrackEnable(1, true);
-			m_pSkinnedAnimationController->SetTrackEnable(2, false);
-			m_pSkinnedAnimationController->SetTrackEnable(3, false);
-			m_pSkinnedAnimationController->SetTrackEnable(4, false);
-			m_pSkinnedAnimationController->SetTrackEnable(5, false);
-			m_pSkinnedAnimationController->SetTrackEnable(6, false);
-		}
-			
-		if ((dwDirection & DIR_CROUCH) && (dwDirection & (DIR_FORWARD | DIR_BACKWARD | DIR_LEFT | DIR_RIGHT)))
-		{
-			isCrouch = false;
-			m_pSkinnedAnimationController->SetTrackEnable(0, false);
-			m_pSkinnedAnimationController->SetTrackEnable(1, false);
-			m_pSkinnedAnimationController->SetTrackEnable(2, false);
-			m_pSkinnedAnimationController->SetTrackEnable(3, false);
-			m_pSkinnedAnimationController->SetTrackEnable(4, false);
-			m_pSkinnedAnimationController->SetTrackEnable(5, false);
-			m_pSkinnedAnimationController->SetTrackEnable(6, true);
-		}
-		else if (dwDirection & DIR_CROUCH) isCrouch = true;
-		else isCrouch = false;
-	}
+	bool isMoving = dwDirection & (DIR_FORWARD | DIR_BACKWARD | DIR_LEFT | DIR_RIGHT);
+	bool isCrouching = dwDirection & DIR_CROUCH;
+	bool isRunning = dwDirection & DIR_DOWN;
+	bool isJumping = dwDirection & DIR_UP;
 
-	if (dwDirection & DIR_UP) isJump = true;
+	if (isJumping)
+		m_currentAnim = AnimationState::JUMP;
+	else if (isCrouching && isMoving)
+		m_currentAnim = AnimationState::CROUCH_WALK;
+	else if (isCrouching)
+		m_currentAnim = AnimationState::CROUCH;
+	else if (isRunning && isMoving)
+		m_currentAnim = AnimationState::RUN;
+	else if (isMoving)
+		m_currentAnim = AnimationState::WALK;
+	else
+		m_currentAnim = AnimationState::IDLE;
 
 	CPlayer::Move(dwDirection, fDistance, bUpdateVelocity);
 }
@@ -542,80 +520,59 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 
 	if (m_pSkinnedAnimationController)
 	{
-		float fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
-
-		if (isJump) {
-			m_pSkinnedAnimationController->SetTrackEnable(0, false);
-			m_pSkinnedAnimationController->SetTrackEnable(1, false);
-			m_pSkinnedAnimationController->SetTrackEnable(2, false);
-			m_pSkinnedAnimationController->SetTrackEnable(3, true);
-			m_pSkinnedAnimationController->SetTrackEnable(4, false);
-			m_pSkinnedAnimationController->SetTrackEnable(5, false);
-			m_pSkinnedAnimationController->SetTrackEnable(6, false);
-
-			m_pSkinnedAnimationController->SetTrackSpeed(3, 2.0f);
-
-			float currentPos = m_pSkinnedAnimationController->m_pAnimationTracks[3].m_fPosition;
-			int animSetIndex = m_pSkinnedAnimationController->m_pAnimationTracks[3].m_nAnimationSet;
-			float length = m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[animSetIndex]->m_fLength;
-
-			if (currentPos >= 1.5)
-			{
-				isJump = false;
-				m_pSkinnedAnimationController->SetTrackEnable(3, false); // ? ë‹ˆë©”ì´???ë‚¬?¼ë‹ˆê¹?êº?
-				m_pSkinnedAnimationController->SetTrackPosition(3, 0.0f); // ?¤ìŒ?????¤í–‰?????ˆê²Œ ì´ˆê¸°??
-			}
-
-		}
-		else if (isSwing) {
-			m_pSkinnedAnimationController->SetTrackEnable(0, false);
-			m_pSkinnedAnimationController->SetTrackEnable(1, false);
-			m_pSkinnedAnimationController->SetTrackEnable(2, false);
-			m_pSkinnedAnimationController->SetTrackEnable(3, false);
-			m_pSkinnedAnimationController->SetTrackEnable(4, true);
-			m_pSkinnedAnimationController->SetTrackEnable(5, false);
-			m_pSkinnedAnimationController->SetTrackEnable(6, false);
-
-			m_pSkinnedAnimationController->SetTrackSpeed(4, 2.0f);
-
-			float currentPos = m_pSkinnedAnimationController->m_pAnimationTracks[4].m_fPosition;
-			int animSetIndex = m_pSkinnedAnimationController->m_pAnimationTracks[4].m_nAnimationSet;
-			float length = m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[animSetIndex]->m_fLength;
-
-			if (currentPos >= 1.5)
-			{
-				isSwing = false;
-				m_pSkinnedAnimationController->SetTrackEnable(4, false);
-				m_pSkinnedAnimationController->SetTrackPosition(4, 0.0f);
-			}
-
-		}
-		else if (isCrouch) {
-			m_pSkinnedAnimationController->SetTrackEnable(0, false);
-			m_pSkinnedAnimationController->SetTrackEnable(1, false);
-			m_pSkinnedAnimationController->SetTrackEnable(2, false);
-			m_pSkinnedAnimationController->SetTrackEnable(3, false);
-			m_pSkinnedAnimationController->SetTrackEnable(4, false);
-			m_pSkinnedAnimationController->SetTrackEnable(5, true);
-			m_pSkinnedAnimationController->SetTrackEnable(6, false);
-
-		}
-		else if (::IsZero(fLength))
+		if (m_animBlend.active)
 		{
-			m_pSkinnedAnimationController->SetTrackEnable(0, true);
-			m_pSkinnedAnimationController->SetTrackEnable(1, false);
-			m_pSkinnedAnimationController->SetTrackEnable(2, false);
-			m_pSkinnedAnimationController->SetTrackEnable(3, false);
-			m_pSkinnedAnimationController->SetTrackEnable(4, false);
-			m_pSkinnedAnimationController->SetTrackEnable(5, false);
-			m_pSkinnedAnimationController->SetTrackEnable(6, false);
+			m_animBlend.elapsed += fTimeElapsed;
+			float t = m_animBlend.elapsed / m_animBlend.duration;
+			if (t >= 1.0f)
+			{
+				t = 1.0f;
+				m_animBlend.active = false;
+				for (int i = 0; i < 7; ++i)
+					m_pSkinnedAnimationController->SetTrackEnable(i, i == m_animBlend.to);
 
-			m_pSkinnedAnimationController->SetTrackPosition(1, 0.0f);
-			m_pSkinnedAnimationController->SetTrackPosition(2, 0.0f);
-			m_pSkinnedAnimationController->SetTrackPosition(3, 0.0f);
-			m_pSkinnedAnimationController->SetTrackPosition(4, 0.0f);
-			m_pSkinnedAnimationController->SetTrackPosition(5, 0.0f);
-			m_pSkinnedAnimationController->SetTrackPosition(6, 0.0f);
+				m_pSkinnedAnimationController->SetTrackWeight(m_animBlend.to, 1.0f);
+				m_pSkinnedAnimationController->SetTrackWeight(m_animBlend.from, 0.0f);
+			}
+			else
+			{
+				m_pSkinnedAnimationController->SetTrackWeight(m_animBlend.from, 1.0f - t);
+				m_pSkinnedAnimationController->SetTrackWeight(m_animBlend.to, t);
+			}
+		}
+
+		switch (m_currentAnim)
+		{
+		case AnimationState::JUMP:
+			PlayAnimationTrack(3, 2.0f);
+			if (IsAnimationFinished(3)) {
+				m_pSkinnedAnimationController->SetTrackPosition(3, 0.0f);
+				m_currentAnim = AnimationState::IDLE;
+			}
+			break;
+		case AnimationState::SWING:
+			PlayAnimationTrack(4, 2.0f);
+			if (IsAnimationFinished(4)) {
+				m_pSkinnedAnimationController->SetTrackPosition(4, 0.0f);
+				m_currentAnim = AnimationState::IDLE;
+			}
+			break;
+		case AnimationState::CROUCH:
+			PlayAnimationTrack(5);
+			break;
+		case AnimationState::CROUCH_WALK:
+			PlayAnimationTrack(6);
+			break;
+		case AnimationState::RUN:
+			PlayAnimationTrack(2);
+			break;
+		case AnimationState::WALK:
+			PlayAnimationTrack(1);
+			break;
+		case AnimationState::IDLE:
+		default:
+			PlayAnimationTrack(0);
+			break;
 		}
 	}
 
@@ -641,17 +598,7 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 		fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x +
 			m_xmf3Velocity.z * m_xmf3Velocity.z);
 
-		uint8_t currentAnimState = static_cast<uint8_t>(AnimationState::IDLE);
-		if (isJump)
-			currentAnimState = static_cast<uint8_t>(AnimationState::JUMP); // 3
-		else if (isSwing)
-			currentAnimState = static_cast<uint8_t>(AnimationState::SWING); // 4
-		else if (isCrouch)
-			currentAnimState = static_cast<uint8_t>(AnimationState::CROUCH); //5
-		else if (::IsZero(fLength))
-			currentAnimState = static_cast<uint8_t>(AnimationState::IDLE); //0
-		else
-			currentAnimState = static_cast<uint8_t>(AnimationState::WALK); //1
+		uint8_t currentAnimState = static_cast<uint8_t>(m_currentAnim);
 
 		static uint8_t prevAnimState = currentAnimState;
 		// -----------------------------------------------------------
@@ -671,3 +618,50 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 	}
 }
 
+void CTerrainPlayer::PlayAnimationTrack(int trackIndex, float speed)
+{
+	if (m_currentTrack == trackIndex) return;
+
+	StartAnimationBlend(m_currentTrack, trackIndex, 0.3f);
+	m_pSkinnedAnimationController->SetTrackSpeed(trackIndex, speed);
+
+	m_currentTrack = trackIndex;
+}
+
+bool CTerrainPlayer::IsAnimationFinished(int trackIndex)
+{
+	float current = m_pSkinnedAnimationController->m_pAnimationTracks[trackIndex].m_fPosition;
+	float length = m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[trackIndex]->m_fLength;
+	return current >= length;
+}
+
+void CTerrainPlayer::StartAnimationBlend(int fromTrack, int toTrack, float blendTime)
+{
+	m_animBlend.from = fromTrack;
+	m_animBlend.to = toTrack;
+	m_animBlend.duration = blendTime;
+	m_animBlend.elapsed = 0.0f;
+	m_animBlend.active = true;
+
+	for (int i = 0; i < 7; ++i)
+		m_pSkinnedAnimationController->SetTrackEnable(i, i == fromTrack || i == toTrack);
+
+	m_pSkinnedAnimationController->SetTrackWeight(fromTrack, 1.0f);
+	m_pSkinnedAnimationController->SetTrackWeight(toTrack, 0.0f);
+}
+
+bool CTerrainPlayer::IsShovel()
+{
+	CGameObject* pHand = FindFrame("hand_r");
+	if (!pHand) return false;
+
+	CGameObject* pHeld = pHand->GetChild();
+	while (pHeld)
+	{
+		if (strcmp(pHeld->GetFrameName(), "Shovel") == 0)
+			return true;
+
+		pHeld = pHeld->GetSibling();
+	}
+	return false;
+}
