@@ -340,13 +340,6 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			case VK_ESCAPE:
 				exit(0);
 				break;
-			case VK_RETURN:
-				//m_ppScenes[m_nScene]->ReleaseObjects();
-				//m_nCurrentScene = 1;
-				//BuildObjects();
-				//LoadingDoneToServer();
-				//isStartScene = false;
-				break;
 			case VK_F1:
 			case VK_F2:
 			case VK_F3:
@@ -355,58 +348,6 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			case VK_F9:
 				ChangeSwapChainState();
 				break;
-			//case '1':
-			//case '2':
-			//case '3':
-			//{
-			//	int itemIndex = wParam - '0';
-			//	int shaderIndex = wParam - '1';
-			//	if (itemIndex < m_pScene->m_nHierarchicalGameObjects) {
-			//		ItemToHand(itemIndex);
-
-
-			//		CGameObject* pItem = m_pScene->m_ppHierarchicalGameObjects[itemIndex];
-			//		SendItemMove(itemIndex, pItem->GetPosition());
-			//		cout << "변경된 아이템 좌표 전송 완료" << endl;
-
-
-			//		m_pPlayer->items[itemIndex] = !m_pPlayer->items[itemIndex];
-			//		dynamic_cast<CTextureToScreenShader*>(m_pScene->m_ppShaders[shaderIndex])->IsInventory[shaderIndex]
-			//			= !dynamic_cast<CTextureToScreenShader*>(m_pScene->m_ppShaders[shaderIndex])->IsInventory[shaderIndex];
-			//	}
-			//	break;
-			//}
-
-			/*case 'F':
-			case'f':
-			{*/
-				//XMFLOAT3 playerPos = m_pPlayer->GetPosition();
-				//long long nearestItemID = FindNearestItemInRange(Recognized_Range, playerPos);
-				//if (nearestItemID != -1) {
-				//	Item* pItem = nullptr;
-				//	{
-				//		std::lock_guard<std::mutex> lock(g_item_mutex);
-				//		auto it = g_items.find(nearestItemID);
-				//		if (it != g_items.end())
-				//			pItem = it->second;
-				//	}
-				//	if (pItem) {
-				//		if (!pItem->IsHeld()) {
-				//			// 들기
-				//			ItemToHand(pItem);
-				//			pItem->SetHeld(true);
-				//			std::cout << "아이템을 집었습니다." << std::endl;
-				//		}
-				//		else {
-				//			// 떨어뜨리기
-				//			ItemDropFromHand(pItem);
-				//			pItem->SetHeld(false);
-				//			std::cout << "아이템을 떨어뜨렸습니다." << std::endl;
-				//		}
-				//	}
-				//}
-				//break;
-			//}
 			}
 			break;
 		default:
@@ -581,59 +522,59 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 // -------------------------------------------------------------------------------------------
 
 
-void CGameFramework::ItemToHand(int objectIndex)
-{
-	CGameObject* pItem = m_pScene->m_ppHierarchicalGameObjects[objectIndex];
-	CGameObject* pRightHand = m_pPlayer->FindFrame("hand_r");
-
-	// 이미 붙어있나 확인
-	CGameObject* pCurr = pRightHand->GetChild();
-	CGameObject* pPrev = nullptr;
-	bool alreadyHeld = false;
-
-	while (pCurr) {
-		if (pCurr == pItem) {
-			alreadyHeld = true;
-			break;
-		}
-		pPrev = pCurr;
-		pCurr = pCurr->GetSibling();
-	}
-
-	if (!alreadyHeld) {
-		// 들기
-		if (pRightHand->GetChild() == nullptr) {
-			pRightHand->SetChild(pItem);
-		}
-		else {
-			CGameObject* last = pRightHand->GetChild();
-			while (last->GetSibling()) last = last->GetSibling();
-			last->m_pSibling = pItem;
-		}
-		pItem->m_pParent = pRightHand;
-		pItem->m_pSibling = nullptr;
-
-		if (objectIndex == 2) {
-			pItem->SetPosition(0.05f, -0.05f, 1.f); 
-		}
-		else { 
-			pItem->SetPosition(0.05f, -0.05f, 0.1f); 
-		}
-
-		m_pPlayer->UpdateTransform(nullptr);
-	}
-	else {
-		// 놓기
-		if (pPrev) {
-			pPrev->m_pSibling = pItem->GetSibling();
-		}
-		else {
-			pRightHand->SetChild(pItem->GetSibling());
-		}
-		pItem->m_pParent = nullptr;
-		pItem->m_pSibling = nullptr;
-	}
-}
+//void CGameFramework::ItemToHand(int objectIndex)
+//{
+//	CGameObject* pItem = m_pScene->m_ppHierarchicalGameObjects[objectIndex];
+//	CGameObject* pRightHand = m_pPlayer->FindFrame("hand_r");
+//
+//	// 이미 붙어있나 확인
+//	CGameObject* pCurr = pRightHand->GetChild();
+//	CGameObject* pPrev = nullptr;
+//	bool alreadyHeld = false;
+//
+//	while (pCurr) {
+//		if (pCurr == pItem) {
+//			alreadyHeld = true;
+//			break;
+//		}
+//		pPrev = pCurr;
+//		pCurr = pCurr->GetSibling();
+//	}
+//
+//	if (!alreadyHeld) {
+//		// 들기
+//		if (pRightHand->GetChild() == nullptr) {
+//			pRightHand->SetChild(pItem);
+//		}
+//		else {
+//			CGameObject* last = pRightHand->GetChild();
+//			while (last->GetSibling()) last = last->GetSibling();
+//			last->m_pSibling = pItem;
+//		}
+//		pItem->m_pParent = pRightHand;
+//		pItem->m_pSibling = nullptr;
+//
+//		if (objectIndex == 2) {
+//			pItem->SetPosition(0.05f, -0.05f, 1.f); 
+//		}
+//		else { 
+//			pItem->SetPosition(0.05f, -0.05f, 0.1f); 
+//		}
+//
+//		m_pPlayer->UpdateTransform(nullptr);
+//	}
+//	else {
+//		// 놓기
+//		if (pPrev) {
+//			pPrev->m_pSibling = pItem->GetSibling();
+//		}
+//		else {
+//			pRightHand->SetChild(pItem->GetSibling());
+//		}
+//		pItem->m_pParent = nullptr;
+//		pItem->m_pSibling = nullptr;
+//	}
+//}
 
 void CGameFramework::OnDestroy()
 {
@@ -960,7 +901,7 @@ void CGameFramework::FrameAdvance()
 	m_GameTimer.GetFrameRate(m_pszFrameRate + 7, 37);
 	size_t nLength = _tcslen(m_pszFrameRate);
 	std::wstring w_user_name(user_name.begin(), user_name.end());
-	_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%s)"), w_user_name.c_str());
+	_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("ID : %s"), w_user_name.c_str());
 	::SetWindowText(m_hWnd, m_pszFrameRate);
 }
 
