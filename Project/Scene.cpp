@@ -192,6 +192,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_ppGameObjects[0]->Rotate(90, 0, 0);
 	//m_ppHierarchicalGameObjects[1]->SetPosition(3, 2, 10);
 	m_ppGameObjects[0]->SetFrameName("FlashLight");
+	m_ppGameObjects[0]->price = 80;
 	if (pFlashlightModel) delete pFlashlightModel;
 
 	CLoadedModelInfo* pShovelModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Shovel.bin", NULL);
@@ -200,6 +201,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_ppGameObjects[1]->Rotate(0, 0, 90);
 	//m_ppHierarchicalGameObjects[2]->SetPosition(3, 2, 12);
 	m_ppGameObjects[1]->SetFrameName("Shovel");
+	m_ppGameObjects[1]->price = 80;
 	if (pShovelModel) delete pShovelModel;
 
 	CLoadedModelInfo* pWhistleModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Whistle.bin", NULL);
@@ -207,6 +209,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_ppGameObjects[2]->SetScale(1, 1, 1);
 	//m_ppHierarchicalGameObjects[3]->SetPosition(3, 2, 13);
 	m_ppGameObjects[2]->SetFrameName("Whistle");
+	m_ppGameObjects[2]->price = 30;
 	if (pWhistleModel) delete pWhistleModel;
 
 	m_nOtherPlayers = 1;
@@ -800,7 +803,7 @@ void CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 				// 손 위치에 맞게 조정
 				if (pItem == pItem->FindFrame("Shovel")) pItem->SetPosition(0.05f, -0.05f, 1.f);
 				else pItem->SetPosition(0.05f, -0.05f, 0.1f);
-				dynamic_cast<CTerrainPlayer*>(m_pPlayer)->debt += 800;
+				//dynamic_cast<CTerrainPlayer*>(m_pPlayer)->debt += pItem->price; 빚 변동
 				m_pPlayer->UpdateTransform(nullptr);
 
 				int newIndex = static_cast<int>(m_pPlayer->m_pHeldItems.size());
@@ -813,8 +816,13 @@ void CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 				if (it != m_textureMap.end())
 				{
 					auto* pShader = dynamic_cast<CTextureToScreenShader*>(m_ppShaders[newIndex]);
+					auto* pShader1 = dynamic_cast<CTextureToScreenShader*>(m_ppShaders[newIndex+6]);
 					if (pShader) {
 						pShader->SetTexture(it->second);
+					}if (pShader1) {
+						pShader1->SetTexture(it->second);
+						std::wstring priceStr = std::to_wstring(pItem->price);
+						dynamic_cast<CShopShader*>(m_ppShaders[5])->price[newIndex] = priceStr;
 					}
 				}
 
@@ -861,8 +869,12 @@ void CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 						if (it != m_textureMap.end())
 						{
 							auto* pShader = dynamic_cast<CTextureToScreenShader*>(m_ppShaders[index]);
+							auto* pShader1 = dynamic_cast<CTextureToScreenShader*>(m_ppShaders[index+6]);
 							if (pShader) {
 								pShader->SetTexture(it->second);
+							}if (pShader1) {
+								pShader1->SetTexture(it->second);
+								dynamic_cast<CShopShader*>(m_ppShaders[5])->price[index] = L"0";
 							}
 						}
 

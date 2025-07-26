@@ -673,8 +673,9 @@ void CShopShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 
 void CShopShader::AnimateObjects(float fTimeElapsed)
 {
-	for (auto& pText : m_pPrice)
-		if (pText) pText->Animate(fTimeElapsed);
+	//for (auto& pText : m_pPrice)
+	for (int i = 0; i < 4; ++i)
+		if (m_pPrice[i]) m_pPrice[i]->UpdateText(price[i], L"$ ");
 
 	CTextureToScreenShader::AnimateObjects(fTimeElapsed);
 }

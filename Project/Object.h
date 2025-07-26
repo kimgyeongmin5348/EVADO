@@ -368,6 +368,7 @@ public:
 
 	bool visible = true;
 	bool isFalling = false;
+	int price = 0;
 
 	CMesh* m_pMesh = NULL;
 
