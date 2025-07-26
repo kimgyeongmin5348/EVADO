@@ -1569,11 +1569,11 @@ CSpider::~CSpider()
 
 void CSpider::Animate(float fTimeElapsed)
 {
-	XMFLOAT3 enemyPos = GetPosition();
-	XMFLOAT3 playerPos = pPlayer->GetPosition(); // 플레이어 위치 받아오기
+	//XMFLOAT3 enemyPos = GetPosition();
+	//XMFLOAT3 playerPos = pPlayer->GetPosition(); // 플레이어 위치 받아오기
 
-	XMFLOAT3 delta = Vector3::Subtract(playerPos, enemyPos);
-	float distance = Vector3::Length(delta);
+	//XMFLOAT3 delta = Vector3::Subtract(playerPos, enemyPos);
+	//float distance = Vector3::Length(delta);
 
 	//if (distance <= 50.0f)
 	//{
@@ -1616,8 +1616,6 @@ void CSpider::Animate(float fTimeElapsed)
 	m_pSkinnedAnimationController->SetTrackEnable(0, false);
 	m_pSkinnedAnimationController->SetTrackEnable(1, true);
 	m_pSkinnedAnimationController->SetTrackEnable(2, false);
-
-
 
 	CGameObject::Animate(fTimeElapsed);
 }	
