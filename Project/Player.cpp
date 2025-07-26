@@ -522,8 +522,6 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 	{
 		if (m_animBlend.active)
 		{
-			std::cout << "Blend progress: " << (m_animBlend.elapsed / m_animBlend.duration) << std::endl;
-
 			m_animBlend.elapsed += fTimeElapsed;
 			float t = m_animBlend.elapsed / m_animBlend.duration;
 			if (t >= 1.0f)
@@ -547,11 +545,17 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 		{
 		case AnimationState::JUMP:
 			PlayAnimationTrack(3, 2.0f);
-			if (IsAnimationFinished(3)) m_currentAnim = AnimationState::IDLE;
+			if (IsAnimationFinished(3)) {
+				m_pSkinnedAnimationController->SetTrackPosition(3, 0.0f);
+				m_currentAnim = AnimationState::IDLE;
+			}
 			break;
 		case AnimationState::SWING:
 			PlayAnimationTrack(4, 2.0f);
-			if (IsAnimationFinished(4)) m_currentAnim = AnimationState::IDLE;
+			if (IsAnimationFinished(4)) {
+				m_pSkinnedAnimationController->SetTrackPosition(4, 0.0f);
+				m_currentAnim = AnimationState::IDLE;
+			}
 			break;
 		case AnimationState::CROUCH:
 			PlayAnimationTrack(5);
@@ -616,20 +620,7 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 
 void CTerrainPlayer::PlayAnimationTrack(int trackIndex, float speed)
 {
-	//for (int i = 0; i < 7; ++i)
-	//	m_pSkinnedAnimationController->SetTrackEnable(i, i == trackIndex);
-
-	//m_pSkinnedAnimationController->SetTrackSpeed(trackIndex, speed);
-		
-	//int prevTrack = static_cast<int>(m_currentAnim);
-	//m_currentAnim = static_cast<AnimationState>(trackIndex);
-	//StartAnimationBlend(prevTrack, trackIndex, 1.f);
-
-	//m_pSkinnedAnimationController->SetTrackSpeed(trackIndex, speed);
-
 	if (m_currentTrack == trackIndex) return;
-
-	std::cout << "[DEBUG] PlayAnimationTrack: from " << m_currentTrack << " to " << trackIndex << std::endl;
 
 	StartAnimationBlend(m_currentTrack, trackIndex, 0.3f);
 	m_pSkinnedAnimationController->SetTrackSpeed(trackIndex, speed);
@@ -640,15 +631,12 @@ void CTerrainPlayer::PlayAnimationTrack(int trackIndex, float speed)
 bool CTerrainPlayer::IsAnimationFinished(int trackIndex)
 {
 	float current = m_pSkinnedAnimationController->m_pAnimationTracks[trackIndex].m_fPosition;
-	int animSetIdx = m_pSkinnedAnimationController->m_pAnimationTracks[trackIndex].m_nAnimationSet;
-	float length = m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[animSetIdx]->m_fLength;
+	float length = m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[trackIndex]->m_fLength;
 	return current >= length;
 }
 
 void CTerrainPlayer::StartAnimationBlend(int fromTrack, int toTrack, float blendTime)
 {
-	std::cout << "Blending from " << fromTrack << " to " << toTrack << std::endl;
-
 	m_animBlend.from = fromTrack;
 	m_animBlend.to = toTrack;
 	m_animBlend.duration = blendTime;
@@ -660,4 +648,20 @@ void CTerrainPlayer::StartAnimationBlend(int fromTrack, int toTrack, float blend
 
 	m_pSkinnedAnimationController->SetTrackWeight(fromTrack, 1.0f);
 	m_pSkinnedAnimationController->SetTrackWeight(toTrack, 0.0f);
+}
+
+bool CTerrainPlayer::IsShovel()
+{
+	CGameObject* pHand = FindFrame("hand_r");
+	if (!pHand) return false;
+
+	CGameObject* pHeld = pHand->GetChild();
+	while (pHeld)
+	{
+		if (strcmp(pHeld->GetFrameName(), "Shovel") == 0)
+			return true;
+
+		pHeld = pHeld->GetSibling();
+	}
+	return false;
 }

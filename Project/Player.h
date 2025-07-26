@@ -180,6 +180,8 @@ public:
 	int m_currentTrack = -1;
 
 	void StartAnimationBlend(int fromTrack, int toTrack, float blendTime);
+
+	bool IsShovel();
 };
 
 

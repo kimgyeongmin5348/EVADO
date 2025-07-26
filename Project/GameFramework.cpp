@@ -744,7 +744,6 @@ void CGameFramework::ProcessInput()
 	static UCHAR pKeysBuffer[256];
 	
 	static bool bPrevSpace = false;
-	static bool bPrevSwing = false;
 
 	bool bProcessedByScene = false;
 	if (GetKeyboardState(pKeysBuffer) && m_pScene) bProcessedByScene = m_pScene->ProcessInput(pKeysBuffer);
@@ -771,14 +770,13 @@ void CGameFramework::ProcessInput()
 		if (pKeysBuffer[VK_CONTROL] & 0xF0) dwDirection |= DIR_CROUCH;
 
 		bool bCurrSpace = (pKeysBuffer[VK_SPACE] & 0xF0);      // jump
-		bool bCurrSwing = (pKeysBuffer[VK_LBUTTON] & 0xF0);    // swing (좌클릭)
 
 		CTerrainPlayer* terrainPlayer = dynamic_cast<CTerrainPlayer*>(m_pPlayer);
 		if (!terrainPlayer) return;
 		AnimationState currentState = terrainPlayer->m_currentAnim;
 
-		// 점프/스윙 중이 아닐 때만 상태 전환
-		if (currentState != AnimationState::JUMP && currentState != AnimationState::SWING)
+		// 점프 중이 아닐 때만 상태 전환
+		if (currentState != AnimationState::SWING && currentState != AnimationState::JUMP)
 		{
 			bool isMoving = dwDirection & (DIR_FORWARD | DIR_BACKWARD | DIR_LEFT | DIR_RIGHT);
 			bool isCrouching = dwDirection & DIR_CROUCH;
@@ -788,10 +786,7 @@ void CGameFramework::ProcessInput()
 			{
 				terrainPlayer->m_currentAnim = AnimationState::JUMP;
 			}
-			else if (bCurrSwing && !bPrevSwing)
-			{
-				terrainPlayer->m_currentAnim = AnimationState::SWING;
-			}
+			
 			else if (isCrouching && isMoving)
 			{
 				terrainPlayer->m_currentAnim = AnimationState::CROUCH_WALK;
@@ -818,7 +813,6 @@ void CGameFramework::ProcessInput()
 		}
 
 		bPrevSpace = bCurrSpace;
-		bPrevSwing = bCurrSwing;
 
 		if (cxDelta || cyDelta)
 		{
@@ -926,7 +920,7 @@ void CGameFramework::FrameAdvance()
 
 	m_pd3dCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, TRUE, &d3dDsvCPUDescriptorHandle);
 
-	ProcessInput();
+	if(!isStartScene) ProcessInput();
 
 	AnimateObjects();
 
