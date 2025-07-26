@@ -45,6 +45,8 @@ constexpr char MAX_ID_LENGTH = 20;
 constexpr char SC_P_MONSTER_SPAWN = 14;
 constexpr char SC_P_MONSTER_MOVE = 15;
 constexpr char SC_P_MONSTER_DIE = 16;
+constexpr char CS_P_SHOVEL_DAMAGE = 26;
+constexpr char SC_P_UPDATE_MONSTER_HP = 27;
 
 // 상점 관련 패킷
 constexpr char CS_P_SHOP_BUY = 21;
@@ -223,9 +225,10 @@ struct sc_packet_monster_spawn
 {
 	unsigned char		size;
 	char				type;
-	int64_t				monsterID;
+	long long			monsterID;
 	XMFLOAT3			position;
-	uint8_t				state;
+	int					state;
+	int					hp;
 };
 
 struct sc_packet_monster_move
@@ -237,7 +240,21 @@ struct sc_packet_monster_move
 	uint8_t				state;
 };
 
+struct cs_packet_shovel_damage
+{
+	unsigned char		size;
+	char				type;
+	long long			monsterID;
+	int					damage;
+};
 
+struct sc_packet_update_monster_hp
+{
+	unsigned char		size;
+	char				type;
+	long long			monsterID;
+	int					hp;
+};
 
 
 #pragma pack (pop)
