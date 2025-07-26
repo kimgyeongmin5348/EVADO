@@ -775,26 +775,58 @@ void CGameFramework::ProcessInput()
 
 		CTerrainPlayer* terrainPlayer = dynamic_cast<CTerrainPlayer*>(m_pPlayer);
 		if (!terrainPlayer) return;
+		AnimationState currentState = terrainPlayer->m_currentAnim;
 
-		if (bCurrSpace && !bPrevSpace)
-			terrainPlayer->m_currentAnim = AnimationState::JUMP;
-		else if (bCurrSwing && !bPrevSwing)
-			terrainPlayer->m_currentAnim = AnimationState::SWING;
+		// 점프/스윙 중이 아닐 때만 상태 전환
+		if (currentState != AnimationState::JUMP && currentState != AnimationState::SWING)
+		{
+			bool isMoving = dwDirection & (DIR_FORWARD | DIR_BACKWARD | DIR_LEFT | DIR_RIGHT);
+			bool isCrouching = dwDirection & DIR_CROUCH;
+			bool isRunning = dwDirection & DIR_DOWN;
+
+			if (bCurrSpace && !bPrevSpace)
+			{
+				terrainPlayer->m_currentAnim = AnimationState::JUMP;
+			}
+			else if (bCurrSwing && !bPrevSwing)
+			{
+				terrainPlayer->m_currentAnim = AnimationState::SWING;
+			}
+			else if (isCrouching && isMoving)
+			{
+				terrainPlayer->m_currentAnim = AnimationState::CROUCH_WALK;
+				terrainPlayer->Move(dwDirection, 2.0f, true);
+			}
+			else if (isCrouching)
+			{
+				terrainPlayer->m_currentAnim = AnimationState::CROUCH;
+			}
+			else if (isRunning && isMoving)
+			{
+				terrainPlayer->m_currentAnim = AnimationState::RUN;
+				terrainPlayer->Move(dwDirection, 2.0f, true);
+			}
+			else if (isMoving)
+			{
+				terrainPlayer->m_currentAnim = AnimationState::WALK;
+				terrainPlayer->Move(dwDirection, 2.0f, true);
+			}
+			else
+			{
+				terrainPlayer->m_currentAnim = AnimationState::IDLE;
+			}
+		}
 
 		bPrevSpace = bCurrSpace;
 		bPrevSwing = bCurrSwing;
-		if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
+
+		if (cxDelta || cyDelta)
 		{
-			if (cxDelta || cyDelta)
-			{
-				if (pKeysBuffer[VK_RBUTTON] & 0xF0)
-					m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
-				else
-					m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
-			}
-			if (dwDirection) m_pPlayer->Move(dwDirection, 2.0f, true);
+			if (pKeysBuffer[VK_RBUTTON] & 0xF0)
+				m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
+			else
+				m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
 		}
-		else terrainPlayer->m_currentAnim = AnimationState::IDLE;
 
 	}
 	m_pPlayer->Update(m_GameTimer.GetTimeElapsed());
