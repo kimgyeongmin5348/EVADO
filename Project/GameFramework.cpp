@@ -289,33 +289,11 @@ void CGameFramework::ChangeSwapChainState()
 void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
 	if (m_pScene) m_pScene->OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
-	switch (nMessageID)
-	{
+	if (!isStartScene) {
+		switch (nMessageID)
+		{
 		case WM_LBUTTONDOWN:
 		case WM_RBUTTONDOWN:
-			//if (m_pPlayer->items[1]) {
-			//	flashlightToggle = !flashlightToggle;
-			//	m_pScene->BuildDefaultLightsAndMaterials(flashlightToggle);
-			//}
-			//if (m_pPlayer->items[2]) {
-			//	m_pPlayer->isSwing = true;
-			//	if (m_pPlayer->m_isMonsterHit)
-			//	{
-			//		// 야매 vector 인덱스 직접 접근
-			//		m_pScene->m_pEffect->Activate(m_pScene->m_ppGameObjects[1]->GetPosition());
-			//		CSpider* pSpider = dynamic_cast<CSpider*>(m_pScene->m_ppHierarchicalGameObjects[0]);
-			//		if (pSpider) {
-			//			pSpider->MonsterHP -= 25.0f;
-			//			float hpRatio = pSpider->MonsterHP / 100.0f;
-
-			//			Hpbar* pHpbar = dynamic_cast<Hpbar*>(pSpider->m_pHpbar);
-			//			if (pHpbar) {
-			//				pHpbar->SetHpbar(hpRatio);
-			//				cout << pSpider->MonsterHP << endl;
-			//			}
-			//		}
-			//	}
-			//}
 			break;
 		case WM_LBUTTONUP:
 		case WM_RBUTTONUP:
@@ -328,6 +306,25 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 			break;
 		default:
 			break;
+		}
+	}
+	else {
+		switch (nMessageID)
+		{
+		case WM_LBUTTONDOWN:
+		case WM_RBUTTONDOWN:
+			::SetCapture(hWnd);
+			::GetCursorPos(&m_ptOldCursorPos);
+			break;
+		case WM_LBUTTONUP:
+		case WM_RBUTTONUP:
+			::ReleaseCapture();
+			break;
+		case WM_MOUSEMOVE:
+			break;
+		default:
+			break;
+		}
 	}
 }
 
