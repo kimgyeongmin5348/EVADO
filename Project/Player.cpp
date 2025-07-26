@@ -520,6 +520,29 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 
 	if (m_pSkinnedAnimationController)
 	{
+		if (m_animBlend.active)
+		{
+			std::cout << "Blend progress: " << (m_animBlend.elapsed / m_animBlend.duration) << std::endl;
+
+			m_animBlend.elapsed += fTimeElapsed;
+			float t = m_animBlend.elapsed / m_animBlend.duration;
+			if (t >= 1.0f)
+			{
+				t = 1.0f;
+				m_animBlend.active = false;
+				for (int i = 0; i < 7; ++i)
+					m_pSkinnedAnimationController->SetTrackEnable(i, i == m_animBlend.to);
+
+				m_pSkinnedAnimationController->SetTrackWeight(m_animBlend.to, 1.0f);
+				m_pSkinnedAnimationController->SetTrackWeight(m_animBlend.from, 0.0f);
+			}
+			else
+			{
+				m_pSkinnedAnimationController->SetTrackWeight(m_animBlend.from, 1.0f - t);
+				m_pSkinnedAnimationController->SetTrackWeight(m_animBlend.to, t);
+			}
+		}
+
 		switch (m_currentAnim)
 		{
 		case AnimationState::JUMP:
@@ -572,16 +595,6 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 			m_xmf3Velocity.z * m_xmf3Velocity.z);
 
 		uint8_t currentAnimState = static_cast<uint8_t>(m_currentAnim);
-		//if (isJump)
-		//	currentAnimState = static_cast<uint8_t>(AnimationState::JUMP); // 3
-		//else if (isSwing)
-		//	currentAnimState = static_cast<uint8_t>(AnimationState::SWING); // 4
-		//else if (isCrouch)
-		//	currentAnimState = static_cast<uint8_t>(AnimationState::CROUCH); //5
-		//else if (::IsZero(fLength))
-		//	currentAnimState = static_cast<uint8_t>(AnimationState::IDLE); //0
-		//else
-		//	currentAnimState = static_cast<uint8_t>(AnimationState::WALK); //1
 
 		static uint8_t prevAnimState = currentAnimState;
 		// -----------------------------------------------------------
@@ -603,10 +616,25 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 
 void CTerrainPlayer::PlayAnimationTrack(int trackIndex, float speed)
 {
-	for (int i = 0; i < 7; ++i)
-		m_pSkinnedAnimationController->SetTrackEnable(i, i == trackIndex);
+	//for (int i = 0; i < 7; ++i)
+	//	m_pSkinnedAnimationController->SetTrackEnable(i, i == trackIndex);
 
+	//m_pSkinnedAnimationController->SetTrackSpeed(trackIndex, speed);
+		
+	//int prevTrack = static_cast<int>(m_currentAnim);
+	//m_currentAnim = static_cast<AnimationState>(trackIndex);
+	//StartAnimationBlend(prevTrack, trackIndex, 1.f);
+
+	//m_pSkinnedAnimationController->SetTrackSpeed(trackIndex, speed);
+
+	if (m_currentTrack == trackIndex) return;
+
+	std::cout << "[DEBUG] PlayAnimationTrack: from " << m_currentTrack << " to " << trackIndex << std::endl;
+
+	StartAnimationBlend(m_currentTrack, trackIndex, 0.3f);
 	m_pSkinnedAnimationController->SetTrackSpeed(trackIndex, speed);
+
+	m_currentTrack = trackIndex;
 }
 
 bool CTerrainPlayer::IsAnimationFinished(int trackIndex)
@@ -615,4 +643,21 @@ bool CTerrainPlayer::IsAnimationFinished(int trackIndex)
 	int animSetIdx = m_pSkinnedAnimationController->m_pAnimationTracks[trackIndex].m_nAnimationSet;
 	float length = m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[animSetIdx]->m_fLength;
 	return current >= length;
+}
+
+void CTerrainPlayer::StartAnimationBlend(int fromTrack, int toTrack, float blendTime)
+{
+	std::cout << "Blending from " << fromTrack << " to " << toTrack << std::endl;
+
+	m_animBlend.from = fromTrack;
+	m_animBlend.to = toTrack;
+	m_animBlend.duration = blendTime;
+	m_animBlend.elapsed = 0.0f;
+	m_animBlend.active = true;
+
+	for (int i = 0; i < 7; ++i)
+		m_pSkinnedAnimationController->SetTrackEnable(i, i == fromTrack || i == toTrack);
+
+	m_pSkinnedAnimationController->SetTrackWeight(fromTrack, 1.0f);
+	m_pSkinnedAnimationController->SetTrackWeight(toTrack, 0.0f);
 }

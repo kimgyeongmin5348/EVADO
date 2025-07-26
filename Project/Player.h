@@ -140,6 +140,15 @@ public:
 //	virtual void HandleCallback(void *pCallbackData, float fTrackPosition); 
 //};
 
+struct AnimationBlend
+{
+	int from = -1;
+	int to = -1;
+	float duration = 0.5f; // ºí·»µù ½Ã°£
+	float elapsed = 0.0f;
+	bool active = false;
+};
+
 class CTerrainPlayer : public CPlayer
 {
 public:
@@ -166,6 +175,11 @@ public:
 
 	void PlayAnimationTrack(int trackIndex, float speed = 1.0f);
 	bool IsAnimationFinished(int trackIndex);
+
+	AnimationBlend m_animBlend;
+	int m_currentTrack = -1;
+
+	void StartAnimationBlend(int fromTrack, int toTrack, float blendTime);
 };
 
 
