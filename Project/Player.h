@@ -52,13 +52,13 @@ protected:
 	BoundingBox			m_shovelAttackBoundingBox;
 
 public:
-	bool	isSwing = false;
-	bool	isCrouch = false;
-	bool	isCrouchWalk = false;
-	bool	isJump = false;
-	bool	isRun = false;
-	bool	isWalk = false;
-	bool	isIdle = true;
+	//bool	isSwing = false;
+	//bool	isCrouch = false;
+	//bool	isCrouchWalk = false;
+	//bool	isJump = false;
+	//bool	isRun = false;
+	//bool	isWalk = false;
+	//bool	isIdle = true;
 
 	bool	m_isMonsterHit = false;
 	bool	alreadyHeld = false;
@@ -166,7 +166,6 @@ public:
 
 	void PlayAnimationTrack(int trackIndex, float speed = 1.0f);
 	bool IsAnimationFinished(int trackIndex);
-	void ResetAllStates();
 };
 
 

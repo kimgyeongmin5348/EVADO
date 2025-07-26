@@ -773,21 +773,16 @@ void CGameFramework::ProcessInput()
 		bool bCurrSpace = (pKeysBuffer[VK_SPACE] & 0xF0);      // jump
 		bool bCurrSwing = (pKeysBuffer[VK_LBUTTON] & 0xF0);    // swing (좌클릭)
 
-		m_pPlayer->isWalk = false;
-		m_pPlayer->isRun = false;
-		m_pPlayer->isCrouch = false;
-		m_pPlayer->isCrouchWalk = false;
-		m_pPlayer->isIdle = false;
+		CTerrainPlayer* terrainPlayer = dynamic_cast<CTerrainPlayer*>(m_pPlayer);
+		if (!terrainPlayer) return;
 
 		if (bCurrSpace && !bPrevSpace)
-			m_pPlayer->isJump = true;
-
-		if (bCurrSwing && !bPrevSwing)
-			m_pPlayer->isSwing = true;
+			terrainPlayer->m_currentAnim = AnimationState::JUMP;
+		else if (bCurrSwing && !bPrevSwing)
+			terrainPlayer->m_currentAnim = AnimationState::SWING;
 
 		bPrevSpace = bCurrSpace;
 		bPrevSwing = bCurrSwing;
-
 		if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
 		{
 			if (cxDelta || cyDelta)
@@ -797,9 +792,10 @@ void CGameFramework::ProcessInput()
 				else
 					m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
 			}
-			if (dwDirection) m_pPlayer->Move(dwDirection, 2.0f, true);		
+			if (dwDirection) m_pPlayer->Move(dwDirection, 2.0f, true);
 		}
-		else m_pPlayer->isIdle = true;
+		else terrainPlayer->m_currentAnim = AnimationState::IDLE;
+
 	}
 	m_pPlayer->Update(m_GameTimer.GetTimeElapsed());
 }

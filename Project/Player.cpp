@@ -485,31 +485,24 @@ void CTerrainPlayer::OnCameraUpdateCallback(float fTimeElapsed)
 void CTerrainPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 {
 	if (dwDirection & DIR_DOWN) fDistance *= 2.0f;
-	
-	isRun = isWalk = isJump = isSwing = isCrouch = isCrouchWalk = false;
 
 	bool isMoving = dwDirection & (DIR_FORWARD | DIR_BACKWARD | DIR_LEFT | DIR_RIGHT);
 	bool isCrouching = dwDirection & DIR_CROUCH;
 	bool isRunning = dwDirection & DIR_DOWN;
+	bool isJumping = dwDirection & DIR_UP;
 
-	if (!isJump)
-	{
-		if (isCrouching)
-		{
-			if (isMoving) isCrouchWalk = true;
-			else          isCrouch = true;
-		}
-		else if (isRunning && isMoving)
-		{
-			isRun = true;
-		}
-		else if (isMoving)
-		{
-			isWalk = true;
-		}
-	}
-
-	if (dwDirection & DIR_UP) isJump = true;
+	if (isJumping)
+		m_currentAnim = AnimationState::JUMP;
+	else if (isCrouching && isMoving)
+		m_currentAnim = AnimationState::CROUCH_WALK;
+	else if (isCrouching)
+		m_currentAnim = AnimationState::CROUCH;
+	else if (isRunning && isMoving)
+		m_currentAnim = AnimationState::RUN;
+	else if (isMoving)
+		m_currentAnim = AnimationState::WALK;
+	else
+		m_currentAnim = AnimationState::IDLE;
 
 	CPlayer::Move(dwDirection, fDistance, bUpdateVelocity);
 }
@@ -527,40 +520,32 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 
 	if (m_pSkinnedAnimationController)
 	{
-		if (isJump) {
+		switch (m_currentAnim)
+		{
+		case AnimationState::JUMP:
 			PlayAnimationTrack(3, 2.0f);
-			if (IsAnimationFinished(3)) {
-				//ResetAllStates();
-				isJump = false;
-			}
-		}
-		else if (isSwing) {
+			if (IsAnimationFinished(3)) m_currentAnim = AnimationState::IDLE;
+			break;
+		case AnimationState::SWING:
 			PlayAnimationTrack(4, 2.0f);
-			if (IsAnimationFinished(4)) {
-				//ResetAllStates();
-				isSwing = false;
-			}
-		}
-		else if (isCrouch) {
+			if (IsAnimationFinished(4)) m_currentAnim = AnimationState::IDLE;
+			break;
+		case AnimationState::CROUCH:
 			PlayAnimationTrack(5);
-		}
-		else if (isCrouchWalk) {
+			break;
+		case AnimationState::CROUCH_WALK:
 			PlayAnimationTrack(6);
-		}
-		else if (isRun) {
+			break;
+		case AnimationState::RUN:
 			PlayAnimationTrack(2);
-		}
-		else if (isWalk) {
+			break;
+		case AnimationState::WALK:
 			PlayAnimationTrack(1);
-		}
-		else if (isIdle) {
+			break;
+		case AnimationState::IDLE:
+		default:
 			PlayAnimationTrack(0);
-			m_pSkinnedAnimationController->SetTrackPosition(1, 0.0f);
-			m_pSkinnedAnimationController->SetTrackPosition(2, 0.0f);
-			m_pSkinnedAnimationController->SetTrackPosition(3, 0.0f);
-			m_pSkinnedAnimationController->SetTrackPosition(4, 0.0f);
-			m_pSkinnedAnimationController->SetTrackPosition(5, 0.0f);
-			m_pSkinnedAnimationController->SetTrackPosition(6, 0.0f);
+			break;
 		}
 	}
 
@@ -586,17 +571,17 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 		fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x +
 			m_xmf3Velocity.z * m_xmf3Velocity.z);
 
-		uint8_t currentAnimState = static_cast<uint8_t>(AnimationState::IDLE);
-		if (isJump)
-			currentAnimState = static_cast<uint8_t>(AnimationState::JUMP); // 3
-		else if (isSwing)
-			currentAnimState = static_cast<uint8_t>(AnimationState::SWING); // 4
-		else if (isCrouch)
-			currentAnimState = static_cast<uint8_t>(AnimationState::CROUCH); //5
-		else if (::IsZero(fLength))
-			currentAnimState = static_cast<uint8_t>(AnimationState::IDLE); //0
-		else
-			currentAnimState = static_cast<uint8_t>(AnimationState::WALK); //1
+		uint8_t currentAnimState = static_cast<uint8_t>(m_currentAnim);
+		//if (isJump)
+		//	currentAnimState = static_cast<uint8_t>(AnimationState::JUMP); // 3
+		//else if (isSwing)
+		//	currentAnimState = static_cast<uint8_t>(AnimationState::SWING); // 4
+		//else if (isCrouch)
+		//	currentAnimState = static_cast<uint8_t>(AnimationState::CROUCH); //5
+		//else if (::IsZero(fLength))
+		//	currentAnimState = static_cast<uint8_t>(AnimationState::IDLE); //0
+		//else
+		//	currentAnimState = static_cast<uint8_t>(AnimationState::WALK); //1
 
 		static uint8_t prevAnimState = currentAnimState;
 		// -----------------------------------------------------------
@@ -630,12 +615,4 @@ bool CTerrainPlayer::IsAnimationFinished(int trackIndex)
 	int animSetIdx = m_pSkinnedAnimationController->m_pAnimationTracks[trackIndex].m_nAnimationSet;
 	float length = m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[animSetIdx]->m_fLength;
 	return current >= length;
-}
-
-void CTerrainPlayer::ResetAllStates()
-{
-	for (int i = 0; i < 7; ++i)
-		m_pSkinnedAnimationController->SetTrackEnable(i, false);
-	for (int i = 1; i < 7; ++i)
-		m_pSkinnedAnimationController->SetTrackPosition(i, 0.0f);
 }

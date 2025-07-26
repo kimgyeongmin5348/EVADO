@@ -665,7 +665,7 @@ void CScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam,
 		}
 		else if (!strcmp(frameName, "Shovel"))
 		{
-			m_pPlayer->isSwing = true;
+			dynamic_cast<CTerrainPlayer*>(m_pPlayer)->m_currentAnim == AnimationState::SWING;
 
 			if (m_pPlayer->m_isMonsterHit)
 			{

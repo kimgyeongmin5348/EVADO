@@ -277,7 +277,7 @@ void CCollisionManager::HandleCollision(CPlayer* player, CGameObject* obj)
         // 몬스터와 충돌 시 처리
     }
 
-    if (player->isSwing
+    if (dynamic_cast<CTerrainPlayer*>(player)->m_currentAnim == AnimationState::SWING
         && std::string::npos != ObjectFrameName.find("Spider"))
     {
         // 몬스터와 플레이어의 공격 충돌 시 처리
