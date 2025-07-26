@@ -54,7 +54,12 @@ protected:
 public:
 	bool	isSwing = false;
 	bool	isCrouch = false;
-	
+	bool	isCrouchWalk = false;
+	bool	isJump = false;
+	bool	isRun = false;
+	bool	isWalk = false;
+	bool	isIdle = true;
+
 	bool	m_isMonsterHit = false;
 	bool	alreadyHeld = false;
 
@@ -93,7 +98,7 @@ public:
 	CCamera *GetCamera() { return(m_pCamera); }
 	void SetCamera(CCamera *pCamera) { m_pCamera = pCamera; }
 
-	virtual void Move(ULONG nDirection, float fDistance, bool bVelocity = false);
+	virtual void Move(DWORD nDirection, float fDistance, bool bVelocity = false);
 	void Move(const XMFLOAT3& xmf3Shift, bool bVelocity = false);
 	void Move(float fx= 0.0f, float fyOffset = 0.0f, float fzOffset = 0.0f);
 	void Rotate(float x, float y, float z);
@@ -152,14 +157,16 @@ public:
 	virtual void OnPlayerUpdateCallback(float fTimeElapsed);
 	virtual void OnCameraUpdateCallback(float fTimeElapsed);
 
-	virtual void Move(ULONG nDirection, float fDistance, bool bVelocity = false);
+	virtual void Move(DWORD nDirection, float fDistance, bool bVelocity = false);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
 
 	virtual void Update(float fTimeElapsed);
 
-	bool isJump = false;
-
 	int debt = 10000;
+
+	void PlayAnimationTrack(int trackIndex, float speed = 1.0f);
+	bool IsAnimationFinished(int trackIndex);
+	void ResetAllStates();
 };
 
 

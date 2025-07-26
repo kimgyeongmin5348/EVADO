@@ -742,6 +742,10 @@ void CGameFramework::ReleaseObjects()
 void CGameFramework::ProcessInput()
 {
 	static UCHAR pKeysBuffer[256];
+	
+	static bool bPrevSpace = false;
+	static bool bPrevSwing = false;
+
 	bool bProcessedByScene = false;
 	if (GetKeyboardState(pKeysBuffer) && m_pScene) bProcessedByScene = m_pScene->ProcessInput(pKeysBuffer);
 	if (!bProcessedByScene)
@@ -766,6 +770,24 @@ void CGameFramework::ProcessInput()
 		if (pKeysBuffer[VK_SHIFT] & 0xF0) dwDirection |= DIR_DOWN;
 		if (pKeysBuffer[VK_CONTROL] & 0xF0) dwDirection |= DIR_CROUCH;
 
+		bool bCurrSpace = (pKeysBuffer[VK_SPACE] & 0xF0);      // jump
+		bool bCurrSwing = (pKeysBuffer[VK_LBUTTON] & 0xF0);    // swing (좌클릭)
+
+		m_pPlayer->isWalk = false;
+		m_pPlayer->isRun = false;
+		m_pPlayer->isCrouch = false;
+		m_pPlayer->isCrouchWalk = false;
+		m_pPlayer->isIdle = false;
+
+		if (bCurrSpace && !bPrevSpace)
+			m_pPlayer->isJump = true;
+
+		if (bCurrSwing && !bPrevSwing)
+			m_pPlayer->isSwing = true;
+
+		bPrevSpace = bCurrSpace;
+		bPrevSwing = bCurrSwing;
+
 		if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
 		{
 			if (cxDelta || cyDelta)
@@ -775,8 +797,9 @@ void CGameFramework::ProcessInput()
 				else
 					m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
 			}
-			if (dwDirection) m_pPlayer->Move(dwDirection, 5.0f, true);
+			if (dwDirection) m_pPlayer->Move(dwDirection, 2.0f, true);		
 		}
+		else m_pPlayer->isIdle = true;
 	}
 	m_pPlayer->Update(m_GameTimer.GetTimeElapsed());
 }

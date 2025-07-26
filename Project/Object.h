@@ -268,6 +268,7 @@ public:
 	void SetEnable(bool bEnable) { m_bEnable = bEnable; }
 	void SetSpeed(float fSpeed) { m_fSpeed = fSpeed; }
 	void SetWeight(float fWeight) { m_fWeight = fWeight; }
+	void SetType(int nType) { m_nType = nType; }
 
 	void SetPosition(float fPosition) { m_fPosition = fPosition; }
 	float UpdatePosition(float fTrackPosition, float fTrackElapsedTime, float fAnimationLength);
@@ -325,6 +326,7 @@ public:
 	void SetTrackPosition(int nAnimationTrack, float fPosition);
 	void SetTrackSpeed(int nAnimationTrack, float fSpeed);
 	void SetTrackWeight(int nAnimationTrack, float fWeight);
+	void SetTrackType(int nAnimationTrack, int nType);
 
 	void SetCallbackKeys(int nAnimationTrack, int nCallbackKeys);
 	void SetCallbackKey(int nAnimationTrack, int nKeyIndex, float fTime, void* pData);
