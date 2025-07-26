@@ -337,6 +337,20 @@ void ProcessPacket(char* ptr)
     {
         sc_packet_item_spawn* pkt = reinterpret_cast<sc_packet_item_spawn*>(ptr);
 
+        // 아래 주석한 식으로 정보를 저장하고 하면 랜더링 할때 지금보단 조금더 수월해 지지 않을까?
+        
+        // 아이템 생성 및 정보 세팅
+        //auto newItem = std::make_unique<Item>();
+        //newItem->SetUniqueID(pkt->item_id);
+        //newItem->SetItemType(static_cast<ITEM_TYPE>(pkt->item_type));
+        //newItem->SetPosition(pkt->position);
+        //newItem->SetCash(pkt->cash);
+        //// 컨테이너에 등록 (예: ID가 키인 맵)
+        //{
+        //    std::lock_guard<std::mutex> lock(g_item_mutex);
+        //    g_items[pkt->item_id] = newItem.get();  // raw 포인터 저장 가능 (단, 소유권은 unique_ptr가 가짐)
+        //}
+
         std::cout << "[Client] Item Create - ID: " << pkt->item_id
             << " Postion(" << pkt->position.x << ", "
             << pkt->position.y << ", " << pkt->position.z << ")"
@@ -359,6 +373,23 @@ void ProcessPacket(char* ptr)
     case SC_P_ITEM_MOVE:
     {
         sc_packet_item_move* pkt = reinterpret_cast<sc_packet_item_move*>(ptr);
+
+        // 그럼 이제 아래의 주석처리된 부분처럼 업데이트 된 부분의 정보를 아이템 class에 보내니까 랜더링코드를 안넣고 하면 되지 않을까? 이미 렌더링 되고 있는 그 정보에
+        // 변경된 정보를 주었으니 그 정보를 받고 랜더링을 했을테니 (이건 지극히 나의 개인적인 생각 클라 구조가 어떻게 되어있는지 자세히는 모르니까)
+
+        //{
+        //    std::lock_guard<std::mutex> lock(g_item_mutex);
+        //    auto it = g_items.find(pkt->item_id);
+        //    if (it != g_items.end() && it->second != nullptr) {
+        //        Item* item = it->second;
+        //        item->SetPosition(pkt->position);  // CGameObject에 구현한 위치 설정 함수 호출
+        //        // 필요시 item->UpdateBoundingBox(), item->UpdateCollision(), 등 호출
+        //    }
+        //    else {
+        //        std::cerr << "[Client] Unknown item ID in move packet: " << pkt->item_id << std::endl;
+        //    }
+        //}
+
 
         std::cout << "[Client] Item Move - ID: " << pkt->item_id
             << " Position(" << pkt->position.x << ", "
