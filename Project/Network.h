@@ -53,10 +53,12 @@ extern std::queue<std::vector<char>> g_sendQueue;
 extern std::mutex g_sendMutex;
 extern std::condition_variable g_sendCV;
 
+extern std::unordered_map<long long, CSpider*> g_monsters;
+extern std::mutex g_monster_mutex;
+
 
 // Monster
-void OnMonsterSpawned(int64_t monsterID, const XMFLOAT3& pos, uint8_t state);
-void UpdateMonsterPosition(int64_t monsterID, const XMFLOAT3& pos, uint8_t state);
+void SendHitSpider(long long monsterID);
 
 
 // Shop

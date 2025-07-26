@@ -35,40 +35,21 @@ std::mutex g_item_mutex;
 // =================================================================
 //           몬스터 렌더링을 위한 몬스터 오브젝트 및 관리 
 // =================================================================
-struct MonsterObject {
-    int64_t monsterID;
-    XMFLOAT3 position;
-    uint8_t state;
 
-    MonsterObject(int64_t id, XMFLOAT3 pos, uint8_t st)
-        : monsterID(id), position(pos), state(st) {
-    }
-
-    void SetPosition(const XMFLOAT3& pos) { position = pos; }
-    void SetState(uint8_t st) { state = st; }
-
-};
-
-std::unordered_map<int64_t, MonsterObject*> g_monsters;
+// 아래의 저장소는 몬스터(CSpider) 고유ID를 저장
+std::unordered_map<long long, CSpider*> g_monsters;
 std::mutex g_monster_mutex;
 
 
-// 몬스터 생성
-void OnMonsterSpawned(int64_t monsterID, const XMFLOAT3& pos, uint8_t state) {
-    std::lock_guard<std::mutex> lock(g_monster_mutex);
-    if (g_monsters.count(monsterID) == 0) {
-        g_monsters[monsterID] = new MonsterObject(monsterID, pos, state);
-    }
-}
-// 몬스터 위치, 상태 업데이트
-void UpdateMonsterPosition(int64_t monsterID, const XMFLOAT3& pos, uint8_t state) {
-    std::lock_guard<std::mutex> lock(g_monster_mutex);
-    auto it = g_monsters.find(monsterID);
-    if (it != g_monsters.end()) {
-        it->second->SetPosition(pos);
-        it->second->SetState(state);
-    }
-   
+// 몬스터 hp 줄어듬
+void SendHitSpider(long long monsterID)
+{
+    cs_packet_shovel_damage psd;
+    psd.size = sizeof(psd);
+    psd.type = CS_P_SHOVEL_DAMAGE;
+    psd.monsterID = monsterID;
+    psd.damage = 10;
+    send_packet(&psd);
 }
 
 
@@ -395,14 +376,21 @@ void ProcessPacket(char* ptr)
     {
         sc_packet_monster_spawn* pkt = reinterpret_cast<sc_packet_monster_spawn*>(ptr);
         std::cout << "[Client] Monster Spawn - ID: " << pkt->monsterID
-            << " Position(" << pkt->position.x << ", " << pkt->position.z << ")"
+            << " Position(" << pkt->position.x << ", " << pkt->position.z << ")" << ", HP: " << pkt->hp
             << " State: " << static_cast<int>(pkt->state) << std::endl;
-
-        // 몬스터 생성
-        OnMonsterSpawned(pkt->monsterID, pkt->position, pkt->state);
 
         // 랜더링 예시 -> gGameFramework.OnMonsterSpawned(pkt->monsterID, pkt->position);
         break;
+    }
+
+    case SC_P_UPDATE_MONSTER_HP:
+    {
+        sc_packet_update_monster_hp* pkt = reinterpret_cast<sc_packet_update_monster_hp*>(ptr);
+
+        std::cout << "[Client] Monster HP Update -> ID : " << pkt->monsterID
+            << ", HP : " << pkt->hp << std::endl;
+
+        // 여긴 체력바 렌더링 하는곳에 보내는 역할의 코드를 작성? 해야하지 않을까?
     }
     
     // 랜더링 해야함
@@ -414,7 +402,6 @@ void ProcessPacket(char* ptr)
             << " New Position(" << pkt->position.x << ", " << pkt->position.z << ")"
             << " State: " << static_cast<int>(pkt->state) << std::endl;
 
-        UpdateMonsterPosition(pkt->monsterID, pkt->position, pkt->state);
 
         // 랜더링 예시 ->  gGameFramework.UpdateMonsterPosition(pkt->monsterID, pkt->position, pkt->state);
         break;
