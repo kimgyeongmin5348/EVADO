@@ -378,6 +378,19 @@ CTerrainPlayer::CTerrainPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandLi
 	SetCameraUpdatedContext(pContext);
 
 	m_pText = new CText(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, L"debt : ", -0.9f, 0.9f);
+	
+	m_playerHP = new CTextureToScreenShader(1);
+	m_playerHP->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/hp.dds", RESOURCE_TEXTURE2D, 0);
+	CScene::CreateShaderResourceViews(pd3dDevice, pTexture, 0, 15);
+	
+	CScreenRectMeshTextured* pMesh = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, 0.25f, 0.5f, 0.9f, 0.1f);
+	m_playerHP->SetMesh(0, pMesh);
+	m_playerHP->SetTexture(pTexture);
+
+	device = pd3dDevice;
+	cmdList = pd3dCommandList;
 
 	CHeightMapTerrain *pTerrain = (CHeightMapTerrain *)pContext;
 	SetPosition(XMFLOAT3(3, 0, 20));
@@ -511,6 +524,7 @@ void CTerrainPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVeloci
 void CTerrainPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	if (m_pText) m_pText->Render(pd3dCommandList, pCamera);
+	if (m_playerHP) m_playerHP->Render(pd3dCommandList, pCamera);
 	CPlayer::Render(pd3dCommandList, pCamera);
 }
 
@@ -577,6 +591,16 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 	}
 
 	if (m_pText) { m_pText->UpdateText(std::to_wstring(debt), L"debt : "); }
+
+	float hpRatio = currentHP / 100.f;
+	float newWidth = hpRatio * 0.5f;
+
+	static float prevWidth = -1.0f;
+	if (fabs(prevWidth - newWidth) > 0.01f)
+	{
+		prevWidth = newWidth;
+		SetHPWidth(newWidth); 
+	}
 	// server
 
 	// position, look, right ------------------------------------
@@ -615,6 +639,18 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 			prevAnimState = currentAnimState;
 		}
 
+	}
+}
+
+void CTerrainPlayer::SetHPWidth(float newWidth)
+{
+	if (m_playerHP)
+	{
+		// 새 mesh 생성
+		CScreenRectMeshTextured* newMesh = new CScreenRectMeshTextured(device, cmdList, 0.25f, newWidth, 0.9f, 0.1f);
+
+		// 기존 메시 교체
+		m_playerHP->SetMesh(0, newMesh);
 	}
 }
 

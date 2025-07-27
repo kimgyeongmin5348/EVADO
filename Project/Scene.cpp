@@ -106,8 +106,8 @@ void CScene::InitializeCollisionSystem()
 		m_CollisionManager.InsertObject(m_ppGameObjects[i]);
 	}
 
-	for (int i = 0; i < m_nHierarchicalGameObjects; ++i) {
-		m_CollisionManager.InsertObject(m_ppHierarchicalGameObjects[i]);
+	for (int i = 0; i < m_nMonster; ++i) {
+		m_CollisionManager.InsertObject(m_ppMonsters[i]);
 	}
 
 	for (auto obj : m_pMap->m_vMapObjects) {
@@ -128,8 +128,8 @@ void CScene::GenerateGameObjectsBoundingBox()
 		m_ppGameObjects[i]->CalculateBoundingBox();
 	}
 
-	for (int i = 0; i < m_nHierarchicalGameObjects; ++i) {
-		m_ppHierarchicalGameObjects[i]->CalculateBoundingBox();
+	for (int i = 0; i < m_nMonster; ++i) {
+		m_ppMonsters[i]->CalculateBoundingBox();
 	}
 
 	for (auto obj : m_pMap->m_vMapObjects) {
@@ -161,24 +161,35 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	m_pEffect = new CParticle(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
-	m_nHierarchicalGameObjects = 4; // spider
-	m_ppHierarchicalGameObjects = new CGameObject * [m_nHierarchicalGameObjects];
+	m_nMonster = 4; // spider
+	m_ppMonsters = new CGameObject * [m_nMonster];
 
-	CLoadedModelInfo* pSpiderModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Spider.bin", NULL);
-	for (int i = 0; i < m_nHierarchicalGameObjects; ++i)
+	CLoadedModelInfo* pSpiderModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/spider_myOldOne.bin", NULL);
+	XMFLOAT3 monsterPos[4] = {
+		{32, 0, -8},
+		{-54, 0, -90},
+		{4, 0, -50},
+		{-46, 0,-42}
+	};
+	for (int i = 0; i < m_nMonster; ++i)
 	{
-		m_ppHierarchicalGameObjects[i] = new CSpider(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pSpiderModel, 3);
-		m_ppHierarchicalGameObjects[i]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-		m_ppHierarchicalGameObjects[i]->m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1);
-		m_ppHierarchicalGameObjects[i]->m_pSkinnedAnimationController->SetTrackAnimationSet(2, 2);
-		m_ppHierarchicalGameObjects[i]->m_pSkinnedAnimationController->SetTrackEnable(1, false);
-		m_ppHierarchicalGameObjects[i]->m_pSkinnedAnimationController->SetTrackEnable(2, false);
+		m_ppMonsters[i] = new CSpider(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pSpiderModel, 5);
+		m_ppMonsters[i]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0); //idle
+		m_ppMonsters[i]->m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1); //walk
+		m_ppMonsters[i]->m_pSkinnedAnimationController->SetTrackAnimationSet(2, 2); //run
+		m_ppMonsters[i]->m_pSkinnedAnimationController->SetTrackAnimationSet(3, 3); //attack
+		m_ppMonsters[i]->m_pSkinnedAnimationController->SetTrackAnimationSet(4, 4); //death
+		m_ppMonsters[i]->m_pSkinnedAnimationController->SetTrackEnable(1, false);
+		m_ppMonsters[i]->m_pSkinnedAnimationController->SetTrackEnable(2, false);
+		m_ppMonsters[i]->m_pSkinnedAnimationController->SetTrackEnable(3, false);
+		m_ppMonsters[i]->m_pSkinnedAnimationController->SetTrackEnable(4, false);
 
-		m_ppHierarchicalGameObjects[i]->SetPosition(3.0f, 0.0f, 30.0f);
-		m_ppHierarchicalGameObjects[i]->Rotate(0, 180, 0);
+		m_ppMonsters[i]->SetPosition(monsterPos[i]);
+		m_ppMonsters[i]->SetScale(2, 2, 2);
+		m_ppMonsters[i]->Rotate(0, 180, 0);
 
 		std::string spiderName = "Spider" + std::to_string(i);
-		m_ppHierarchicalGameObjects[i]->SetFrameName(spiderName.c_str());
+		m_ppMonsters[i]->SetFrameName(spiderName.c_str());
 	}
 
 	if (pSpiderModel) delete pSpiderModel;
@@ -375,10 +386,10 @@ void CScene::ReleaseObjects()
 	if (m_pTerrain) delete m_pTerrain;
 	if (m_pSkyBox) delete m_pSkyBox;
 
-	if (m_ppHierarchicalGameObjects)
+	if (m_ppMonsters)
 	{
-		for (int i = 0; i < m_nHierarchicalGameObjects; i++) if (m_ppHierarchicalGameObjects[i]) m_ppHierarchicalGameObjects[i]->Release();
-		delete[] m_ppHierarchicalGameObjects;
+		for (int i = 0; i < m_nMonster; i++) if (m_ppMonsters[i]) m_ppMonsters[i]->Release();
+		delete[] m_ppMonsters;
 	}
 
 	ReleaseShaderVariables();
@@ -643,7 +654,7 @@ void CScene::ReleaseUploadBuffers()
 
 	for (int i = 0; i < m_nShaders; i++) m_ppShaders[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->ReleaseUploadBuffers();
-	for (int i = 0; i < m_nHierarchicalGameObjects; i++) m_ppHierarchicalGameObjects[i]->ReleaseUploadBuffers();
+	for (int i = 0; i < m_nMonster; i++)if (m_ppMonsters[i]) m_ppMonsters[i]->ReleaseUploadBuffers();
 }
 
 void CScene::CreateCbvSrvDescriptorHeaps(ID3D12Device *pd3dDevice, int nConstantBufferViews, int nShaderResourceViews)
@@ -732,7 +743,7 @@ void CScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam,
 				{
 					m_pEffect->Activate(m_ppGameObjects[1]->GetPosition());
 
-					CSpider* pSpider = dynamic_cast<CSpider*>(m_ppHierarchicalGameObjects[0]);
+					CSpider* pSpider = dynamic_cast<CSpider*>(m_ppMonsters[0]);
 					if (pSpider)
 					{
 						pSpider->MonsterHP -= 25.0f;
@@ -925,8 +936,12 @@ void CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 			for (int i = 5; i < 10; ++i)
 				dynamic_cast<CTextureToScreenShader*>(m_ppShaders[i])->visible = isShop;
 			break;
+		case VK_UP:
+			dynamic_cast<CTerrainPlayer*>(m_pPlayer)->currentHP -= 10.f;
+			break;
 		}
 		break;
+		
 	default:
 		break;
 	}
@@ -987,13 +1002,13 @@ void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera
 		}
 	}
   
-	for (int i = 0; i < m_nHierarchicalGameObjects; i++)
+	for (int i = 0; i < m_nMonster; i++)
 	{
-		if (m_ppHierarchicalGameObjects[i])
+		if (m_ppMonsters[i])
 		{
-			m_ppHierarchicalGameObjects[i]->Animate(m_fElapsedTime);
+			m_ppMonsters[i]->Animate(m_fElapsedTime);
 			//if (!m_ppHierarchicalGameObjects[i]->m_pSkinnedAnimationController) m_ppHierarchicalGameObjects[i]->UpdateTransform(NULL);
-			m_ppHierarchicalGameObjects[i]->Render(pd3dCommandList, pCamera);
+			m_ppMonsters[i]->Render(pd3dCommandList, pCamera);
 		}
 	}
 

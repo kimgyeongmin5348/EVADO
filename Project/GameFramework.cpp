@@ -636,7 +636,7 @@ void CGameFramework::BuildObjects()
 	if (m_nCurrentScene == 1)
 	{ 
 
-		m_pScene->m_ppHierarchicalGameObjects[0]->SetPlayer(m_pPlayer);
+		m_pScene->m_ppMonsters[0]->SetPlayer(m_pPlayer);
 	}
 
 	m_pd3dCommandList->Close();
@@ -754,6 +754,9 @@ void CGameFramework::AnimateObjects()
 	if (m_pScene) { 
 		m_pScene->AnimateObjects(fTimeElapsed);
 		if (m_pScene->m_ppOtherPlayers) m_pScene->m_ppOtherPlayers[0]->Animate(m_pScene->m_ppOtherPlayers[0]->targetAnim, fTimeElapsed);
+		if (m_pScene->m_ppMonsters) 
+			for(int i=0;i< m_pScene->m_nMonster; ++i)
+			m_pScene->m_ppMonsters[i]->Animate(fTimeElapsed);
 	}
 
 	m_pPlayer->Animate(fTimeElapsed);
