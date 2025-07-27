@@ -294,16 +294,16 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 	{
 	case WM_LBUTTONDOWN:
 	case WM_RBUTTONDOWN:
-		//::SetCapture(hWnd);
-		//::GetCursorPos(&m_ptOldCursorPos);
+		::SetCapture(hWnd);
+		::GetCursorPos(&m_ptOldCursorPos);
 		break;
 	case WM_LBUTTONUP:
 	case WM_RBUTTONUP:
-		//::ReleaseCapture();
+		::ReleaseCapture();
 		break;
 	case WM_MOUSEMOVE:
-		::SetCapture(hWnd);
-		::GetCursorPos(&m_ptOldCursorPos);
+		//::SetCapture(hWnd);
+		//::GetCursorPos(&m_ptOldCursorPos);
 		break;
 	default:
 		break;
@@ -753,7 +753,7 @@ void CGameFramework::AnimateObjects()
 
 	if (m_pScene) { 
 		m_pScene->AnimateObjects(fTimeElapsed);
-		if (m_pScene->m_ppOtherPlayers) m_pScene->m_ppOtherPlayers[0]->Animate(m_pScene->m_ppOtherPlayers[0]->animation, fTimeElapsed);
+		if (m_pScene->m_ppOtherPlayers) m_pScene->m_ppOtherPlayers[0]->Animate(m_pScene->m_ppOtherPlayers[0]->targetAnim, fTimeElapsed);
 	}
 
 	m_pPlayer->Animate(fTimeElapsed);

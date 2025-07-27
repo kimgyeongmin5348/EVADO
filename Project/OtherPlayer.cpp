@@ -40,6 +40,7 @@ OtherPlayer::~OtherPlayer()
 
 void OtherPlayer::Animate(int animation, float fTimeElapsed)
 {
+	/*
 	for (int i = 0; i < 7; ++i) { 
 		m_pSkinnedAnimationController->SetTrackEnable(i, false); 
 		m_pSkinnedAnimationController->SetTrackWeight(i, 0.0f);
@@ -68,7 +69,96 @@ void OtherPlayer::Animate(int animation, float fTimeElapsed)
 			m_pSkinnedAnimationController->SetTrackPosition(animation, 0.0f);
 		}
 	}
+	*/
+	if (m_pSkinnedAnimationController)
+	{
+		if (m_animBlend.active)
+		{
+			m_animBlend.elapsed += fTimeElapsed;
+			float t = m_animBlend.elapsed / m_animBlend.duration;
+			if (t >= 1.0f)
+			{
+				t = 1.0f;
+				m_animBlend.active = false;
+				for (int i = 0; i < 7; ++i)
+					m_pSkinnedAnimationController->SetTrackEnable(i, i == m_animBlend.to);
 
-
+				m_pSkinnedAnimationController->SetTrackWeight(m_animBlend.to, 1.0f);
+				m_pSkinnedAnimationController->SetTrackWeight(m_animBlend.from, 0.0f);
+			}
+			else
+			{
+				m_pSkinnedAnimationController->SetTrackWeight(m_animBlend.from, 1.0f - t);
+				m_pSkinnedAnimationController->SetTrackWeight(m_animBlend.to, t);
+			}
+		}
+		switch (animation)
+		{
+		case 3:
+			PlayAnimationTrack(3, 2.0f);
+			if (IsAnimationFinished(3)) {
+				m_pSkinnedAnimationController->SetTrackPosition(3, 0.0f);
+				animation = 0;
+			}
+			break;
+		case 4:
+			PlayAnimationTrack(4, 2.0f);
+			if (IsAnimationFinished(4)) {
+				m_pSkinnedAnimationController->SetTrackPosition(4, 0.0f);
+				animation = 0;
+			}
+			break;
+		case 5:
+			PlayAnimationTrack(5);
+			break;
+		case 6:
+			PlayAnimationTrack(6);
+			break;
+		case 2:
+			PlayAnimationTrack(2);
+			break;
+		case 1:
+			PlayAnimationTrack(1);
+			break;
+		case 0:
+		default:
+			PlayAnimationTrack(0);
+			break;
+		}
+	}
+	cout << "animation - " << currentAnim << ", target - " << targetAnim << endl;
 	CGameObject::Animate(fTimeElapsed);
+}
+
+void OtherPlayer::PlayAnimationTrack(int trackIndex, float speed)
+{
+	if (currentAnim == trackIndex) return;
+
+	StartAnimationBlend(currentAnim, trackIndex, 0.3f);
+	m_pSkinnedAnimationController->SetTrackSpeed(trackIndex, speed);
+
+	currentAnim = trackIndex;
+}
+
+bool OtherPlayer::IsAnimationFinished(int trackIndex)
+{
+	float current = m_pSkinnedAnimationController->m_pAnimationTracks[trackIndex].m_fPosition;
+	float length = m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[trackIndex]->m_fLength;
+	return current >= length;
+}
+
+void OtherPlayer::StartAnimationBlend(int fromTrack, int toTrack, float blendTime)
+{
+	m_animBlend.from = fromTrack;
+	m_animBlend.to = toTrack;
+	m_animBlend.duration = blendTime;
+	m_animBlend.elapsed = 0.0f;
+	m_animBlend.active = true;
+
+	for (int i = 0; i < 7; ++i)
+		m_pSkinnedAnimationController->SetTrackEnable(i, i == fromTrack || i == toTrack);
+
+	m_pSkinnedAnimationController->SetTrackWeight(fromTrack, 1.0f);
+	m_pSkinnedAnimationController->SetTrackWeight(toTrack, 0.0f);
+
 }
