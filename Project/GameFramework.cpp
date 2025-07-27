@@ -294,17 +294,16 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 	{
 	case WM_LBUTTONDOWN:
 	case WM_RBUTTONDOWN:
-		cout << m_ptOldCursorPos.x << ", " << m_ptOldCursorPos.y << endl;
-		::SetCapture(hWnd);
-		::GetCursorPos(&m_ptOldCursorPos);
+		//::SetCapture(hWnd);
+		//::GetCursorPos(&m_ptOldCursorPos);
 		break;
 	case WM_LBUTTONUP:
 	case WM_RBUTTONUP:
-		::ReleaseCapture();
+		//::ReleaseCapture();
 		break;
 	case WM_MOUSEMOVE:
-		//::SetCapture(hWnd);
-		//::GetCursorPos(&m_ptOldCursorPos);
+		::SetCapture(hWnd);
+		::GetCursorPos(&m_ptOldCursorPos);
 		break;
 	default:
 		break;
