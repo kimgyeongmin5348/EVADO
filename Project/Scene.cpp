@@ -164,7 +164,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_nHierarchicalGameObjects = 4; // spider
 	m_ppHierarchicalGameObjects = new CGameObject * [m_nHierarchicalGameObjects];
 
-	CLoadedModelInfo* pSpiderModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Spider.bin", NULL);
+	CLoadedModelInfo* pSpiderModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/spider_myOldOne.bin", NULL);
 	XMFLOAT3 monsterPos[4] = {
 		{32, 0, -8},
 		{-54, 0, -90},
@@ -173,14 +173,19 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	};
 	for (int i = 0; i < m_nHierarchicalGameObjects; ++i)
 	{
-		m_ppHierarchicalGameObjects[i] = new CSpider(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pSpiderModel, 3);
-		m_ppHierarchicalGameObjects[i]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-		m_ppHierarchicalGameObjects[i]->m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1);
-		m_ppHierarchicalGameObjects[i]->m_pSkinnedAnimationController->SetTrackAnimationSet(2, 2);
+		m_ppHierarchicalGameObjects[i] = new CSpider(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pSpiderModel, 5);
+		m_ppHierarchicalGameObjects[i]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0); //idle
+		m_ppHierarchicalGameObjects[i]->m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1); //walk
+		m_ppHierarchicalGameObjects[i]->m_pSkinnedAnimationController->SetTrackAnimationSet(2, 2); //run
+		m_ppHierarchicalGameObjects[i]->m_pSkinnedAnimationController->SetTrackAnimationSet(3, 3); //attack
+		m_ppHierarchicalGameObjects[i]->m_pSkinnedAnimationController->SetTrackAnimationSet(4, 4); //death
 		m_ppHierarchicalGameObjects[i]->m_pSkinnedAnimationController->SetTrackEnable(1, false);
 		m_ppHierarchicalGameObjects[i]->m_pSkinnedAnimationController->SetTrackEnable(2, false);
+		m_ppHierarchicalGameObjects[i]->m_pSkinnedAnimationController->SetTrackEnable(3, false);
+		m_ppHierarchicalGameObjects[i]->m_pSkinnedAnimationController->SetTrackEnable(4, false);
 
 		m_ppHierarchicalGameObjects[i]->SetPosition(monsterPos[i]);
+		m_ppHierarchicalGameObjects[i]->SetScale(2, 2, 2);
 		m_ppHierarchicalGameObjects[i]->Rotate(0, 180, 0);
 
 		std::string spiderName = "Spider" + std::to_string(i);
@@ -649,7 +654,7 @@ void CScene::ReleaseUploadBuffers()
 
 	for (int i = 0; i < m_nShaders; i++) m_ppShaders[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->ReleaseUploadBuffers();
-	for (int i = 0; i < m_nHierarchicalGameObjects; i++) m_ppHierarchicalGameObjects[i]->ReleaseUploadBuffers();
+	for (int i = 0; i < m_nHierarchicalGameObjects; i++)if (m_ppHierarchicalGameObjects[i]) m_ppHierarchicalGameObjects[i]->ReleaseUploadBuffers();
 }
 
 void CScene::CreateCbvSrvDescriptorHeaps(ID3D12Device *pd3dDevice, int nConstantBufferViews, int nShaderResourceViews)
