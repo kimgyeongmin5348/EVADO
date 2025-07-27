@@ -566,7 +566,7 @@ public:
 
 	float MonsterHP = 100.0f;
 	float hpRatio = MonsterHP / 100.0f;
-	Hpbar* m_pHpbar = NULL;
+	//Hpbar* m_pHpbar = NULL;
 private:
 	CPlayer* pPlayer = NULL;
 };

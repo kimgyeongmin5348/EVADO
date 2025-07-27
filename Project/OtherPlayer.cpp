@@ -96,7 +96,6 @@ void OtherPlayer::Animate(int animation, float fTimeElapsed)
 			break;
 		}
 	}
-	cout << "animation - " << currentAnim << ", target - " << targetAnim << endl;
 	CGameObject::Animate(fTimeElapsed);
 }
 

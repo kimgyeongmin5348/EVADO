@@ -931,8 +931,12 @@ void CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 			for (int i = 5; i < 10; ++i)
 				dynamic_cast<CTextureToScreenShader*>(m_ppShaders[i])->visible = isShop;
 			break;
+		case VK_UP:
+			dynamic_cast<CTerrainPlayer*>(m_pPlayer)->currentHP -= 10.f;
+			break;
 		}
 		break;
+		
 	default:
 		break;
 	}

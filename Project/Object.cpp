@@ -1559,8 +1559,8 @@ CSpider::CSpider(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dComman
 	SetChild(pSpiderModel->m_pModelRootObject, true);
 	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, nAnimationTracks, pSpiderModel);
 
-	Hpbar *pHpbar = new Hpbar(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-	m_pHpbar = pHpbar;
+	//Hpbar *pHpbar = new Hpbar(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	//m_pHpbar = pHpbar;
 }
 
 CSpider::~CSpider()
@@ -1623,8 +1623,8 @@ void CSpider::Animate(float fTimeElapsed)
 void CSpider::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	XMFLOAT3 hpbarPos = GetPosition();
-	m_pHpbar->SetPosition(hpbarPos);
-	m_pHpbar->Render(pd3dCommandList, pCamera);
+	//m_pHpbar->SetPosition(hpbarPos);
+	//m_pHpbar->Render(pd3dCommandList, pCamera);
 
 	CGameObject::Render(pd3dCommandList, pCamera);
 }

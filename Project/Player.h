@@ -164,6 +164,12 @@ public:
 
 	int debt = 10000;
 
+	CTextureToScreenShader* m_playerHP = NULL;
+	float currentHP = 100.f;
+	ID3D12Device* device = nullptr; 
+	ID3D12GraphicsCommandList* cmdList = nullptr;
+	void SetHPWidth(float newWidth);
+
 	void PlayAnimationTrack(int trackIndex, float speed = 1.0f);
 	bool IsAnimationFinished(int trackIndex);
 
