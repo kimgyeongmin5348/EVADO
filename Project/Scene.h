@@ -155,6 +155,8 @@ public:
 
 	CParticle							*m_pEffect = NULL;
 	
+	POINT m_ptPos;
+
 public:
 
 	//server
