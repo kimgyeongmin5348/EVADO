@@ -181,7 +181,7 @@ public:
 	}
 	void UpdateOtherPlayerAnimation(int clientnum, int animNum)
 	{
-		m_ppOtherPlayers[clientnum]->animation = animNum;
+		m_ppOtherPlayers[clientnum]->targetAnim = animNum;
 	}
 	void UpdateOtherPlayerRotate(int clinetnum, XMFLOAT3 right, XMFLOAT3 look)
 	{
