@@ -14,7 +14,7 @@ CParticle::CParticle(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
     CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
     CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-    pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/effect.dds", RESOURCE_TEXTURE2D, 0);
+    pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/hp.dds", RESOURCE_TEXTURE2D, 0);
 
     CCubeShader *pShader = new CCubeShader();
     pShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);

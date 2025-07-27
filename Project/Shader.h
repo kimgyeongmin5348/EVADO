@@ -6,6 +6,7 @@
 
 #include "Object.h"
 #include "Camera.h"
+#include "CText.h"
 
 class CShader
 {
@@ -91,6 +92,20 @@ public:
 	void SetTexture(CTexture* pTexture);
 
 	void SetVisible(bool b) { visible = b; }
+};
+
+class CShopShader : public CTextureToScreenShader
+{
+public:
+	CShopShader(int nMeshes) : CTextureToScreenShader(nMeshes) {}
+
+	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, void* pContext = NULL);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+	virtual void AnimateObjects(float fTimeElapsed);
+	virtual void ReleaseObjects();
+
+	CText* m_pPrice[4] = { NULL };
+	std::wstring price[4] = { L"0",L"0" ,L"0" ,L"0" };
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

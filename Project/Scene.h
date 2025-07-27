@@ -84,6 +84,8 @@ public:
 	void SetPlayer(CPlayer* pPlayer) { m_pPlayer = pPlayer; }
 	CPlayer* GetPlayer() { return(m_pPlayer); }
  
+	bool isShop = false;
+
 	ID3D12RootSignature						*m_pd3dGraphicsRootSignature = NULL;
 	ID3D12Device* Device = NULL;
 	ID3D12GraphicsCommandList* Commandlist = NULL;

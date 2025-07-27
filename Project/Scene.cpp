@@ -192,6 +192,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_ppGameObjects[0]->Rotate(90, 0, 0);
 	//m_ppHierarchicalGameObjects[1]->SetPosition(3, 2, 10);
 	m_ppGameObjects[0]->SetFrameName("FlashLight");
+	m_ppGameObjects[0]->price = 80;
 	if (pFlashlightModel) delete pFlashlightModel;
 
 	CLoadedModelInfo* pShovelModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Shovel.bin", NULL);
@@ -200,6 +201,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_ppGameObjects[1]->Rotate(0, 0, 90);
 	//m_ppHierarchicalGameObjects[2]->SetPosition(3, 2, 12);
 	m_ppGameObjects[1]->SetFrameName("Shovel");
+	m_ppGameObjects[1]->price = 80;
 	if (pShovelModel) delete pShovelModel;
 
 	CLoadedModelInfo* pWhistleModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Whistle.bin", NULL);
@@ -207,6 +209,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_ppGameObjects[2]->SetScale(1, 1, 1);
 	//m_ppHierarchicalGameObjects[3]->SetPosition(3, 2, 13);
 	m_ppGameObjects[2]->SetFrameName("Whistle");
+	m_ppGameObjects[2]->price = 30;
 	if (pWhistleModel) delete pWhistleModel;
 
 	m_nOtherPlayers = 1;
@@ -231,14 +234,14 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	if (pOtherPlayerModel) delete pOtherPlayerModel;
 
-	// 인벤토리 UI
-	m_nShaders = 5;
+	// 인벤토리 UI 및 상점
+	m_nShaders = 10;
 	m_ppShaders = new CShader * [m_nShaders];
 
 	CTexture* pTextureinven = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	pTextureinven->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/effect.dds", RESOURCE_TEXTURE2D, 0);
+	pTextureinven->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/inven.dds", RESOURCE_TEXTURE2D, 0);
 	CreateShaderResourceViews(pd3dDevice, pTextureinven, 0, 15);
-	m_textureMap["effect"] = pTextureinven;
+	m_textureMap["inven"] = pTextureinven;
 
 	CTexture* pTextureItem1 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
 	pTextureItem1->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Shovel.dds", RESOURCE_TEXTURE2D, 0);
@@ -279,7 +282,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	CTextureToScreenShader* pTextureItem4Shader = new CTextureToScreenShader(1);
 	pTextureItem4Shader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	CTexture* pTextureItem4 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	pTextureItem4->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/effect.dds", RESOURCE_TEXTURE2D, 0);
+	pTextureItem4->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/inven.dds", RESOURCE_TEXTURE2D, 0);
 	CreateShaderResourceViews(pd3dDevice, pTextureItem4, 0, 15);
 	CScreenRectMeshTextured* pMesh3 = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, 0.02f + 0.375f, 0.225f * 0.5f, -0.65f, 0.4f * 0.5f);
 	pTextureItem4Shader->SetMesh(0, pMesh3);
@@ -295,6 +298,54 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	pInventoryShader->SetMesh(0, pInventoryMesh);
 	pInventoryShader->SetTexture(pTexture);
 	m_ppShaders[4] = pInventoryShader;
+
+	//상점
+	CShopShader* pShopShader = new CShopShader(1);
+	pShopShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	pShopShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL, NULL);
+
+	CTexture* pShopTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pShopTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/shop.dds", RESOURCE_TEXTURE2D, 0);
+	CreateShaderResourceViews(pd3dDevice, pShopTexture, 0, 15);
+	CScreenRectMeshTextured* pShopMesh = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, -0.9f, 0.5f, 0.8f, 0.7f);
+	pShopShader->SetMesh(0, pShopMesh);
+	pShopShader->SetTexture(pShopTexture);
+	pShopShader->SetVisible(false);
+
+	m_ppShaders[5] = pShopShader;
+
+	//상점 4칸
+	CTextureToScreenShader* pShopSpace1Shader = new CTextureToScreenShader(1);
+	pShopSpace1Shader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	CScreenRectMeshTextured* pShopMesh1 = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, -0.825f, 0.08f, 0.625f, 0.09f);
+	pShopSpace1Shader->SetMesh(0, pShopMesh1);
+	pShopSpace1Shader->SetTexture(pTextureinven);
+	pShopSpace1Shader->SetVisible(false);
+	m_ppShaders[6] = pShopSpace1Shader;
+
+	CTextureToScreenShader* pShopSpace2Shader = new CTextureToScreenShader(1);
+	pShopSpace2Shader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	CScreenRectMeshTextured* pShopMesh2 = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, -0.825f, 0.08f, 0.505f, 0.09f);
+	pShopSpace2Shader->SetMesh(0, pShopMesh2);
+	pShopSpace2Shader->SetTexture(pTextureinven);
+	pShopSpace2Shader->SetVisible(false);
+	m_ppShaders[7] = pShopSpace2Shader;
+
+	CTextureToScreenShader* pShopSpace3Shader = new CTextureToScreenShader(1);
+	pShopSpace3Shader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	CScreenRectMeshTextured* pShopMesh3 = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, -0.825f, 0.08f, 0.385f, 0.09f);
+	pShopSpace3Shader->SetMesh(0, pShopMesh3);
+	pShopSpace3Shader->SetTexture(pTextureinven);
+	pShopSpace3Shader->SetVisible(false);
+	m_ppShaders[8] = pShopSpace3Shader;
+
+	CTextureToScreenShader* pShopSpace4Shader = new CTextureToScreenShader(1);
+	pShopSpace4Shader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	CScreenRectMeshTextured* pShopMesh4 = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, -0.825f, 0.08f, 0.265f, 0.09f);
+	pShopSpace4Shader->SetMesh(0, pShopMesh4);
+	pShopSpace4Shader->SetTexture(pTextureinven);
+	pShopSpace4Shader->SetVisible(false);
+	m_ppShaders[9] = pShopSpace4Shader;
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
@@ -752,7 +803,7 @@ void CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 				// 손 위치에 맞게 조정
 				if (pItem == pItem->FindFrame("Shovel")) pItem->SetPosition(0.05f, -0.05f, 1.f);
 				else pItem->SetPosition(0.05f, -0.05f, 0.1f);
-				dynamic_cast<CTerrainPlayer*>(m_pPlayer)->debt += 800;
+				//dynamic_cast<CTerrainPlayer*>(m_pPlayer)->debt += pItem->price; 빚 변동
 				m_pPlayer->UpdateTransform(nullptr);
 
 				int newIndex = static_cast<int>(m_pPlayer->m_pHeldItems.size());
@@ -765,8 +816,13 @@ void CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 				if (it != m_textureMap.end())
 				{
 					auto* pShader = dynamic_cast<CTextureToScreenShader*>(m_ppShaders[newIndex]);
+					auto* pShader1 = dynamic_cast<CTextureToScreenShader*>(m_ppShaders[newIndex+6]);
 					if (pShader) {
 						pShader->SetTexture(it->second);
+					}if (pShader1) {
+						pShader1->SetTexture(it->second);
+						std::wstring priceStr = std::to_wstring(pItem->price);
+						dynamic_cast<CShopShader*>(m_ppShaders[5])->price[newIndex] = priceStr;
 					}
 				}
 
@@ -809,12 +865,16 @@ void CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 						m_pPlayer->RemoveHeldItem(pItem);
 
 						// 아이콘 숨기기
-						auto it = m_textureMap.find("effect");
+						auto it = m_textureMap.find("inven");
 						if (it != m_textureMap.end())
 						{
 							auto* pShader = dynamic_cast<CTextureToScreenShader*>(m_ppShaders[index]);
+							auto* pShader1 = dynamic_cast<CTextureToScreenShader*>(m_ppShaders[index+6]);
 							if (pShader) {
 								pShader->SetTexture(it->second);
+							}if (pShader1) {
+								pShader1->SetTexture(it->second);
+								dynamic_cast<CShopShader*>(m_ppShaders[5])->price[index] = L"0";
 							}
 						}
 
@@ -825,8 +885,12 @@ void CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 
 			break;
 		}
-
-		break;
+			break;
+		case VK_TAB:		
+			isShop = !isShop;
+			for (int i = 5; i < 10; ++i)
+				dynamic_cast<CTextureToScreenShader*>(m_ppShaders[i])->visible = isShop;
+			break;
 		}
 		break;
 	default:
