@@ -657,10 +657,10 @@ void CTextureToScreenShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, 
 
 void CShopShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, void* pContext)
 {
-	m_pPrice[0] = new CText(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, L"$ ", -0.795f, 0.700f);
-	m_pPrice[1] = new CText(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, L"$ ", -0.795f, 0.575f);
-	m_pPrice[2] = new CText(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, L"$ ", -0.795f, 0.450f);
-	m_pPrice[3] = new CText(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, L"$ ", -0.795f, 0.325f);
+	m_pPrice[0] = new CText(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, L"$ ", -0.755f, 0.635f);
+	m_pPrice[1] = new CText(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, L"$ ", -0.755f, 0.510f);
+	m_pPrice[2] = new CText(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, L"$ ", -0.755f, 0.385f);
+	m_pPrice[3] = new CText(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, L"$ ", -0.755f, 0.260f);
 }
 
 void CShopShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)

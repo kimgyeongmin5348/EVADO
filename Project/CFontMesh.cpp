@@ -13,7 +13,7 @@ CFontMesh::CFontMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
     if (m_pd3dPositionUploadBuffer) m_pd3dPositionUploadBuffer->Release();
 
     const float charSize = 0.1f;
-    const float spacing = 0.05f;
+    const float spacing = 0.025f;
     m_nVertices = 6 * count;
 
     CTexturedVertex* vertices = new CTexturedVertex[m_nVertices];

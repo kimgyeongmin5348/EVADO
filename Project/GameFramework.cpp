@@ -289,43 +289,27 @@ void CGameFramework::ChangeSwapChainState()
 void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
 	if (m_pScene) m_pScene->OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
-	if (!isStartScene) {
-		switch (nMessageID)
-		{
-		case WM_LBUTTONDOWN:
-		case WM_RBUTTONDOWN:
-			break;
-		case WM_LBUTTONUP:
-		case WM_RBUTTONUP:
-			//::ReleaseCapture();
-			break;
-		case WM_MOUSEMOVE:
-			::SetCapture(hWnd);
-			::GetCursorPos(&m_ptOldCursorPos);
-			//
-			break;
-		default:
-			break;
-		}
+
+	switch (nMessageID)
+	{
+	case WM_LBUTTONDOWN:
+	case WM_RBUTTONDOWN:
+		cout << m_ptOldCursorPos.x << ", " << m_ptOldCursorPos.y << endl;
+		::SetCapture(hWnd);
+		::GetCursorPos(&m_ptOldCursorPos);
+		break;
+	case WM_LBUTTONUP:
+	case WM_RBUTTONUP:
+		::ReleaseCapture();
+		break;
+	case WM_MOUSEMOVE:
+		//::SetCapture(hWnd);
+		//::GetCursorPos(&m_ptOldCursorPos);
+		break;
+	default:
+		break;
 	}
-	else {
-		switch (nMessageID)
-		{
-		case WM_LBUTTONDOWN:
-		case WM_RBUTTONDOWN:
-			::SetCapture(hWnd);
-			::GetCursorPos(&m_ptOldCursorPos);
-			break;
-		case WM_LBUTTONUP:
-		case WM_RBUTTONUP:
-			::ReleaseCapture();
-			break;
-		case WM_MOUSEMOVE:
-			break;
-		default:
-			break;
-		}
-	}
+
 }
 
 void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
@@ -689,7 +673,7 @@ void CGameFramework::ProcessInput()
 	{
 		float cxDelta = 0.0f, cyDelta = 0.0f;
 		POINT ptCursorPos;
-		if (GetCapture() == m_hWnd)
+		if (GetCapture() == m_hWnd && !(m_pScene && m_pScene->isShop))
 		{
 			SetCursor(NULL);
 			GetCursorPos(&ptCursorPos);
@@ -771,7 +755,6 @@ void CGameFramework::AnimateObjects()
 	if (m_pScene) { 
 		m_pScene->AnimateObjects(fTimeElapsed);
 		if (m_pScene->m_ppOtherPlayers) m_pScene->m_ppOtherPlayers[0]->Animate(m_pScene->m_ppOtherPlayers[0]->animation, fTimeElapsed);
-
 	}
 
 	m_pPlayer->Animate(fTimeElapsed);

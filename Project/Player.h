@@ -64,7 +64,7 @@ public:
 	bool	alreadyHeld = false;
 
 	// 아이템
-	int m_nSelectedInventoryIndex = 0;  // 기본값은 0번 (1번 슬롯)
+	int m_nSelectedInventoryIndex = -1;  // 기본값은 0번 (1번 슬롯)
 	std::vector<CGameObject*> m_pHeldItems;
 	bool bflashlight = false;
 	void RemoveHeldItem(CGameObject* pItem);
@@ -139,15 +139,6 @@ public:
 //public:
 //	virtual void HandleCallback(void *pCallbackData, float fTrackPosition); 
 //};
-
-struct AnimationBlend
-{
-	int from = -1;
-	int to = -1;
-	float duration = 0.5f; // 블렌딩 시간
-	float elapsed = 0.0f;
-	bool active = false;
-};
 
 class CTerrainPlayer : public CPlayer
 {
