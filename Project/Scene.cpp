@@ -705,41 +705,75 @@ void CScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam,
 	{
 	case WM_LBUTTONDOWN:
 	{
-		int index = m_pPlayer->m_nSelectedInventoryIndex;
+		if (!isShop) {
+			int index = m_pPlayer->m_nSelectedInventoryIndex;
 
-		// 손에 든 아이템 인덱스 유효성 검사
-		if (index < 0 || index >= 4) break;
+			// 손에 든 아이템 인덱스 유효성 검사
+			if (index < 0 || index >= 4) break;
 
-		CGameObject* pHeldItem = m_pPlayer->m_pHeldItems[index];
-		if (!pHeldItem) break;
+			CGameObject* pHeldItem = m_pPlayer->m_pHeldItems[index];
+			if (!pHeldItem) break;
 
-		char* frameName = pHeldItem->GetFrameName();
+			char* frameName = pHeldItem->GetFrameName();
 
-		if (!strcmp(frameName, "FlashLight"))
-		{
-			m_pPlayer->bflashlight = !m_pPlayer->bflashlight;
-			BuildDefaultLightsAndMaterials(m_pPlayer->bflashlight);
-		}
-		else if (!strcmp(frameName, "Shovel"))
-		{
-			dynamic_cast<CTerrainPlayer*>(m_pPlayer)->m_currentAnim = AnimationState::SWING;
-			uint8_t currentAnimState = static_cast<uint8_t>(dynamic_cast<CTerrainPlayer*>(m_pPlayer)->m_currentAnim);
-
-			cout << "CScene - anim" << currentAnimState << endl;
-
-			if (m_pPlayer->m_isMonsterHit)
+			if (!strcmp(frameName, "FlashLight"))
 			{
-				m_pEffect->Activate(m_ppGameObjects[1]->GetPosition());
+				m_pPlayer->bflashlight = !m_pPlayer->bflashlight;
+				BuildDefaultLightsAndMaterials(m_pPlayer->bflashlight);
+			}
+			else if (!strcmp(frameName, "Shovel"))
+			{
+				dynamic_cast<CTerrainPlayer*>(m_pPlayer)->m_currentAnim = AnimationState::SWING;
+				uint8_t currentAnimState = static_cast<uint8_t>(dynamic_cast<CTerrainPlayer*>(m_pPlayer)->m_currentAnim);
 
-				CSpider* pSpider = dynamic_cast<CSpider*>(m_ppHierarchicalGameObjects[0]);
-				if (pSpider)
+				cout << "CScene - anim" << currentAnimState << endl;
+
+				if (m_pPlayer->m_isMonsterHit)
 				{
-					pSpider->MonsterHP -= 25.0f;
+					m_pEffect->Activate(m_ppGameObjects[1]->GetPosition());
+
+					CSpider* pSpider = dynamic_cast<CSpider*>(m_ppHierarchicalGameObjects[0]);
+					if (pSpider)
+					{
+						pSpider->MonsterHP -= 25.0f;
+					}
+				}
+				break;
+			}
+		}
+		else {
+			// 상점 판매 버튼 클릭
+			const RECT rt[4] =
+			{
+				{450, 240, 550, 265},
+				{450, 310, 550, 335},
+				{450, 370, 550, 395},
+				{450, 440, 550, 465}
+			};
+
+			for (int i = 0; i < 4; ++i) {
+				if (PtInRect(&rt[i], m_ptPos)) {
+					if (m_pPlayer->m_pHeldItems[i]->price > 0) {
+						dynamic_cast<CTerrainPlayer*>(m_pPlayer)->debt -= m_pPlayer->m_pHeldItems[i]->price;
+						auto it = m_textureMap.find("inven");
+						if (it != m_textureMap.end())
+						{
+							auto* pShader = dynamic_cast<CTextureToScreenShader*>(m_ppShaders[i]);
+							auto* pShader1 = dynamic_cast<CTextureToScreenShader*>(m_ppShaders[i + 6]);
+							if (pShader) {
+								pShader->SetTexture(it->second);
+							}if (pShader1) {
+								pShader1->SetTexture(it->second);
+								dynamic_cast<CShopShader*>(m_ppShaders[5])->price[i] = L"0";
+							}
+							// 오브젝트도 삭제해야함
+						}
+					}
 				}
 			}
-			break;
 		}
 	}
+	break;
 	}
 }
 

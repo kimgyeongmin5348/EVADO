@@ -680,7 +680,7 @@ void CGameFramework::ProcessInput()
 			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 3.0f;
 			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
 		}
-
+		m_pScene->m_ptPos = m_ptOldCursorPos;
 		DWORD dwDirection = 0;
 		if (pKeysBuffer['W'] & 0xF0) dwDirection |= DIR_FORWARD;
 		if (pKeysBuffer['S'] & 0xF0) dwDirection |= DIR_BACKWARD;
