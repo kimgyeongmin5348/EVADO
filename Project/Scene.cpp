@@ -165,6 +165,12 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_ppHierarchicalGameObjects = new CGameObject * [m_nHierarchicalGameObjects];
 
 	CLoadedModelInfo* pSpiderModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Spider.bin", NULL);
+	XMFLOAT3 monsterPos[4] = {
+		{32, 0, -8},
+		{-54, 0, -90},
+		{4, 0, -50},
+		{-46, 0,-42}
+	};
 	for (int i = 0; i < m_nHierarchicalGameObjects; ++i)
 	{
 		m_ppHierarchicalGameObjects[i] = new CSpider(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pSpiderModel, 3);
@@ -174,7 +180,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 		m_ppHierarchicalGameObjects[i]->m_pSkinnedAnimationController->SetTrackEnable(1, false);
 		m_ppHierarchicalGameObjects[i]->m_pSkinnedAnimationController->SetTrackEnable(2, false);
 
-		m_ppHierarchicalGameObjects[i]->SetPosition(3.0f, 0.0f, 30.0f);
+		m_ppHierarchicalGameObjects[i]->SetPosition(monsterPos[i]);
 		m_ppHierarchicalGameObjects[i]->Rotate(0, 180, 0);
 
 		std::string spiderName = "Spider" + std::to_string(i);
