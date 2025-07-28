@@ -185,8 +185,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 		m_ppMonsters[i]->m_pSkinnedAnimationController->SetTrackEnable(4, false);
 
 		m_ppMonsters[i]->SetPosition(monsterPos[i]);
-		m_ppMonsters[i]->SetScale(2, 2, 2);
-		m_ppMonsters[i]->Rotate(0, 180, 0);
+		m_ppMonsters[i]->SetScale(5, 5, 5);
 
 		std::string spiderName = "Spider" + std::to_string(i);
 		m_ppMonsters[i]->SetFrameName(spiderName.c_str());
