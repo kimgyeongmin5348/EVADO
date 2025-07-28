@@ -163,7 +163,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	m_nMonster = 4; // spider
 	m_ppMonsters = new CGameObject * [m_nMonster];
-
+	int monsterID[4] = { 10001,10002,10003,10004 };
 	CLoadedModelInfo* pSpiderModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/spider_myOldOne.bin", NULL);
 	XMFLOAT3 monsterPos[4] = {
 		{27, 0, -2},
@@ -765,6 +765,10 @@ void CScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam,
 				if (PtInRect(&rt[i], m_ptPos)) {
 					if (m_pPlayer->m_pHeldItems[i]->price > 0) {
 						dynamic_cast<CTerrainPlayer*>(m_pPlayer)->debt -= m_pPlayer->m_pHeldItems[i]->price;
+						int objectIndex = -1;
+						for (int j = 0; j < m_nGameObjects; ++j)
+							if (m_ppGameObjects[j]->GetFrameName() == m_pPlayer->m_pHeldItems[i]->GetFrameName())
+								objectIndex = j;
 						auto it = m_textureMap.find("inven");
 						if (it != m_textureMap.end())
 						{
@@ -777,6 +781,7 @@ void CScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam,
 								dynamic_cast<CShopShader*>(m_ppShaders[5])->price[i] = L"0";
 							}
 							// 오브젝트도 삭제해야함
+							if (objectIndex > -1) m_ppGameObjects[objectIndex] = nullptr;
 						}
 					}
 				}
@@ -978,7 +983,7 @@ void CScene::AnimateObjects(float fTimeElapsed)
 		m_pLights[1].m_xmf3Direction = m_pPlayer->GetLookVector();
 	}
 
-	if (m_pEffect) m_pEffect->Animate(fTimeElapsed, m_ppGameObjects[1]->GetPosition());
+	if (m_pEffect&& m_ppGameObjects[1]) m_pEffect->Animate(fTimeElapsed, m_ppGameObjects[1]->GetPosition());
 }
 
 void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera)
