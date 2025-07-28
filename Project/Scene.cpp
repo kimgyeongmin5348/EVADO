@@ -166,7 +166,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	CLoadedModelInfo* pSpiderModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/spider_myOldOne.bin", NULL);
 	XMFLOAT3 monsterPos[4] = {
-		{32, 0, -8},
+		{27, 0, -2},
 		{-54, 0, -90},
 		{4, 0, -50},
 		{-46, 0,-42}
@@ -937,6 +937,10 @@ void CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 			break;
 		case VK_UP:
 			dynamic_cast<CTerrainPlayer*>(m_pPlayer)->currentHP -= 10.f;
+			//for (int i = 0; i < 4; ++i) {
+			//	XMFLOAT3 pos = m_ppMonsters[i]->GetPosition();
+			//	cout << i << "번 몬스터 x - " << pos.x << ", y - " << pos.y << ", z - " << pos.z << endl;
+			//}
 			break;
 		}
 		break;

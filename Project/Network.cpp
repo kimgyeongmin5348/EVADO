@@ -267,13 +267,13 @@ void ProcessPacket(char* ptr)
         g_myid = packet->id;
         //player.SetPosition(packet->position);
 
-        //std::cout << "[Client] My Player : " << packet->id << std::endl;
-        //std::cout << "[Client] My Player Information ID:" << packet->id
-        //    << " Positino(" << packet->position.x << "," << packet->position.y << "," << packet->position.z << ")"
-        //    << " Look(" << packet->look.x << "," << packet->look.y << "," << packet->look.z << ")"
-        //    << " Right(" << packet->right.x << "," << packet->right.y << "," << packet->right.z << ")"
-        //    << "Animation : " << static_cast<int>(packet->animState) << ", HP : " << packet->hp
-        //    << std::endl;
+  /*      std::cout << "[Client] My Player : " << packet->id << std::endl;
+        std::cout << "[Client] My Player Information ID:" << packet->id
+            << " Positino(" << packet->position.x << "," << packet->position.y << "," << packet->position.z << ")"
+            << " Look(" << packet->look.x << "," << packet->look.y << "," << packet->look.z << ")"
+            << " Right(" << packet->right.x << "," << packet->right.y << "," << packet->right.z << ")"
+            << "Animation : " << static_cast<int>(packet->animState) << ", HP : " << packet->hp
+            << std::endl;*/
         break;
     }
     
@@ -284,13 +284,13 @@ void ProcessPacket(char* ptr)
 
         if (id == g_myid) break;
 
-        //std::cout << "[Client] New Player " << id << "Connect " << "\n";
-        //std::cout << "[Client] New Player Information Recv "
-        //    << " Position(" << packet->position.x << "," << packet->position.y << "," << packet->position.z << ")"
-        //    << " Look(" << packet->look.x << "," << packet->look.y << "," << packet->look.z << ")"
-        //    << " Right(" << packet->right.x << "," << packet->right.y << "," << packet->right.z << ")"
-        //    << "Animation : " << static_cast<int>(packet->animState) << "HP : " << packet->hp
-        //    << std::endl;
+        std::cout << "[Client] New Player " << id << "Connect " << "\n";
+        std::cout << "[Client] New Player Information Recv "
+            << " Position(" << packet->position.x << "," << packet->position.y << "," << packet->position.z << ")"
+            << " Look(" << packet->look.x << "," << packet->look.y << "," << packet->look.z << ")"
+            << " Right(" << packet->right.x << "," << packet->right.y << "," << packet->right.z << ")"
+            << "Animation : " << static_cast<int>(packet->animState) << "HP : " << packet->hp
+            << std::endl;
 
         // 씬에 OtherPlayer가 딱 나타난다
         gGameFramework.OnOtherClientConnected();
@@ -313,12 +313,12 @@ void ProcessPacket(char* ptr)
             gGameFramework.UpdateOtherPlayerRotate(0, packet->right, packet->look);
         }
 
-        //std::cout << "[Client] New Player Information Recv "
-        //    << " Position(" << packet->position.x << "," << packet->position.y << "," << packet->position.z << ")"
-        //    << " Look(" << packet->look.x << "," << packet->look.y << "," << packet->look.z << ")"
-        //    << " Right(" << packet->right.x << "," << packet->right.y << "," << packet->right.z << ")"
-        //    << "Animation : " << static_cast<int>(packet->animState)
-        //    << std::endl;
+        std::cout << "[Client] New Player Information Recv "
+            << " Position(" << packet->position.x << "," << packet->position.y << "," << packet->position.z << ")"
+            << " Look(" << packet->look.x << "," << packet->look.y << "," << packet->look.z << ")"
+            << " Right(" << packet->right.x << "," << packet->right.y << "," << packet->right.z << ")"
+            << "Animation : " << static_cast<int>(packet->animState)
+            << std::endl;
 
         break;
     }
