@@ -3,9 +3,9 @@
 
 Map::Map(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
 {
-	//LoadMapObjectsFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-	//LoadGeometryFromFile();
-	//SetMapObjects();
+	LoadMapObjectsFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	LoadGeometryFromFile();
+	SetMapObjects();
 
 	//cout << "[ m_vLoadedModelInfo ]" << endl;
 	//for (auto& a : m_vLoadedModelInfo) {
