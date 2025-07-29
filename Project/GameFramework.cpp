@@ -883,7 +883,7 @@ void CGameFramework::FrameAdvance()
 	dxgiPresentParameters.pDirtyRects = NULL;
 	dxgiPresentParameters.pScrollRect = NULL;
 	dxgiPresentParameters.pScrollOffset = NULL;
-	m_pdxgiSwapChain->Present1(1, 0, &dxgiPresentParameters);
+	m_pdxgiSwapChain->Present1(1, 0, &dxgiPresentParameters); 
 #else
 #ifdef _WITH_SYNCH_SWAPCHAIN
 	m_pdxgiSwapChain->Present(1, 0);
@@ -901,3 +901,56 @@ void CGameFramework::FrameAdvance()
 	::SetWindowText(m_hWnd, m_pszFrameRate);
 }
 
+void CGameFramework::OnMonsterSpawned(int monsterID, const XMFLOAT3& pos, int state)
+{
+	auto it = g_monsters.find(monsterID);
+	if (it != g_monsters.end())
+	{
+		// 기존 몬스터 위치/상태/HP 갱신
+		it->second->SetPosition(pos);
+		UpdateMonsterState(it->second, state);
+	}
+	else
+	{
+		//// 몬스터 객체 새로 생성 (생성자 파라미터는 적절히 수정)
+		//CSpider* pMonster = new CSpider(pd3dDevice, pd3dCommandList, pRootSignature, pModel, 5);
+		//pMonster->SetPosition(pos);
+		//UpdateMonsterState(pMonster, state);
+
+
+		//g_monsters[monsterID] = pMonster;
+
+		//// 씬에서 관리하는 리스트나 배열에도 추가할 수 있음
+	}
+}
+
+void CGameFramework::UpdateMonsterState(CSpider* pMonster, int state)
+{
+	// 애니메이션 트랙 설정 등
+	for (int i = 0; i < 5; ++i)
+		pMonster->m_pSkinnedAnimationController->SetTrackEnable(i, false);
+
+	switch (state)
+	{
+	case 0: pMonster->m_pSkinnedAnimationController->SetTrackEnable(0, true); break; // idle
+	case 1: pMonster->m_pSkinnedAnimationController->SetTrackEnable(1, true); break; // walk
+	case 2: pMonster->m_pSkinnedAnimationController->SetTrackEnable(2, true); break; // run
+	case 3: pMonster->m_pSkinnedAnimationController->SetTrackEnable(3, true); break; // attack
+	case 4: pMonster->m_pSkinnedAnimationController->SetTrackEnable(4, true); break; // death
+	default: break;
+	}
+}
+
+void CGameFramework::UpdateMonsterPosition(int monsterID, const XMFLOAT3& pos, int state)
+{
+	auto it = g_monsters.find(monsterID);
+	if (it == g_monsters.end())
+	{
+		std::cout << "[Error] Monster ID not found: " << monsterID << std::endl;
+		return;
+	}
+
+	CSpider* pMonster = it->second;
+	pMonster->SetPosition(pos);
+	UpdateMonsterState(pMonster, state);
+}

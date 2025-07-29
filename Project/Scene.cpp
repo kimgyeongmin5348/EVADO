@@ -3,6 +3,13 @@
 //-----------------------------------------------------------------------------
 #include "stdafx.h"
 #include "Scene.h"
+<<<<<<< Updated upstream
+=======
+#include "Network.h"
+#include "GameFramework.h"
+
+extern CGameFramework gGameFramework;
+>>>>>>> Stashed changes
 
 ID3D12DescriptorHeap *CScene::m_pd3dCbvSrvDescriptorHeap = NULL;
 
@@ -151,6 +158,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	m_pEffect = new CParticle(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
+<<<<<<< Updated upstream
 	m_nHierarchicalGameObjects = 4; // spider, flashlight, shovel, whistle
 	m_ppHierarchicalGameObjects = new CGameObject * [m_nHierarchicalGameObjects];
 
@@ -164,6 +172,41 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_ppHierarchicalGameObjects[0]->SetPosition(3, 0, 30);
 	m_ppHierarchicalGameObjects[0]->Rotate(0, 180, 0);
 	m_ppHierarchicalGameObjects[0]->SetFrameName("Spider");
+=======
+	m_nMonster = 4; // spider
+	m_ppMonsters = new CGameObject * [m_nMonster];
+	int monsterIDs[4] = { 10001,10002,10003,10004 };
+	CLoadedModelInfo* pSpiderModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/spider_myOldOne.bin", NULL);
+	XMFLOAT3 monsterPos[4] = {
+		{27, 0, -2},
+		{-54, 0, -90},
+		{4, 0, -50},
+		{-46, 0,-42}
+	};
+	for (int i = 0; i < m_nMonster; ++i)
+	{
+		m_ppMonsters[i] = new CSpider(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pSpiderModel, 5);
+		m_ppMonsters[i]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0); //idle
+		m_ppMonsters[i]->m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1); //walk
+		m_ppMonsters[i]->m_pSkinnedAnimationController->SetTrackAnimationSet(2, 2); //run
+		m_ppMonsters[i]->m_pSkinnedAnimationController->SetTrackAnimationSet(3, 3); //attack
+		m_ppMonsters[i]->m_pSkinnedAnimationController->SetTrackAnimationSet(4, 4); //death
+		m_ppMonsters[i]->m_pSkinnedAnimationController->SetTrackEnable(1, false);
+		m_ppMonsters[i]->m_pSkinnedAnimationController->SetTrackEnable(2, false);
+		m_ppMonsters[i]->m_pSkinnedAnimationController->SetTrackEnable(3, false);
+		m_ppMonsters[i]->m_pSkinnedAnimationController->SetTrackEnable(4, false);
+
+		m_ppMonsters[i]->SetPosition(monsterPos[i]);
+		m_ppMonsters[i]->SetScale(3, 3, 3);
+
+		std::string spiderName = "Spider" + std::to_string(i);
+		m_ppMonsters[i]->SetFrameName(spiderName.c_str());
+
+		static_cast<CSpider*>(m_ppMonsters[i])->SetMonsterID(monsterIDs[i]);
+		g_monsters[monsterIDs[i]] = static_cast<CSpider*>(m_ppMonsters[i]);
+
+	}
+>>>>>>> Stashed changes
 
 	if (pSpiderModel) delete pSpiderModel;
 
