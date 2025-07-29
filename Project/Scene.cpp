@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 #include "stdafx.h"
 #include "Scene.h"
+#include "Network.h"
 #include "GameFramework.h"
 
 extern CGameFramework gGameFramework;
@@ -161,9 +162,25 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	m_pEffect = new CParticle(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
+
+	m_nHierarchicalGameObjects = 4; // spider, flashlight, shovel, whistle
+	m_ppHierarchicalGameObjects = new CGameObject * [m_nHierarchicalGameObjects];
+
+	CLoadedModelInfo* pSpiderModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Spider.bin", NULL);
+	m_ppHierarchicalGameObjects[0] = new CSpider(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pSpiderModel, 3);
+	m_ppHierarchicalGameObjects[0]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+	m_ppHierarchicalGameObjects[0]->m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1);
+	m_ppHierarchicalGameObjects[0]->m_pSkinnedAnimationController->SetTrackAnimationSet(2, 2);
+	m_ppHierarchicalGameObjects[0]->m_pSkinnedAnimationController->SetTrackEnable(1, false);
+	m_ppHierarchicalGameObjects[0]->m_pSkinnedAnimationController->SetTrackEnable(2, false);
+	m_ppHierarchicalGameObjects[0]->SetPosition(3, 0, 30);
+	m_ppHierarchicalGameObjects[0]->Rotate(0, 180, 0);
+	m_ppHierarchicalGameObjects[0]->SetFrameName("Spider");
+
 	m_nMonster = 4; // spider
 	m_ppMonsters = new CGameObject * [m_nMonster];
 	int monsterID[4] = { 10001,10002,10003,10004 };
+
 	CLoadedModelInfo* pSpiderModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/spider_myOldOne.bin", NULL);
 	XMFLOAT3 monsterPos[4] = {
 		{27, 0, -2},
@@ -185,11 +202,16 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 		m_ppMonsters[i]->m_pSkinnedAnimationController->SetTrackEnable(4, false);
 
 		m_ppMonsters[i]->SetPosition(monsterPos[i]);
-		m_ppMonsters[i]->SetScale(5, 5, 5);
+		m_ppMonsters[i]->SetScale(3, 3, 3);
 
 		std::string spiderName = "Spider" + std::to_string(i);
 		m_ppMonsters[i]->SetFrameName(spiderName.c_str());
+
+		static_cast<CSpider*>(m_ppMonsters[i])->SetMonsterID(monsterIDs[i]);
+		g_monsters[monsterIDs[i]] = static_cast<CSpider*>(m_ppMonsters[i]);
+
 	}
+
 
 	if (pSpiderModel) delete pSpiderModel;
 
