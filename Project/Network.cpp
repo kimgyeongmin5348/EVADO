@@ -264,8 +264,10 @@ void ProcessPacket(char* ptr)
     case SC_P_USER_INFO: // 클라이언트의 정보를 가지고 있는 패킷 타입
     {
         sc_packet_user_info* packet = reinterpret_cast<sc_packet_user_info*>(ptr);
-
         g_myid = packet->id;
+        gGameFramework.UpdatePlayerHP(packet->hp);
+        //g_pScene->m_pPlayer->currentHP = packet->hp;
+        
         //player.SetPosition(packet->position);
 
         std::cout << "[Client] My Player : " << packet->id << std::endl;

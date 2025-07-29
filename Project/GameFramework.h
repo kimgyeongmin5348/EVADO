@@ -48,9 +48,13 @@ public:
 	//void ItemToHand(Item* pItem);
 	//void ItemDropFromHand(Item* pItem);
 
-	void CGameFramework::OnMonsterSpawned(int monsterID, const XMFLOAT3& pos, int state);
-	void CGameFramework::UpdateMonsterState(CSpider* pMonster, int state);
-	void CGameFramework::UpdateMonsterPosition(int monsterID, const XMFLOAT3& pos, int state);
+	void UpdatePlayerHP(float hp) {
+		m_pPlayer->currentHP = hp;
+	}
+
+	void OnMonsterSpawned(int monsterID, const XMFLOAT3& pos, int state);
+	void UpdateMonsterState(CSpider* pMonster, int state);
+	void UpdateMonsterPosition(int monsterID, const XMFLOAT3& pos, int state);
 
 
 	void ItemToHand(int objectIndex);

@@ -592,6 +592,8 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 
 	if (m_pText) { m_pText->UpdateText(std::to_wstring(debt), L"debt : "); }
 
+	//currentHP = g_myid.hp;
+
 	float hpRatio = currentHP / 100.f;
 	float newWidth = hpRatio * 0.5f;
 

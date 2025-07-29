@@ -62,6 +62,7 @@ public:
 
 	bool	m_isMonsterHit = false;
 	bool	alreadyHeld = false;
+	float currentHP = 100.f;
 
 	// 아이템
 	int m_nSelectedInventoryIndex = -1;  // 기본값은 0번 (1번 슬롯)
@@ -165,7 +166,6 @@ public:
 	int debt = 10000;
 
 	CTextureToScreenShader* m_playerHP = NULL;
-	float currentHP = 100.f;
 	ID3D12Device* device = nullptr; 
 	ID3D12GraphicsCommandList* cmdList = nullptr;
 	void SetHPWidth(float newWidth);

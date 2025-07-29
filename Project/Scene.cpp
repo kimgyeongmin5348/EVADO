@@ -313,9 +313,6 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	CTextureToScreenShader* pTextureItem4Shader = new CTextureToScreenShader(1);
 	pTextureItem4Shader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-	CTexture* pTextureItem4 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	pTextureItem4->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/inven.dds", RESOURCE_TEXTURE2D, 0);
-	CreateShaderResourceViews(pd3dDevice, pTextureItem4, 0, 15);
 	CScreenRectMeshTextured* pMesh3 = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, 0.02f + 0.375f, 0.225f * 0.5f, -0.65f, 0.4f * 0.5f);
 	pTextureItem4Shader->SetMesh(0, pMesh3);
 	pTextureItem4Shader->SetTexture(pTextureinven);
@@ -874,7 +871,6 @@ void CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 				// 손 위치에 맞게 조정
 				if (pItem == pItem->FindFrame("Shovel")) pItem->SetPosition(0.05f, -0.05f, 1.f);
 				else pItem->SetPosition(0.05f, -0.05f, 0.1f);
-				//dynamic_cast<CTerrainPlayer*>(m_pPlayer)->debt += pItem->price; 빚 변동
 				m_pPlayer->UpdateTransform(nullptr);
 
 				int newIndex = static_cast<int>(m_pPlayer->m_pHeldItems.size());
