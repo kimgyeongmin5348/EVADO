@@ -74,6 +74,15 @@ enum class AnimationState : uint8_t {
 	CROUCH_WALK   // 6
 };
 
+struct AnimationBlend
+{
+	int from = -1;
+	int to = -1;
+	float duration = 0.5f; // ºí·»µù ½Ã°£
+	float elapsed = 0.0f;
+	bool active = false;
+};
+
 struct sc_packet_user_info {
 	unsigned char	size;
 	char			type;

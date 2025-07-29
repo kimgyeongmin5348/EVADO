@@ -272,16 +272,15 @@ void CCollisionManager::HandleCollision(CPlayer* player, CGameObject* obj)
         playerBox = player->GetBoundingBox();
     }
 
-    if (std::string::npos != ObjectFrameName.find("Spider"))
+    if (std::string::npos != ObjectFrameName.starts_with("Spider")) // Find -> starts_with 로 수정
     {
         // 몬스터와 충돌 시 처리
     }
 
-    if (player->isSwing
-        && std::string::npos != ObjectFrameName.find("Spider"))
+    if (dynamic_cast<CTerrainPlayer*>(player)->m_currentAnim == AnimationState::SWING
+        && std::string::npos != ObjectFrameName.starts_with("Spider"))
     {
         // 몬스터와 플레이어의 공격 충돌 시 처리
-        cout << "Hit!" << endl;
         player->m_isMonsterHit = true;
     }
 }

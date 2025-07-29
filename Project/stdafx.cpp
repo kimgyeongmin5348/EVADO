@@ -1,6 +1,6 @@
-// stdafx.cpp : Ç¥ÁØ Æ÷ÇÔ ÆÄÀÏ¸¸ µé¾î ÀÖ´Â ¼Ò½º ÆÄÀÏÀÔ´Ï´Ù.
-// LabProject03-1.pch´Â ¹Ì¸® ÄÄÆÄÀÏµÈ Çì´õ°¡ µË´Ï´Ù.
-// stdafx.obj¿¡´Â ¹Ì¸® ÄÄÆÄÀÏµÈ Çü½Ä Á¤º¸°¡ Æ÷ÇÔµË´Ï´Ù.
+ï»¿// stdafx.cpp : í‘œì¤€ í¬í•¨ íŒŒì¼ë§Œ ë“¤ì–´ ìˆëŠ” ì†ŒìŠ¤ íŒŒì¼ì…ë‹ˆë‹¤.
+// LabProject03-1.pchëŠ” ë¯¸ë¦¬ ì»´íŒŒì¼ëœ í—¤ë”ê°€ ë©ë‹ˆë‹¤.
+// stdafx.objì—ëŠ” ë¯¸ë¦¬ ì»´íŒŒì¼ëœ í˜•ì‹ ì •ë³´ê°€ í¬í•¨ë©ë‹ˆë‹¤.
 
 #include "stdafx.h"
 
@@ -13,9 +13,9 @@ UINT gnDsvDescriptorIncrementSize = 0;
 
 void CreateConsole()
 {
-	AllocConsole(); // ÄÜ¼Ö »ı¼º
+	AllocConsole(); // ì½˜ì†” ìƒì„±
 
-	// Ç¥ÁØ ½ºÆ®¸²À» ÄÜ¼Ö¿¡ ¿¬°á
+	// í‘œì¤€ ìŠ¤íŠ¸ë¦¼ì„ ì½˜ì†”ì— ì—°ê²°
 	FILE* fp;
 	freopen_s(&fp, "CONOUT$", "w", stdout);
 	freopen_s(&fp, "CONOUT$", "w", stderr);
@@ -88,6 +88,11 @@ ID3D12Resource* CreateTextureResource(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 		D3D12_RESOURCE_STATES d3dResourceInitialStates = (ppd3dUploadBuffer && pData) ? D3D12_RESOURCE_STATE_COMMON : d3dResourceStates;
 //		D3D12_RESOURCE_STATES d3dResourceInitialStates = (ppd3dUploadBuffer && pData) ? D3D12_RESOURCE_STATE_COPY_DEST : d3dResourceStates;
 		HRESULT hResult = pd3dDevice->CreateCommittedResource(&d3dHeapPropertiesDesc, D3D12_HEAP_FLAG_NONE, &d3dResourceDesc, d3dResourceInitialStates, NULL, __uuidof(ID3D12Resource), (void**)&pd3dBuffer);
+		if (FAILED(hResult)) {
+			OutputDebugString((L"[ERROR] Upload Heap CreateCommittedResource FAILED. HRESULT: 0x" +
+				std::format(L"{:08X}", static_cast<unsigned int>(hResult)) + L"\n").c_str());
+			return nullptr;
+		}
 		if (ppd3dUploadBuffer && pData)
 		{
 			d3dHeapPropertiesDesc.Type = D3D12_HEAP_TYPE_UPLOAD;
@@ -205,7 +210,7 @@ ID3D12Resource* CreateTextureResourceFromDDSFile(ID3D12Device* pd3dDevice, ID3D1
 
 	D3D12_RESOURCE_DESC d3dUploadResourceDesc;
 	::ZeroMemory(&d3dUploadResourceDesc, sizeof(D3D12_RESOURCE_DESC));
-	d3dUploadResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER; //Upload Heap¿¡´Â ÅØ½ºÃÄ¸¦ »ı¼ºÇÒ ¼ö ¾øÀ½
+	d3dUploadResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER; //Upload Heapì—ëŠ” í…ìŠ¤ì³ë¥¼ ìƒì„±í•  ìˆ˜ ì—†ìŒ
 	d3dUploadResourceDesc.Alignment = 0;
 	d3dUploadResourceDesc.Width = nBytes;
 	d3dUploadResourceDesc.Height = 1;
@@ -292,7 +297,7 @@ ID3D12Resource* CreateTextureResourceFromWICFile(ID3D12Device* pd3dDevice, ID3D1
 
 	D3D12_RESOURCE_DESC d3dResourceDesc;
 	::ZeroMemory(&d3dResourceDesc, sizeof(D3D12_RESOURCE_DESC));
-	d3dResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER; //Upload Heap¿¡´Â ÅØ½ºÃÄ¸¦ »ı¼ºÇÒ ¼ö ¾øÀ½
+	d3dResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER; //Upload Heapì—ëŠ” í…ìŠ¤ì³ë¥¼ ìƒì„±í•  ìˆ˜ ì—†ìŒ
 	d3dResourceDesc.Alignment = 0;
 	d3dResourceDesc.Width = nBytes;
 	d3dResourceDesc.Height = 1;

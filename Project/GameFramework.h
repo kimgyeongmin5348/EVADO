@@ -36,6 +36,7 @@ public:
 
 	void WaitForGpuComplete();
 	void MoveToNextFrame();
+	void MoveToNextScene();
 
 	void OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	void OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
@@ -72,7 +73,7 @@ public:
 	}
 
 
-	void AddItemToScene(long long id, ITEM_TYPE type, const XMFLOAT3& position)
+	void AddItemToScene(long long id, ITEM_TYPE type, const XMFLOAT3& position);
 
 	const float Recognized_Range = 2.0f;
 
@@ -84,7 +85,10 @@ public:
 			m_pScene->AddItem(id, type, position);
 		}
 	}
-
+	void UpdateOtherPlayerRotate(int clinetnum, XMFLOAT3 right, XMFLOAT3 look)
+	{
+		m_ppScenes[m_nCurrentScene]->UpdateOtherPlayerRotate(clinetnum, right, look);
+	}
 
 
 	/*void UpdateItemPosition(long long id, const XMFLOAT3& position)
@@ -149,8 +153,6 @@ private:
 	POINT m_ptOldCursorPos;
 
 	_TCHAR						m_pszFrameRate[70];
-
-	bool flashlightToggle = false;
 
 	//server
 	//float m_fLastPositionSendTime = 0.0f; 

@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "GameFramework.h"
 #include "Network.h"
+#include "Hpbar.h"
 
 CGameFramework::CGameFramework()
 {
@@ -288,122 +289,53 @@ void CGameFramework::ChangeSwapChainState()
 void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
 	if (m_pScene) m_pScene->OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
+
 	switch (nMessageID)
 	{
-		case WM_LBUTTONDOWN:
-		case WM_RBUTTONDOWN:
-			if (m_pPlayer->items[1]) {
-				flashlightToggle = !flashlightToggle;
-				m_pScene->BuildDefaultLightsAndMaterials(flashlightToggle);
-			}
-			if (m_pPlayer->items[2]) { 
-				m_pPlayer->isSwing = true;
-				if (m_pPlayer->m_isMonsterHit)
-				{
-					// 야매 vector 인덱스 직접 접근
-					m_pScene->m_pEffect->Activate(m_pScene->m_ppHierarchicalGameObjects[2]->GetPosition());
-					m_pPlayer->m_isMonsterHit = false;
-				}
-				//m_pScene->m_pEffect->Activate();
-			}
-			::SetCapture(hWnd);
-			::GetCursorPos(&m_ptOldCursorPos);
-			break;
-		case WM_LBUTTONUP:
-		case WM_RBUTTONUP:
-			::ReleaseCapture();
-			break;
-		case WM_MOUSEMOVE:
-
-			//
-			break;
-		default:
-			break;
+	case WM_LBUTTONDOWN:
+	case WM_RBUTTONDOWN:
+		::SetCapture(hWnd);
+		::GetCursorPos(&m_ptOldCursorPos);
+		break;
+	case WM_LBUTTONUP:
+	case WM_RBUTTONUP:
+		::ReleaseCapture();
+		break;
+	case WM_MOUSEMOVE:
+		//::SetCapture(hWnd);
+		//::GetCursorPos(&m_ptOldCursorPos);
+		break;
+	default:
+		break;
 	}
+
 }
 
 void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
 	if (m_pScene) m_pScene->OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
-	switch (nMessageID)
-	{
-	case WM_KEYUP:
-		switch (wParam)
+	if (!isStartScene) {
+		switch (nMessageID)
 		{
-		case VK_ESCAPE:
-			exit(0);
-			break;
-		case VK_RETURN:
-			m_ppScenes[m_nScene]->ReleaseObjects();
-			m_nCurrentScene = 1;
-			BuildObjects();
-			LoadingDoneToServer();
-			isStartScene = false;
-			break;
-		case VK_F1:
-		case VK_F2:
-		case VK_F3:
-			m_pCamera = m_pPlayer->ChangeCamera((DWORD)(wParam - VK_F1 + 1), m_GameTimer.GetTimeElapsed());
-			break;
-		case VK_F9:
-			ChangeSwapChainState();
-			break;
-		case '1':
-		case '2':
-		case '3':
-		{
-			int itemIndex = wParam - '0';
-			int shaderIndex = wParam - '1';
-			if (itemIndex < m_pScene->m_nHierarchicalGameObjects) {
-				ItemToHand(itemIndex);
-
-
-				CGameObject* pItem = m_pScene->m_ppHierarchicalGameObjects[itemIndex];
-				SendItemMove(itemIndex, pItem->GetPosition());
-				cout << "변경된 아이템 좌표 전송 완료" << endl;
-
-
-				m_pPlayer->items[itemIndex] = !m_pPlayer->items[itemIndex];
-				dynamic_cast<CTextureToScreenShader*>(m_pScene->m_ppShaders[shaderIndex])->IsInventory[shaderIndex] 
-					= !dynamic_cast<CTextureToScreenShader*>(m_pScene->m_ppShaders[shaderIndex])->IsInventory[shaderIndex];
+		case WM_KEYUP:
+			switch (wParam)
+			{
+			case VK_ESCAPE:
+				exit(0);
+				break;
+			case VK_F1:
+			case VK_F2:
+			case VK_F3:
+				m_pCamera = m_pPlayer->ChangeCamera((DWORD)(wParam - VK_F1 + 1), m_GameTimer.GetTimeElapsed());
+				break;
+			case VK_F9:
+				ChangeSwapChainState();
+				break;
 			}
 			break;
+		default:
+			break;
 		}
-
-		case 'F':
-		case'f':
-		{
-			//XMFLOAT3 playerPos = m_pPlayer->GetPosition();
-			//long long nearestItemID = FindNearestItemInRange(Recognized_Range, playerPos);
-			//if (nearestItemID != -1) {
-			//	Item* pItem = nullptr;
-			//	{
-			//		std::lock_guard<std::mutex> lock(g_item_mutex);
-			//		auto it = g_items.find(nearestItemID);
-			//		if (it != g_items.end())
-			//			pItem = it->second;
-			//	}
-			//	if (pItem) {
-			//		if (!pItem->IsHeld()) {
-			//			// 들기
-			//			ItemToHand(pItem);
-			//			pItem->SetHeld(true);
-			//			std::cout << "아이템을 집었습니다." << std::endl;
-			//		}
-			//		else {
-			//			// 떨어뜨리기
-			//			ItemDropFromHand(pItem);
-			//			pItem->SetHeld(false);
-			//			std::cout << "아이템을 떨어뜨렸습니다." << std::endl;
-			//		}
-			//	}
-			//}
-			//break;
-		}
-		}
-		break;
-	default:
-		break;
 	}
 }
 
@@ -573,59 +505,59 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 // -------------------------------------------------------------------------------------------
 
 
-void CGameFramework::ItemToHand(int objectIndex)
-{
-	CGameObject* pItem = m_pScene->m_ppHierarchicalGameObjects[objectIndex];
-	CGameObject* pRightHand = m_pPlayer->FindFrame("hand_r");
-
-	// 이미 붙어있나 확인
-	CGameObject* pCurr = pRightHand->GetChild();
-	CGameObject* pPrev = nullptr;
-	bool alreadyHeld = false;
-
-	while (pCurr) {
-		if (pCurr == pItem) {
-			alreadyHeld = true;
-			break;
-		}
-		pPrev = pCurr;
-		pCurr = pCurr->GetSibling();
-	}
-
-	if (!alreadyHeld) {
-		// 들기
-		if (pRightHand->GetChild() == nullptr) {
-			pRightHand->SetChild(pItem);
-		}
-		else {
-			CGameObject* last = pRightHand->GetChild();
-			while (last->GetSibling()) last = last->GetSibling();
-			last->m_pSibling = pItem;
-		}
-		pItem->m_pParent = pRightHand;
-		pItem->m_pSibling = nullptr;
-
-		if (objectIndex == 2) {
-			pItem->SetPosition(0.05f, -0.05f, 1.f); 
-		}
-		else { 
-			pItem->SetPosition(0.05f, -0.05f, 0.1f); 
-		}
-
-		m_pPlayer->UpdateTransform(nullptr);
-	}
-	else {
-		// 놓기
-		if (pPrev) {
-			pPrev->m_pSibling = pItem->GetSibling();
-		}
-		else {
-			pRightHand->SetChild(pItem->GetSibling());
-		}
-		pItem->m_pParent = nullptr;
-		pItem->m_pSibling = nullptr;
-	}
-}
+//void CGameFramework::ItemToHand(int objectIndex)
+//{
+//	CGameObject* pItem = m_pScene->m_ppHierarchicalGameObjects[objectIndex];
+//	CGameObject* pRightHand = m_pPlayer->FindFrame("hand_r");
+//
+//	// 이미 붙어있나 확인
+//	CGameObject* pCurr = pRightHand->GetChild();
+//	CGameObject* pPrev = nullptr;
+//	bool alreadyHeld = false;
+//
+//	while (pCurr) {
+//		if (pCurr == pItem) {
+//			alreadyHeld = true;
+//			break;
+//		}
+//		pPrev = pCurr;
+//		pCurr = pCurr->GetSibling();
+//	}
+//
+//	if (!alreadyHeld) {
+//		// 들기
+//		if (pRightHand->GetChild() == nullptr) {
+//			pRightHand->SetChild(pItem);
+//		}
+//		else {
+//			CGameObject* last = pRightHand->GetChild();
+//			while (last->GetSibling()) last = last->GetSibling();
+//			last->m_pSibling = pItem;
+//		}
+//		pItem->m_pParent = pRightHand;
+//		pItem->m_pSibling = nullptr;
+//
+//		if (objectIndex == 2) {
+//			pItem->SetPosition(0.05f, -0.05f, 1.f); 
+//		}
+//		else { 
+//			pItem->SetPosition(0.05f, -0.05f, 0.1f); 
+//		}
+//
+//		m_pPlayer->UpdateTransform(nullptr);
+//	}
+//	else {
+//		// 놓기
+//		if (pPrev) {
+//			pPrev->m_pSibling = pItem->GetSibling();
+//		}
+//		else {
+//			pRightHand->SetChild(pItem->GetSibling());
+//		}
+//		pItem->m_pParent = nullptr;
+//		pItem->m_pSibling = nullptr;
+//	}
+//}
 
 void CGameFramework::OnDestroy()
 {
@@ -704,7 +636,7 @@ void CGameFramework::BuildObjects()
 	if (m_nCurrentScene == 1)
 	{ 
 
-		m_pScene->m_ppHierarchicalGameObjects[0]->SetPlayer(m_pPlayer);
+		m_pScene->m_ppMonsters[0]->SetPlayer(m_pPlayer);
 	}
 
 	m_pd3dCommandList->Close();
@@ -731,13 +663,16 @@ void CGameFramework::ReleaseObjects()
 void CGameFramework::ProcessInput()
 {
 	static UCHAR pKeysBuffer[256];
+	
+	static bool bPrevSpace = false;
+
 	bool bProcessedByScene = false;
 	if (GetKeyboardState(pKeysBuffer) && m_pScene) bProcessedByScene = m_pScene->ProcessInput(pKeysBuffer);
 	if (!bProcessedByScene)
 	{
 		float cxDelta = 0.0f, cyDelta = 0.0f;
 		POINT ptCursorPos;
-		if (GetCapture() == m_hWnd)
+		if (GetCapture() == m_hWnd && !(m_pScene && m_pScene->isShop))
 		{
 			SetCursor(NULL);
 			GetCursorPos(&ptCursorPos);
@@ -745,7 +680,7 @@ void CGameFramework::ProcessInput()
 			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 3.0f;
 			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
 		}
-
+		m_pScene->m_ptPos = m_ptOldCursorPos;
 		DWORD dwDirection = 0;
 		if (pKeysBuffer['W'] & 0xF0) dwDirection |= DIR_FORWARD;
 		if (pKeysBuffer['S'] & 0xF0) dwDirection |= DIR_BACKWARD;
@@ -755,17 +690,59 @@ void CGameFramework::ProcessInput()
 		if (pKeysBuffer[VK_SHIFT] & 0xF0) dwDirection |= DIR_DOWN;
 		if (pKeysBuffer[VK_CONTROL] & 0xF0) dwDirection |= DIR_CROUCH;
 
-		if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
+		bool bCurrSpace = (pKeysBuffer[VK_SPACE] & 0xF0);      // jump
+
+		CTerrainPlayer* terrainPlayer = dynamic_cast<CTerrainPlayer*>(m_pPlayer);
+		if (!terrainPlayer) return;
+		AnimationState currentState = terrainPlayer->m_currentAnim;
+
+		// 점프 중이 아닐 때만 상태 전환
+		if (currentState != AnimationState::SWING && currentState != AnimationState::JUMP)
 		{
-			if (cxDelta || cyDelta)
+			bool isMoving = dwDirection & (DIR_FORWARD | DIR_BACKWARD | DIR_LEFT | DIR_RIGHT);
+			bool isCrouching = dwDirection & DIR_CROUCH;
+			bool isRunning = dwDirection & DIR_DOWN;
+
+			if (bCurrSpace && !bPrevSpace)
 			{
-				if (pKeysBuffer[VK_RBUTTON] & 0xF0)
-					m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
-				else
-					m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
+				terrainPlayer->m_currentAnim = AnimationState::JUMP;
 			}
-			if (dwDirection) m_pPlayer->Move(dwDirection, 5.0f, true);
+			
+			else if (isCrouching && isMoving)
+			{
+				terrainPlayer->m_currentAnim = AnimationState::CROUCH_WALK;
+				terrainPlayer->Move(dwDirection, 2.0f, true);
+			}
+			else if (isCrouching)
+			{
+				terrainPlayer->m_currentAnim = AnimationState::CROUCH;
+			}
+			else if (isRunning && isMoving)
+			{
+				terrainPlayer->m_currentAnim = AnimationState::RUN;
+				terrainPlayer->Move(dwDirection, 2.0f, true);
+			}
+			else if (isMoving)
+			{
+				terrainPlayer->m_currentAnim = AnimationState::WALK;
+				terrainPlayer->Move(dwDirection, 2.0f, true);
+			}
+			else
+			{
+				terrainPlayer->m_currentAnim = AnimationState::IDLE;
+			}
 		}
+
+		bPrevSpace = bCurrSpace;
+
+		if (cxDelta || cyDelta)
+		{
+			if (pKeysBuffer[VK_RBUTTON] & 0xF0)
+				m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
+			else
+				m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
+		}
+
 	}
 	m_pPlayer->Update(m_GameTimer.GetTimeElapsed());
 }
@@ -776,26 +753,28 @@ void CGameFramework::AnimateObjects()
 
 	if (m_pScene) { 
 		m_pScene->AnimateObjects(fTimeElapsed);
-		if (m_pScene->m_ppOtherPlayers) m_pScene->m_ppOtherPlayers[0]->Animate(m_pScene->m_ppOtherPlayers[0]->animation, fTimeElapsed);
-
+		if (m_pScene->m_ppOtherPlayers) m_pScene->m_ppOtherPlayers[0]->Animate(m_pScene->m_ppOtherPlayers[0]->targetAnim, fTimeElapsed);
+		if (m_pScene->m_ppMonsters) 
+			for(int i=0;i< m_pScene->m_nMonster; ++i)
+			m_pScene->m_ppMonsters[i]->Animate(fTimeElapsed);
 	}
 
 	m_pPlayer->Animate(fTimeElapsed);
 
 	if (m_nCurrentScene == 0) m_pPlayer->SetPosition(XMFLOAT3(3, 0, 20));
-	if (m_nCurrentScene == 1) {
-		for (int i = 0; i < 4; ++i)
-		{
-			if (!m_pPlayer->items[i]) // 손에 들리지 않은 상태일 때만
-			{	
-				if (m_pScene->m_ppHierarchicalGameObjects[i]) {
-					XMFLOAT3 pos = m_pScene->m_ppHierarchicalGameObjects[i]->GetPosition();
-					if (pos.y > 0.1f) pos.y -= 0.1;
-					m_pScene->m_ppHierarchicalGameObjects[i]->SetPosition(pos);
-				}
-			}
-		}
-	}
+	//if (m_nCurrentScene == 1) {
+	//	for (int i = 0; i < 4; ++i)
+	//	{
+	//		if (!m_pPlayer->items[i]) // 손에 들리지 않은 상태일 때만
+	//		{	
+	//			if (m_pScene->m_ppHierarchicalGameObjects[i]) {
+	//				XMFLOAT3 pos = m_pScene->m_ppHierarchicalGameObjects[i]->GetPosition();
+	//				if (pos.y > 0.1f) pos.y -= 0.1;
+	//				m_pScene->m_ppHierarchicalGameObjects[i]->SetPosition(pos);
+	//			}
+	//		}
+	//	}
+	//}
 }
 
 void CGameFramework::WaitForGpuComplete()
@@ -824,15 +803,21 @@ void CGameFramework::MoveToNextFrame()
 	}
 }
 
+void CGameFramework::MoveToNextScene()
+{
+	m_ppScenes[m_nScene]->ReleaseObjects();
+	m_nCurrentScene = 1;
+	BuildObjects();
+	LoadingDoneToServer();
+	isStartScene = false;
+}
+
 //#define _WITH_PLAYER_TOP
 
 void CGameFramework::FrameAdvance()
 {    
 	m_GameTimer.Tick(60.0f);
 	
-	ProcessInput();
-
-    AnimateObjects();
 
 	HRESULT hResult = m_pd3dCommandAllocator->Reset();
 	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
@@ -858,12 +843,16 @@ void CGameFramework::FrameAdvance()
 
 	m_pd3dCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, TRUE, &d3dDsvCPUDescriptorHandle);
 
+	if(!isStartScene) ProcessInput();
+
+	AnimateObjects();
+
 	if (m_pScene) m_pScene->Render(m_pd3dCommandList, m_pCamera);
 
 #ifdef _WITH_PLAYER_TOP
 	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 #endif
-	if (m_pPlayer) m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
+	if (m_pPlayer && !isStartScene) m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
 
 	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
@@ -897,7 +886,7 @@ void CGameFramework::FrameAdvance()
 	m_GameTimer.GetFrameRate(m_pszFrameRate + 7, 37);
 	size_t nLength = _tcslen(m_pszFrameRate);
 	std::wstring w_user_name(user_name.begin(), user_name.end());
-	_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%s)"), w_user_name.c_str());
+	_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("ID : %s"), w_user_name.c_str());
 	::SetWindowText(m_hWnd, m_pszFrameRate);
 }
 

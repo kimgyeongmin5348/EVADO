@@ -11,6 +11,7 @@
 #include "Map.h"
 #include "CollisionManager.h"
 #include "CParticle.h"
+#include "CText.h"
 
 #define MAX_LIGHTS						16 
 
@@ -48,7 +49,7 @@ public:
     CScene();
     ~CScene();
 
-	bool OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
+	virtual void OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	virtual void OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 
 	virtual void CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList);
@@ -63,7 +64,7 @@ public:
 	ID3D12RootSignature *GetGraphicsRootSignature() { return(m_pd3dGraphicsRootSignature); }
 
 	bool ProcessInput(UCHAR *pKeysBuffer);
-    void AnimateObjects(float fTimeElapsed);
+    virtual void AnimateObjects(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera=NULL);
 
 	void ReleaseUploadBuffers();
@@ -71,7 +72,10 @@ public:
 	void InitializeCollisionSystem();
 	void GenerateGameObjectsBoundingBox();
 
+	void ItemToHand(CGameObject* pItem);
+
 	CPlayer								*m_pPlayer = NULL;
+	std::unordered_map<std::string, CTexture*> m_textureMap;
 
 	std::vector<OtherPlayer*>				m_vPlayers;
 	int										m_nOtherPlayers = 0;
@@ -80,7 +84,12 @@ public:
 	void SetPlayer(CPlayer* pPlayer) { m_pPlayer = pPlayer; }
 	CPlayer* GetPlayer() { return(m_pPlayer); }
  
+	bool isShop = false;
+
 	ID3D12RootSignature						*m_pd3dGraphicsRootSignature = NULL;
+	ID3D12Device* Device = NULL;
+	ID3D12GraphicsCommandList* Commandlist = NULL;
+
 
 protected:
 	//ID3D12RootSignature					*m_pd3dGraphicsRootSignature = NULL;
@@ -122,8 +131,8 @@ public:
 	int									m_nGameObjects = 0;
 	CGameObject							**m_ppGameObjects = NULL;
 
-	int									m_nHierarchicalGameObjects = 0;
-	CGameObject							**m_ppHierarchicalGameObjects = NULL;
+	int									m_nMonster = 0;
+	CGameObject							**m_ppMonsters = NULL;
 
 	XMFLOAT3							m_xmf3RotatePosition = XMFLOAT3(0.0f, 0.0f, 0.0f);
 
@@ -145,10 +154,12 @@ public:
 	CCollisionManager					m_CollisionManager;
 
 	CParticle							*m_pEffect = NULL;
-	//server
 	
+	POINT m_ptPos;
+
 public:
 
+	//server
 	void AddItem(long long id, ITEM_TYPE type, const XMFLOAT3& position);
 	void UpdateItemPosition(long long id, const XMFLOAT3& position);
 	
@@ -170,28 +181,47 @@ public:
 	}
 	void UpdateOtherPlayerAnimation(int clientnum, int animNum)
 	{
-		m_ppOtherPlayers[clientnum]->animation = animNum;
+		m_ppOtherPlayers[clientnum]->targetAnim = animNum;
+	}
+	void UpdateOtherPlayerRotate(int clinetnum, XMFLOAT3 right, XMFLOAT3 look)
+	{
+		m_ppOtherPlayers[clinetnum]->m_xmf3Look = look;
+		m_ppOtherPlayers[clinetnum]->m_xmf3Right = right;
 	}
 };
 
-class CMainScene : public CScene
-{
-public:
-	CMainScene() {}
-	~CMainScene(){}
-
-	//virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
-	//virtual void ReleaseObjects();
-
-	//virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
-
-};
+enum class InputStep { EnterID, EnterIP, Done };
 
 class CStartScene : public CScene
 {
 public:
 	CStartScene(){}
 	~CStartScene(){}
+
+	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void ReleaseObjects();
+
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+	virtual void AnimateObjects(float fTimeElapsed);
+
+	virtual void OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
+
+private:
+	InputStep m_inputStep = InputStep::EnterID;
+	std::string m_inputID;
+	std::string m_inputIP;
+	bool m_networkInitialized = false;
+	bool m_textDirty = false;
+	CText* m_pFontID = nullptr;
+	CText* m_pFontIP = nullptr;
+
+};
+
+class CEndScene : public CScene
+{
+public:
+	CEndScene(){}
+	~CEndScene(){}
 
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void ReleaseObjects();

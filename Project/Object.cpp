@@ -589,6 +589,12 @@ void CAnimationController::SetTrackWeight(int nAnimationTrack, float fWeight)
 	if (m_pAnimationTracks) m_pAnimationTracks[nAnimationTrack].SetWeight(fWeight);
 }
 
+void CAnimationController::SetTrackType(int nAnimationTrack, int nType)
+{
+	if (m_pAnimationTracks) m_pAnimationTracks[nAnimationTrack].SetType(nType);
+
+}
+
 void CAnimationController::UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList)
 {
 	for (int i = 0; i < m_nSkinnedMeshes; i++)
@@ -842,8 +848,8 @@ void CGameObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pC
 			}
 		}
 	}
-	if (m_pSibling) m_pSibling->Render(pd3dCommandList, pCamera);
-	if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera);
+	if (m_pSibling && m_pSibling->GetVisible()) m_pSibling->Render(pd3dCommandList, pCamera);
+	if (m_pChild && m_pChild->GetVisible()) m_pChild->Render(pd3dCommandList, pCamera);
 }
 
 void CGameObject::CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
@@ -907,6 +913,12 @@ void CGameObject::SetScale(float x, float y, float z)
 void CGameObject::SetScale(XMFLOAT3 xmf3Scale)
 {
 	SetScale(xmf3Scale.x, xmf3Scale.y, xmf3Scale.z);
+}
+
+bool CGameObject::IsHeldBy(CPlayer* pPlayer)
+{
+	CGameObject* pHand = pPlayer->FindFrame("hand_r");
+	return (this->GetParent() == pHand);
 }
 
 void CGameObject::Move(XMFLOAT3 xmf3Offset)
@@ -1546,9 +1558,20 @@ CSpider::CSpider(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dComman
 
 	SetChild(pSpiderModel->m_pModelRootObject, true);
 	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, nAnimationTracks, pSpiderModel);
+	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0); // idle
+	m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1); // walk
+	m_pSkinnedAnimationController->SetTrackAnimationSet(2, 2); // attack
+	m_pSkinnedAnimationController->SetTrackAnimationSet(3, 3); //attack
+	m_pSkinnedAnimationController->SetTrackAnimationSet(4, 4); //death
+	m_pSkinnedAnimationController->SetTrackEnable(1, false);
+	m_pSkinnedAnimationController->SetTrackEnable(2, false);
+	m_pSkinnedAnimationController->SetTrackEnable(3, false);
+	m_pSkinnedAnimationController->SetTrackEnable(4, false);
 
-	Hpbar *pHpbar = new Hpbar(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-	m_pHpbar = pHpbar;
+	//Hpbar *pHpbar = new Hpbar(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	//m_pHpbar = pHpbar;
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
 }
 
 CSpider::~CSpider()
@@ -1557,11 +1580,11 @@ CSpider::~CSpider()
 
 void CSpider::Animate(float fTimeElapsed)
 {
-	XMFLOAT3 enemyPos = GetPosition();
-	XMFLOAT3 playerPos = pPlayer->GetPosition(); // 플레이어 위치 받아오기
+	//XMFLOAT3 enemyPos = GetPosition();
+	//XMFLOAT3 playerPos = pPlayer->GetPosition(); // 플레이어 위치 받아오기
 
-	XMFLOAT3 delta = Vector3::Subtract(playerPos, enemyPos);
-	float distance = Vector3::Length(delta);
+	//XMFLOAT3 delta = Vector3::Subtract(playerPos, enemyPos);
+	//float distance = Vector3::Length(delta);
 
 	//if (distance <= 50.0f)
 	//{
@@ -1601,9 +1624,9 @@ void CSpider::Animate(float fTimeElapsed)
 	//	m_pSkinnedAnimationController->SetTrackEnable(2, false);
 	//}
 
-	m_pSkinnedAnimationController->SetTrackEnable(0, false);
-	m_pSkinnedAnimationController->SetTrackEnable(1, true);
-	m_pSkinnedAnimationController->SetTrackEnable(2, false);
+	//m_pSkinnedAnimationController->SetTrackEnable(0, true);
+	//m_pSkinnedAnimationController->SetTrackEnable(1, false);
+	//m_pSkinnedAnimationController->SetTrackEnable(2, false);
 
 	CGameObject::Animate(fTimeElapsed);
 }	
@@ -1611,10 +1634,8 @@ void CSpider::Animate(float fTimeElapsed)
 void CSpider::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	XMFLOAT3 hpbarPos = GetPosition();
-	hpbarPos.x += 5.0f;	
-	hpbarPos.y += 3.0f;
-	m_pHpbar->SetPosition(hpbarPos);
-	m_pHpbar->Render(pd3dCommandList, pCamera);
+	//m_pHpbar->SetPosition(hpbarPos);
+	//m_pHpbar->Render(pd3dCommandList, pCamera);
 
 	CGameObject::Render(pd3dCommandList, pCamera);
 }

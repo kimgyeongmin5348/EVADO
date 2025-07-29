@@ -10,6 +10,7 @@
 #include "Object.h"
 #include "Camera.h"
 #include "Network.h"
+#include "CText.h"
 
 struct BoundingCylinder
 {
@@ -51,11 +52,22 @@ protected:
 	BoundingBox			m_shovelAttackBoundingBox;
 
 public:
-	bool	isSwing = false;
-	bool	isCrouch = false;
-	bool	items[4] = { false,false,false,false };
-	bool	m_isMonsterHit = false;
+	//bool	isSwing = false;
+	//bool	isCrouch = false;
+	//bool	isCrouchWalk = false;
+	//bool	isJump = false;
+	//bool	isRun = false;
+	//bool	isWalk = false;
+	//bool	isIdle = true;
 
+	bool	m_isMonsterHit = false;
+	bool	alreadyHeld = false;
+
+	// 아이템
+	int m_nSelectedInventoryIndex = -1;  // 기본값은 0번 (1번 슬롯)
+	std::vector<CGameObject*> m_pHeldItems;
+	bool bflashlight = false;
+	void RemoveHeldItem(CGameObject* pItem);
 public:
 	CPlayer();
 	virtual ~CPlayer();
@@ -86,7 +98,7 @@ public:
 	CCamera *GetCamera() { return(m_pCamera); }
 	void SetCamera(CCamera *pCamera) { m_pCamera = pCamera; }
 
-	virtual void Move(ULONG nDirection, float fDistance, bool bVelocity = false);
+	virtual void Move(DWORD nDirection, float fDistance, bool bVelocity = false);
 	void Move(const XMFLOAT3& xmf3Shift, bool bVelocity = false);
 	void Move(float fx= 0.0f, float fyOffset = 0.0f, float fzOffset = 0.0f);
 	void Rotate(float x, float y, float z);
@@ -134,6 +146,8 @@ public:
 	CTerrainPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, void *pContext=NULL);
 	virtual ~CTerrainPlayer();
 
+	CText* m_pText = nullptr;
+
 	//server
 	AnimationState m_currentAnim = AnimationState::IDLE;
 
@@ -143,13 +157,28 @@ public:
 	virtual void OnPlayerUpdateCallback(float fTimeElapsed);
 	virtual void OnCameraUpdateCallback(float fTimeElapsed);
 
-	virtual void Move(ULONG nDirection, float fDistance, bool bVelocity = false);
+	virtual void Move(DWORD nDirection, float fDistance, bool bVelocity = false);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
 
 	virtual void Update(float fTimeElapsed);
 
-	bool isJump = false;
+	int debt = 10000;
 
+	CTextureToScreenShader* m_playerHP = NULL;
+	float currentHP = 100.f;
+	ID3D12Device* device = nullptr; 
+	ID3D12GraphicsCommandList* cmdList = nullptr;
+	void SetHPWidth(float newWidth);
 
+	void PlayAnimationTrack(int trackIndex, float speed = 1.0f);
+	bool IsAnimationFinished(int trackIndex);
+
+	AnimationBlend m_animBlend;
+	int m_currentTrack = -1;
+
+	void StartAnimationBlend(int fromTrack, int toTrack, float blendTime);
+
+	bool IsShovel();
 };
 
 

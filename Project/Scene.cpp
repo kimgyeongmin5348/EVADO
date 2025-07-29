@@ -3,13 +3,10 @@
 //-----------------------------------------------------------------------------
 #include "stdafx.h"
 #include "Scene.h"
-<<<<<<< Updated upstream
-=======
 #include "Network.h"
 #include "GameFramework.h"
 
 extern CGameFramework gGameFramework;
->>>>>>> Stashed changes
 
 ID3D12DescriptorHeap *CScene::m_pd3dCbvSrvDescriptorHeap = NULL;
 
@@ -22,7 +19,6 @@ D3D12_CPU_DESCRIPTOR_HANDLE	CScene::m_d3dCbvCPUDescriptorNextHandle;
 D3D12_GPU_DESCRIPTOR_HANDLE	CScene::m_d3dCbvGPUDescriptorNextHandle;
 D3D12_CPU_DESCRIPTOR_HANDLE	CScene::m_d3dSrvCPUDescriptorNextHandle;
 D3D12_GPU_DESCRIPTOR_HANDLE	CScene::m_d3dSrvGPUDescriptorNextHandle;
-
 
 CScene::CScene()
 {
@@ -111,8 +107,8 @@ void CScene::InitializeCollisionSystem()
 		m_CollisionManager.InsertObject(m_ppGameObjects[i]);
 	}
 
-	for (int i = 0; i < m_nHierarchicalGameObjects; ++i) {
-		m_CollisionManager.InsertObject(m_ppHierarchicalGameObjects[i]);
+	for (int i = 0; i < m_nMonster; ++i) {
+		m_CollisionManager.InsertObject(m_ppMonsters[i]);
 	}
 
 	for (auto obj : m_pMap->m_vMapObjects) {
@@ -133,8 +129,8 @@ void CScene::GenerateGameObjectsBoundingBox()
 		m_ppGameObjects[i]->CalculateBoundingBox();
 	}
 
-	for (int i = 0; i < m_nHierarchicalGameObjects; ++i) {
-		m_ppHierarchicalGameObjects[i]->CalculateBoundingBox();
+	for (int i = 0; i < m_nMonster; ++i) {
+		m_ppMonsters[i]->CalculateBoundingBox();
 	}
 
 	for (auto obj : m_pMap->m_vMapObjects) {
@@ -142,15 +138,23 @@ void CScene::GenerateGameObjectsBoundingBox()
 	}
 }
 
+void CScene::ItemToHand(CGameObject* pItem)
+{
+
+}
+
 void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 350);
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 100, 400);
 
 	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature); 
 
 	BuildDefaultLightsAndMaterials(false);
+
+	Device = pd3dDevice;
+	Commandlist = pd3dCommandList;
 
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
@@ -158,7 +162,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	m_pEffect = new CParticle(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
-<<<<<<< Updated upstream
+
 	m_nHierarchicalGameObjects = 4; // spider, flashlight, shovel, whistle
 	m_ppHierarchicalGameObjects = new CGameObject * [m_nHierarchicalGameObjects];
 
@@ -172,10 +176,11 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_ppHierarchicalGameObjects[0]->SetPosition(3, 0, 30);
 	m_ppHierarchicalGameObjects[0]->Rotate(0, 180, 0);
 	m_ppHierarchicalGameObjects[0]->SetFrameName("Spider");
-=======
+
 	m_nMonster = 4; // spider
 	m_ppMonsters = new CGameObject * [m_nMonster];
-	int monsterIDs[4] = { 10001,10002,10003,10004 };
+	int monsterID[4] = { 10001,10002,10003,10004 };
+
 	CLoadedModelInfo* pSpiderModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/spider_myOldOne.bin", NULL);
 	XMFLOAT3 monsterPos[4] = {
 		{27, 0, -2},
@@ -206,31 +211,37 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 		g_monsters[monsterIDs[i]] = static_cast<CSpider*>(m_ppMonsters[i]);
 
 	}
->>>>>>> Stashed changes
+
 
 	if (pSpiderModel) delete pSpiderModel;
 
+	m_nGameObjects = 3;
+	m_ppGameObjects = new CGameObject * [m_nGameObjects];
+
 	CLoadedModelInfo* pFlashlightModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Flashlightgold.bin", NULL);
-	m_ppHierarchicalGameObjects[1] = new FlashLight(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFlashlightModel);
-	m_ppHierarchicalGameObjects[1]->SetScale(3, 3, 3);
-	m_ppHierarchicalGameObjects[1]->Rotate(90, 0, 0);
+	m_ppGameObjects[0] = new FlashLight(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFlashlightModel);
+	m_ppGameObjects[0]->SetScale(3, 3, 3);
+	m_ppGameObjects[0]->Rotate(90, 0, 0);
 	//m_ppHierarchicalGameObjects[1]->SetPosition(3, 2, 10);
-	m_ppHierarchicalGameObjects[1]->SetFrameName("FlashLight");
+	m_ppGameObjects[0]->SetFrameName("FlashLight");
+	m_ppGameObjects[0]->price = 80;
 	if (pFlashlightModel) delete pFlashlightModel;
 
 	CLoadedModelInfo* pShovelModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Shovel.bin", NULL);
-	m_ppHierarchicalGameObjects[2] = new Shovel(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShovelModel);
-	m_ppHierarchicalGameObjects[2]->SetScale(1, 1, 1);
-	m_ppHierarchicalGameObjects[2]->Rotate(0, 0, 90);
+	m_ppGameObjects[1] = new Shovel(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShovelModel);
+	m_ppGameObjects[1]->SetScale(1, 1, 1);
+	m_ppGameObjects[1]->Rotate(0, 0, 90);
 	//m_ppHierarchicalGameObjects[2]->SetPosition(3, 2, 12);
-	m_ppHierarchicalGameObjects[2]->SetFrameName("Shovel");
+	m_ppGameObjects[1]->SetFrameName("Shovel");
+	m_ppGameObjects[1]->price = 80;
 	if (pShovelModel) delete pShovelModel;
 
 	CLoadedModelInfo* pWhistleModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Whistle.bin", NULL);
-	m_ppHierarchicalGameObjects[3] = new Whistle(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pWhistleModel);
-	m_ppHierarchicalGameObjects[3]->SetScale(1, 1, 1);
+	m_ppGameObjects[2] = new Whistle(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pWhistleModel);
+	m_ppGameObjects[2]->SetScale(1, 1, 1);
 	//m_ppHierarchicalGameObjects[3]->SetPosition(3, 2, 13);
-	m_ppHierarchicalGameObjects[3]->SetFrameName("Whistle");
+	m_ppGameObjects[2]->SetFrameName("Whistle");
+	m_ppGameObjects[2]->price = 30;
 	if (pWhistleModel) delete pWhistleModel;
 
 	m_nOtherPlayers = 1;
@@ -255,49 +266,118 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	if (pOtherPlayerModel) delete pOtherPlayerModel;
 
-	// 인벤토리 UI
-	m_nShaders = 4;
+	// 인벤토리 UI 및 상점
+	m_nShaders = 10;
 	m_ppShaders = new CShader * [m_nShaders];
+
+	CTexture* pTextureinven = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pTextureinven->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/inven.dds", RESOURCE_TEXTURE2D, 0);
+	CreateShaderResourceViews(pd3dDevice, pTextureinven, 0, 15);
+	m_textureMap["inven"] = pTextureinven;
+
+	CTexture* pTextureItem1 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pTextureItem1->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Shovel.dds", RESOURCE_TEXTURE2D, 0);
+	CreateShaderResourceViews(pd3dDevice, pTextureItem1, 0, 15);
+	m_textureMap["Shovel"] = pTextureItem1;
+
+	CTexture* pTextureItem2 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pTextureItem2->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/FlashLight.dds", RESOURCE_TEXTURE2D, 0);
+	CreateShaderResourceViews(pd3dDevice, pTextureItem2, 0, 15);
+	m_textureMap["FlashLight"] = pTextureItem2;
+
+	CTexture* pTextureItem3 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pTextureItem3->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Whistle.dds", RESOURCE_TEXTURE2D, 0);
+	CreateShaderResourceViews(pd3dDevice, pTextureItem3, 0, 15);
+	m_textureMap["Whistle"] = pTextureItem3;
 
 	CTextureToScreenShader* pTextureItem1Shader = new CTextureToScreenShader(1);
 	pTextureItem1Shader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-	CTexture* pTextureItem1 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	pTextureItem1->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/FlashLight_bg_ui.dds", RESOURCE_TEXTURE2D, 0);
-	CreateShaderResourceViews(pd3dDevice, pTextureItem1, 0, 15);
-	CScreenRectMeshTextured* pMesh = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, -0.5f + 0.02f, 0.225f, -0.55f, 0.4f);
+	CScreenRectMeshTextured* pMesh = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, 0.02f, 0.225f * 0.5f, -0.65f, 0.4f * 0.5f);
 	pTextureItem1Shader->SetMesh(0, pMesh);
-	pTextureItem1Shader->SetTexture(pTextureItem1);
+	pTextureItem1Shader->SetTexture(pTextureinven);
 	m_ppShaders[0] = pTextureItem1Shader;
 
 	CTextureToScreenShader* pTextureItem2Shader = new CTextureToScreenShader(1);
 	pTextureItem2Shader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-	CTexture* pTextureItem2 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	pTextureItem2->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Shovel_bg_ui.dds", RESOURCE_TEXTURE2D, 0);
-	CreateShaderResourceViews(pd3dDevice, pTextureItem2, 0, 15);
-	CScreenRectMeshTextured* pMesh1 = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, -0.25f + 0.02f, 0.225f, -0.55f, 0.4f);
+	CScreenRectMeshTextured* pMesh1 = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, 0.02f + 0.125f, 0.225f * 0.5f, -0.65f, 0.4f * 0.5f);
 	pTextureItem2Shader->SetMesh(0, pMesh1);
-	pTextureItem2Shader->SetTexture(pTextureItem2);
+	pTextureItem2Shader->SetTexture(pTextureinven);
 	m_ppShaders[1] = pTextureItem2Shader;
 
 	CTextureToScreenShader* pTextureItem3Shader = new CTextureToScreenShader(1);
 	pTextureItem3Shader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-	CTexture* pTextureItem3 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	pTextureItem3->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Whistle_bg_ui.dds", RESOURCE_TEXTURE2D, 0);
-	CreateShaderResourceViews(pd3dDevice, pTextureItem3, 0, 15);
-	CScreenRectMeshTextured* pMesh2 = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, 0.0f + 0.02f, 0.225f, -0.55f, 0.4f);
+	CScreenRectMeshTextured* pMesh2 = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, 0.02f + 0.25f, 0.225f * 0.5f, -0.65f, 0.4f * 0.5f);
 	pTextureItem3Shader->SetMesh(0, pMesh2);
-	pTextureItem3Shader->SetTexture(pTextureItem3);
+	pTextureItem3Shader->SetTexture(pTextureinven);
 	m_ppShaders[2] = pTextureItem3Shader;
+
+	CTextureToScreenShader* pTextureItem4Shader = new CTextureToScreenShader(1);
+	pTextureItem4Shader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	CTexture* pTextureItem4 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pTextureItem4->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/inven.dds", RESOURCE_TEXTURE2D, 0);
+	CreateShaderResourceViews(pd3dDevice, pTextureItem4, 0, 15);
+	CScreenRectMeshTextured* pMesh3 = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, 0.02f + 0.375f, 0.225f * 0.5f, -0.65f, 0.4f * 0.5f);
+	pTextureItem4Shader->SetMesh(0, pMesh3);
+	pTextureItem4Shader->SetTexture(pTextureinven);
+	m_ppShaders[3] = pTextureItem4Shader;
 
 	CTextureToScreenShader* pInventoryShader = new CTextureToScreenShader(1);
 	pInventoryShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
 	pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Inventory.dds", RESOURCE_TEXTURE2D, 0);
 	CreateShaderResourceViews(pd3dDevice, pTexture, 0, 15);
-	CScreenRectMeshTextured* pInventoryMesh = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, -0.5f, 1.0f, -0.5f, 0.5f);
+	CScreenRectMeshTextured* pInventoryMesh = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, -0.5f + 0.5f, 1.0f * 0.5f, -0.6f, 0.5f * 0.5f);
 	pInventoryShader->SetMesh(0, pInventoryMesh);
 	pInventoryShader->SetTexture(pTexture);
-	m_ppShaders[3] = pInventoryShader;
+	m_ppShaders[4] = pInventoryShader;
+
+	//상점
+	CShopShader* pShopShader = new CShopShader(1);
+	pShopShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	pShopShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL, NULL);
+
+	CTexture* pShopTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pShopTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/shop.dds", RESOURCE_TEXTURE2D, 0);
+	CreateShaderResourceViews(pd3dDevice, pShopTexture, 0, 15);
+	CScreenRectMeshTextured* pShopMesh = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, -0.9f, 0.5f, 0.8f, 0.7f);
+	pShopShader->SetMesh(0, pShopMesh);
+	pShopShader->SetTexture(pShopTexture);
+	pShopShader->SetVisible(false);
+
+	m_ppShaders[5] = pShopShader;
+
+	//상점 4칸
+	CTextureToScreenShader* pShopSpace1Shader = new CTextureToScreenShader(1);
+	pShopSpace1Shader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	CScreenRectMeshTextured* pShopMesh1 = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, -0.825f, 0.08f, 0.625f, 0.09f);
+	pShopSpace1Shader->SetMesh(0, pShopMesh1);
+	pShopSpace1Shader->SetTexture(pTextureinven);
+	pShopSpace1Shader->SetVisible(false);
+	m_ppShaders[6] = pShopSpace1Shader;
+
+	CTextureToScreenShader* pShopSpace2Shader = new CTextureToScreenShader(1);
+	pShopSpace2Shader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	CScreenRectMeshTextured* pShopMesh2 = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, -0.825f, 0.08f, 0.505f, 0.09f);
+	pShopSpace2Shader->SetMesh(0, pShopMesh2);
+	pShopSpace2Shader->SetTexture(pTextureinven);
+	pShopSpace2Shader->SetVisible(false);
+	m_ppShaders[7] = pShopSpace2Shader;
+
+	CTextureToScreenShader* pShopSpace3Shader = new CTextureToScreenShader(1);
+	pShopSpace3Shader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	CScreenRectMeshTextured* pShopMesh3 = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, -0.825f, 0.08f, 0.385f, 0.09f);
+	pShopSpace3Shader->SetMesh(0, pShopMesh3);
+	pShopSpace3Shader->SetTexture(pTextureinven);
+	pShopSpace3Shader->SetVisible(false);
+	m_ppShaders[8] = pShopSpace3Shader;
+
+	CTextureToScreenShader* pShopSpace4Shader = new CTextureToScreenShader(1);
+	pShopSpace4Shader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	CScreenRectMeshTextured* pShopMesh4 = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, -0.825f, 0.08f, 0.265f, 0.09f);
+	pShopSpace4Shader->SetMesh(0, pShopMesh4);
+	pShopSpace4Shader->SetTexture(pTextureinven);
+	pShopSpace4Shader->SetVisible(false);
+	m_ppShaders[9] = pShopSpace4Shader;
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
@@ -327,10 +407,10 @@ void CScene::ReleaseObjects()
 	if (m_pTerrain) delete m_pTerrain;
 	if (m_pSkyBox) delete m_pSkyBox;
 
-	if (m_ppHierarchicalGameObjects)
+	if (m_ppMonsters)
 	{
-		for (int i = 0; i < m_nHierarchicalGameObjects; i++) if (m_ppHierarchicalGameObjects[i]) m_ppHierarchicalGameObjects[i]->Release();
-		delete[] m_ppHierarchicalGameObjects;
+		for (int i = 0; i < m_nMonster; i++) if (m_ppMonsters[i]) m_ppMonsters[i]->Release();
+		delete[] m_ppMonsters;
 	}
 
 	ReleaseShaderVariables();
@@ -342,7 +422,7 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 {
 	ID3D12RootSignature *pd3dGraphicsRootSignature = NULL;
 
-	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[11];
+	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[12];
 
 	pd3dDescriptorRanges[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRanges[0].NumDescriptors = 1;
@@ -406,11 +486,17 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 
 	pd3dDescriptorRanges[10].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRanges[10].NumDescriptors = 1;
-	pd3dDescriptorRanges[10].BaseShaderRegister = 0; //t: gtxTexture
+	pd3dDescriptorRanges[10].BaseShaderRegister = 0; //t0: gtxTexture
 	pd3dDescriptorRanges[10].RegisterSpace = 0;
 	pd3dDescriptorRanges[10].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-	D3D12_ROOT_PARAMETER pd3dRootParameters[16];
+	pd3dDescriptorRanges[11].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	pd3dDescriptorRanges[11].NumDescriptors = 1;
+	pd3dDescriptorRanges[11].BaseShaderRegister = 3; //t3: gFontTexture
+	pd3dDescriptorRanges[11].RegisterSpace = 0;
+	pd3dDescriptorRanges[11].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+	D3D12_ROOT_PARAMETER pd3dRootParameters[17];
 
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	pd3dRootParameters[0].Descriptor.ShaderRegister = 1; //Camera
@@ -493,7 +579,12 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 	pd3dRootParameters[15].DescriptorTable.pDescriptorRanges = &(pd3dDescriptorRanges[10]);
 	pd3dRootParameters[15].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
-	D3D12_STATIC_SAMPLER_DESC pd3dSamplerDescs[2];
+	pd3dRootParameters[16].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	pd3dRootParameters[16].DescriptorTable.NumDescriptorRanges = 1;
+	pd3dRootParameters[16].DescriptorTable.pDescriptorRanges = &(pd3dDescriptorRanges[11]);
+	pd3dRootParameters[16].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+	D3D12_STATIC_SAMPLER_DESC pd3dSamplerDescs[3];
 
 	pd3dSamplerDescs[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
 	pd3dSamplerDescs[0].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
@@ -520,6 +611,19 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 	pd3dSamplerDescs[1].ShaderRegister = 1;
 	pd3dSamplerDescs[1].RegisterSpace = 0;
 	pd3dSamplerDescs[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+	pd3dSamplerDescs[2].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+	pd3dSamplerDescs[2].AddressU = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+	pd3dSamplerDescs[2].AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+	pd3dSamplerDescs[2].AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+	pd3dSamplerDescs[2].MipLODBias = 0;
+	pd3dSamplerDescs[2].MaxAnisotropy = 1;
+	pd3dSamplerDescs[2].ComparisonFunc = D3D12_COMPARISON_FUNC_ALWAYS;
+	pd3dSamplerDescs[2].MinLOD = 0;
+	pd3dSamplerDescs[2].MaxLOD = D3D12_FLOAT32_MAX;
+	pd3dSamplerDescs[2].ShaderRegister = 2;
+	pd3dSamplerDescs[2].RegisterSpace = 0;
+	pd3dSamplerDescs[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT | D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
 	D3D12_ROOT_SIGNATURE_DESC d3dRootSignatureDesc;
@@ -571,7 +675,7 @@ void CScene::ReleaseUploadBuffers()
 
 	for (int i = 0; i < m_nShaders; i++) m_ppShaders[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->ReleaseUploadBuffers();
-	for (int i = 0; i < m_nHierarchicalGameObjects; i++) m_ppHierarchicalGameObjects[i]->ReleaseUploadBuffers();
+	for (int i = 0; i < m_nMonster; i++)if (m_ppMonsters[i]) m_ppMonsters[i]->ReleaseUploadBuffers();
 }
 
 void CScene::CreateCbvSrvDescriptorHeaps(ID3D12Device *pd3dDevice, int nConstantBufferViews, int nShaderResourceViews)
@@ -627,9 +731,87 @@ void CScene::CreateShaderResourceViews(ID3D12Device* pd3dDevice, CTexture* pText
 	for (int j = 0; j < nRootParameters; j++) pTexture->SetRootParameterIndex(j, nRootParameterStartIndex + j);
 }
 
-bool CScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+void CScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
-	return(false);
+	switch (nMessageID)
+	{
+	case WM_LBUTTONDOWN:
+	{
+		if (!isShop) {
+			int index = m_pPlayer->m_nSelectedInventoryIndex;
+
+			// 손에 든 아이템 인덱스 유효성 검사
+			if (index < 0 || index >= 4) break;
+
+			CGameObject* pHeldItem = m_pPlayer->m_pHeldItems[index];
+			if (!pHeldItem) break;
+
+			char* frameName = pHeldItem->GetFrameName();
+
+			if (!strcmp(frameName, "FlashLight"))
+			{
+				m_pPlayer->bflashlight = !m_pPlayer->bflashlight;
+				BuildDefaultLightsAndMaterials(m_pPlayer->bflashlight);
+			}
+			else if (!strcmp(frameName, "Shovel"))
+			{
+				dynamic_cast<CTerrainPlayer*>(m_pPlayer)->m_currentAnim = AnimationState::SWING;
+				uint8_t currentAnimState = static_cast<uint8_t>(dynamic_cast<CTerrainPlayer*>(m_pPlayer)->m_currentAnim);
+
+				cout << "CScene - anim" << currentAnimState << endl;
+
+				if (m_pPlayer->m_isMonsterHit)
+				{
+					m_pEffect->Activate(m_ppGameObjects[1]->GetPosition());
+
+					CSpider* pSpider = dynamic_cast<CSpider*>(m_ppMonsters[0]);
+					if (pSpider)
+					{
+						pSpider->MonsterHP -= 25.0f;
+					}
+				}
+				break;
+			}
+		}
+		else {
+			// 상점 판매 버튼 클릭
+			const RECT rt[4] =
+			{
+				{450, 240, 550, 265},
+				{450, 310, 550, 335},
+				{450, 370, 550, 395},
+				{450, 440, 550, 465}
+			};
+
+			for (int i = 0; i < 4; ++i) {
+				if (PtInRect(&rt[i], m_ptPos)) {
+					if (m_pPlayer->m_pHeldItems[i]->price > 0) {
+						dynamic_cast<CTerrainPlayer*>(m_pPlayer)->debt -= m_pPlayer->m_pHeldItems[i]->price;
+						int objectIndex = -1;
+						for (int j = 0; j < m_nGameObjects; ++j)
+							if (m_ppGameObjects[j]->GetFrameName() == m_pPlayer->m_pHeldItems[i]->GetFrameName())
+								objectIndex = j;
+						auto it = m_textureMap.find("inven");
+						if (it != m_textureMap.end())
+						{
+							auto* pShader = dynamic_cast<CTextureToScreenShader*>(m_ppShaders[i]);
+							auto* pShader1 = dynamic_cast<CTextureToScreenShader*>(m_ppShaders[i + 6]);
+							if (pShader) {
+								pShader->SetTexture(it->second);
+							}if (pShader1) {
+								pShader1->SetTexture(it->second);
+								dynamic_cast<CShopShader*>(m_ppShaders[5])->price[i] = L"0";
+							}
+							// 오브젝트도 삭제해야함
+							if (objectIndex > -1) m_ppGameObjects[objectIndex] = nullptr;
+						}
+					}
+				}
+			}
+		}
+	}
+	break;
+	}
 }
 
 void CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
@@ -637,7 +819,159 @@ void CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 	switch (nMessageID)
 	{
 	case WM_KEYDOWN:
+		switch (wParam)
+		{
+		case '1':
+		case '2':
+		case '3':
+		case '4':
+		{
+			int slotIndex = wParam - '1';
+			m_pPlayer->m_nSelectedInventoryIndex = slotIndex;
+
+			// 슬롯에 따라 visible 갱신
+			for (int i = 0; i < m_pPlayer->m_pHeldItems.size(); ++i)
+			{
+				CGameObject* item = m_pPlayer->m_pHeldItems[i];
+				item->SetVisible(i == slotIndex); // 선택된 슬롯만 true
+			}
+		}
+			break;
+		case 'F':
+		case 'f':
+		{
+			bool bPickedUp = false;
+
+			// 1단계: 먼저 주울 수 있는 아이템 탐색
+			for (int i = 0; i < m_nGameObjects; ++i)
+			{
+				CGameObject* pItem = m_ppGameObjects[i];
+				if (!pItem) continue;
+
+				// 플레이어와 아이템 간 거리 계산
+				XMFLOAT3 playerPos = m_pPlayer->GetPosition();
+				XMFLOAT3 itemPos = pItem->GetPosition();
+				float distance = Vector3::Length(Vector3::Subtract(playerPos, itemPos));
+				if (distance > 0.5f) continue;
+
+				// 이미 손에 들고 있는 경우는 스킵
+				if (pItem->GetParent() == m_pPlayer->FindFrame("hand_r")) continue;
+
+				// 들기
+				CGameObject* pRightHand = m_pPlayer->FindFrame("hand_r");
+				if (!pRightHand) return;
+
+				if (!pRightHand->GetChild()) pRightHand->SetChild(pItem);
+				else
+				{
+					CGameObject* last = pRightHand->GetChild();
+					while (last->GetSibling()) last = last->GetSibling();
+					last->m_pSibling = pItem;
+				}
+				pItem->m_pParent = pRightHand;
+				pItem->m_pSibling = nullptr;
+
+				// 손 위치에 맞게 조정
+				if (pItem == pItem->FindFrame("Shovel")) pItem->SetPosition(0.05f, -0.05f, 1.f);
+				else pItem->SetPosition(0.05f, -0.05f, 0.1f);
+				//dynamic_cast<CTerrainPlayer*>(m_pPlayer)->debt += pItem->price; 빚 변동
+				m_pPlayer->UpdateTransform(nullptr);
+
+				int newIndex = static_cast<int>(m_pPlayer->m_pHeldItems.size());
+				m_pPlayer->m_pHeldItems.push_back(pItem);
+				pItem->SetVisible(newIndex == m_pPlayer->m_nSelectedInventoryIndex);
+
+				// 아이콘 표시
+				std::string frameName = pItem->m_pstrFrameName;
+				auto it = m_textureMap.find(frameName);
+				if (it != m_textureMap.end())
+				{
+					auto* pShader = dynamic_cast<CTextureToScreenShader*>(m_ppShaders[newIndex]);
+					auto* pShader1 = dynamic_cast<CTextureToScreenShader*>(m_ppShaders[newIndex+6]);
+					if (pShader) {
+						pShader->SetTexture(it->second);
+					}if (pShader1) {
+						pShader1->SetTexture(it->second);
+						std::wstring priceStr = std::to_wstring(pItem->price);
+						dynamic_cast<CShopShader*>(m_ppShaders[5])->price[newIndex] = priceStr;
+					}
+				}
+
+				bPickedUp = true;
+				break; // 한 개만 주우면 종료
+			}
+
+			// 2단계: 못 주웠으면 → 선택된 인덱스의 아이템만 내려놓기
+			if (!bPickedUp) {
+				int index = m_pPlayer->m_nSelectedInventoryIndex;
+				if (index >= 0 && index < m_pPlayer->m_pHeldItems.size())
+				{
+					CGameObject* pItem = m_pPlayer->m_pHeldItems[index];
+					if (!pItem) return;
+
+					CGameObject* pRightHand = m_pPlayer->FindFrame("hand_r");
+					if (!pRightHand) return;
+
+					// 형제 연결 재조정
+					CGameObject* pCurr = pRightHand->GetChild();
+					CGameObject* pPrev = nullptr;
+
+					while (pCurr)
+					{
+						if (pCurr == pItem) break;
+						pPrev = pCurr;
+						pCurr = pCurr->GetSibling();
+					}
+
+					if (pCurr == pItem)
+					{
+						if (pPrev) pPrev->m_pSibling = pItem->GetSibling();
+						else pRightHand->SetChild(pItem->GetSibling());
+
+						pItem->m_pParent = nullptr;
+						pItem->m_pSibling = nullptr;
+						pItem->isFalling = true;
+						pItem->SetVisible(true);
+
+						m_pPlayer->RemoveHeldItem(pItem);
+
+						// 아이콘 숨기기
+						auto it = m_textureMap.find("inven");
+						if (it != m_textureMap.end())
+						{
+							auto* pShader = dynamic_cast<CTextureToScreenShader*>(m_ppShaders[index]);
+							auto* pShader1 = dynamic_cast<CTextureToScreenShader*>(m_ppShaders[index+6]);
+							if (pShader) {
+								pShader->SetTexture(it->second);
+							}if (pShader1) {
+								pShader1->SetTexture(it->second);
+								dynamic_cast<CShopShader*>(m_ppShaders[5])->price[index] = L"0";
+							}
+						}
+
+						break;
+					}
+				}
+			}
+
+			break;
+		}
+			break;
+		case VK_TAB:		
+			isShop = !isShop;
+			for (int i = 5; i < 10; ++i)
+				dynamic_cast<CTextureToScreenShader*>(m_ppShaders[i])->visible = isShop;
+			break;
+		case VK_UP:
+			dynamic_cast<CTerrainPlayer*>(m_pPlayer)->currentHP -= 10.f;
+			//for (int i = 0; i < 4; ++i) {
+			//	XMFLOAT3 pos = m_ppMonsters[i]->GetPosition();
+			//	cout << i << "번 몬스터 x - " << pos.x << ", y - " << pos.y << ", z - " << pos.z << endl;
+			//}
+			break;
+		}
 		break;
+		
 	default:
 		break;
 	}
@@ -650,7 +984,19 @@ bool CScene::ProcessInput(UCHAR *pKeysBuffer)
 
 void CScene::AnimateObjects(float fTimeElapsed)
 {
-	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Animate(fTimeElapsed);	
+	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) { 
+		m_ppGameObjects[i]->Animate(fTimeElapsed); 
+
+		if (m_ppGameObjects[i]->isFalling) {
+			XMFLOAT3 pos = m_ppGameObjects[i]->GetPosition();
+			if (pos.y > 0.1f)
+			{
+				pos.y -= 0.1f;
+				m_ppGameObjects[i]->SetPosition(pos);
+			}
+			else m_ppGameObjects[i]->isFalling = false;		
+		}
+	}
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);
 
 	if (m_pLights)
@@ -659,7 +1005,7 @@ void CScene::AnimateObjects(float fTimeElapsed)
 		m_pLights[1].m_xmf3Direction = m_pPlayer->GetLookVector();
 	}
 
-	if (m_pEffect) m_pEffect->Animate(fTimeElapsed, m_ppHierarchicalGameObjects[2]->GetPosition());
+	if (m_pEffect&& m_ppGameObjects[1]) m_pEffect->Animate(fTimeElapsed, m_ppGameObjects[1]->GetPosition());
 }
 
 void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera)
@@ -679,15 +1025,20 @@ void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera
 	if (m_pTerrain) m_pTerrain->Render(pd3dCommandList, pCamera);
 	if (m_pMap) m_pMap->Render(pd3dCommandList, pCamera);
 
-	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Render(pd3dCommandList, pCamera);
-  
-	for (int i = 0; i < m_nHierarchicalGameObjects; i++)
-	{
-		if (m_ppHierarchicalGameObjects[i])
+	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) { 
+		if (m_ppGameObjects[i]->GetVisible())
 		{
-			m_ppHierarchicalGameObjects[i]->Animate(m_fElapsedTime);
+			m_ppGameObjects[i]->Render(pd3dCommandList, pCamera);
+		}
+	}
+  
+	for (int i = 0; i < m_nMonster; i++)
+	{
+		if (m_ppMonsters[i])
+		{
+			m_ppMonsters[i]->Animate(m_fElapsedTime);
 			//if (!m_ppHierarchicalGameObjects[i]->m_pSkinnedAnimationController) m_ppHierarchicalGameObjects[i]->UpdateTransform(NULL);
-			m_ppHierarchicalGameObjects[i]->Render(pd3dCommandList, pCamera);
+			m_ppMonsters[i]->Render(pd3dCommandList, pCamera);
 		}
 	}
 
@@ -702,78 +1053,80 @@ void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera
 		m_ppOtherPlayers[i]->Render(pd3dCommandList, pCamera);
 	}
 
-	for (int i = 0; i < m_nShaders; i++) if (dynamic_cast<CTextureToScreenShader*>(m_ppShaders[i])->IsInventory[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
+	for (int i = 0; i < m_nShaders; i++) if (dynamic_cast<CTextureToScreenShader*>(m_ppShaders[i])->visible) { 
+		m_ppShaders[i]->Render(pd3dCommandList, pCamera);
+	}
 }
 
 // 아이템 생성 server(민상.ver AddItem)
 
-//void CScene::AddItem(long long id, ITEM_TYPE type, const XMFLOAT3& position) {
-//	CLoadedModelInfo* pModel = nullptr;
-//	Item* pNewItem = nullptr;
-//
-//	switch (type)
-//	{
-//	case ITEM_TYPE_SHOVEL:
-//		dynamic_cast<Shovel*>(m_ppHierarchicalGameObjects[2])->ChangeExistState(true);
-//		dynamic_cast<Shovel*>(m_ppHierarchicalGameObjects[2])->SetPosition(position);
-//		break;
-//	case ITEM_TYPE_HANDMAP:
-//		break;
-//	case ITEM_TYPE_FLASHLIGHT:
-//		dynamic_cast<FlashLight*>(m_ppHierarchicalGameObjects[1])->ChangeExistState(true);
-//		dynamic_cast<FlashLight*>(m_ppHierarchicalGameObjects[1])->SetPosition(position);
-//		break;
-//	case ITEM_TYPE_WHISTLE:
-//		dynamic_cast<Whistle*>(m_ppHierarchicalGameObjects[3])->ChangeExistState(true);
-//		dynamic_cast<Whistle*>(m_ppHierarchicalGameObjects[3])->SetPosition(position);
-//		break;
-//	default:
-//		std::cerr << "[Error] Unknown item type: " << static_cast<int>(type) << std::endl;
-//		return;
-//	}
-//
-//	if (pModel && pNewItem) {
-//		pNewItem->SetPosition(position);
-//		pNewItem->SetScale(1.0f, 1.0f, 1.0f); // 기본 스케일 설정
-//
-//		std::lock_guard<std::mutex> lock(g_item_mutex);
-//		g_items[id] = pNewItem;
-//		delete pModel; // 모델 데이터는 복제되었으므로 삭제
-//	}
-//}
-
 void CScene::AddItem(long long id, ITEM_TYPE type, const XMFLOAT3& position) {
-    Item* pNewItem = nullptr;
+	CLoadedModelInfo* pModel = nullptr;
+	Item* pNewItem = nullptr;
 
-    switch (type) {
-    case ITEM_TYPE_SHOVEL:
-        pNewItem = dynamic_cast<Shovel*>(m_ppHierarchicalGameObjects[2]);
-        break;
-    case ITEM_TYPE_HANDMAP:
-        break;
-    case ITEM_TYPE_FLASHLIGHT:
-        pNewItem = dynamic_cast<FlashLight*>(m_ppHierarchicalGameObjects[1]);
-        break;
-    case ITEM_TYPE_WHISTLE:
-        pNewItem = dynamic_cast<Whistle*>(m_ppHierarchicalGameObjects[3]);
-        break;
-    default:
-        std::cerr << "[Error] Unknown item type: " << static_cast<int>(type) << std::endl;
-        return;
-    }
+	switch (type)
+	{
+	case ITEM_TYPE_SHOVEL:
+		dynamic_cast<Shovel*>(m_ppGameObjects[1])->ChangeExistState(true);
+		dynamic_cast<Shovel*>(m_ppGameObjects[1])->SetPosition(position);
+		break;
+	case ITEM_TYPE_HANDMAP:
+		break;
+	case ITEM_TYPE_FLASHLIGHT:
+		dynamic_cast<FlashLight*>(m_ppGameObjects[0])->ChangeExistState(true);
+		dynamic_cast<FlashLight*>(m_ppGameObjects[0])->SetPosition(position);
+		break;
+	case ITEM_TYPE_WHISTLE:
+		dynamic_cast<Whistle*>(m_ppGameObjects[2])->ChangeExistState(true);
+		dynamic_cast<Whistle*>(m_ppGameObjects[2])->SetPosition(position);
+		break;
+	default:
+		std::cerr << "[Error] Unknown item type: " << static_cast<int>(type) << std::endl;
+		return;
+	}
 
-    if (pNewItem) {
-        // 고유아이디 세팅 (Item 클래스에 SetUniqueID 추가되어 있어야 함)
-        //pNewItem->SetUniqueID(id);
+	if (pModel && pNewItem) {
+		pNewItem->SetPosition(position);
+		pNewItem->SetScale(1.0f, 1.0f, 1.0f); // 기본 스케일 설정
 
-        pNewItem->ChangeExistState(true);
-        pNewItem->SetPosition(position);
-        pNewItem->SetScale(1.0f, 1.0f, 1.0f);
-
-        std::lock_guard<std::mutex> lock(g_item_mutex);
-        g_items[id] = pNewItem;
-    }
+		std::lock_guard<std::mutex> lock(g_item_mutex);
+		g_items[id] = pNewItem;
+		delete pModel; // 모델 데이터는 복제되었으므로 삭제
+	}
 }
+
+//void CScene::AddItem(long long id, ITEM_TYPE type, const XMFLOAT3& position) {
+//    Item* pNewItem = nullptr;
+//
+//    switch (type) {
+//    case ITEM_TYPE_SHOVEL:
+//        pNewItem = dynamic_cast<Shovel*>(m_ppHierarchicalGameObjects[2]);
+//        break;
+//    case ITEM_TYPE_HANDMAP:
+//        break;
+//    case ITEM_TYPE_FLASHLIGHT:
+//        pNewItem = dynamic_cast<FlashLight*>(m_ppHierarchicalGameObjects[1]);
+//        break;
+//    case ITEM_TYPE_WHISTLE:
+//        pNewItem = dynamic_cast<Whistle*>(m_ppHierarchicalGameObjects[3]);
+//        break;
+//    default:
+//        std::cerr << "[Error] Unknown item type: " << static_cast<int>(type) << std::endl;
+//        return;
+//    }
+//
+//    if (pNewItem) {
+//        // 고유아이디 세팅 (Item 클래스에 SetUniqueID 추가되어 있어야 함)
+//        //pNewItem->SetUniqueID(id);
+//
+//        pNewItem->ChangeExistState(true);
+//        pNewItem->SetPosition(position);
+//        pNewItem->SetScale(1.0f, 1.0f, 1.0f);
+//
+//        std::lock_guard<std::mutex> lock(g_item_mutex);
+//        g_items[id] = pNewItem;
+//    }
+//}
 
 // server 추가해봄 UpdateItemPosition
 
@@ -825,7 +1178,7 @@ void CStartScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 20); 
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 100); 
 
 	m_nShaders = 1;
 	m_ppShaders = new CShader * [m_nShaders];
@@ -847,6 +1200,15 @@ void CStartScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 	m_ppShaders[0] = pTextureToScreenShader;
 
+	m_nGameObjects = 2;
+	m_ppGameObjects = new CGameObject * [m_nGameObjects];
+
+	m_pFontID = new CText(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Enter ID : ", -0.5f, -0.25f);
+	m_ppGameObjects[0] = m_pFontID;
+
+	m_pFontIP = new CText(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, L"Enter IP : ", -0.5f, -0.55f);
+	m_ppGameObjects[1] = m_pFontIP;
+
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
@@ -865,6 +1227,12 @@ void CStartScene::ReleaseObjects()
 		}
 		delete[] m_ppShaders;
 	}
+
+	if (m_ppGameObjects)
+	{
+		for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Release();
+		delete[] m_ppGameObjects;
+	}
 }
 
 void CStartScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
@@ -878,26 +1246,76 @@ void CStartScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 	UpdateShaderVariables(pd3dCommandList);
 
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
+	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Render(pd3dCommandList, pCamera);
+}
 
-	/*EnterCriticalSection(&m_csRemotePlayers);
-	for (auto& [id, pPlayer] : m_remotePlayers) {
-		pPlayer->Render(pd3dCommandList, pCamera);
+void CStartScene::AnimateObjects(float fTimeElapsed)
+{
+	if (m_textDirty && m_inputStep == InputStep::EnterID)
+	{
+		wstring id;
+		id.assign(m_inputID.begin(), m_inputID.end());
+
+		m_pFontID->UpdateText(id, L"Enter ID : ");
+		m_textDirty = false;
 	}
-	LeaveCriticalSection(&m_csRemotePlayers);*/
+	if (m_textDirty && m_inputStep == InputStep::EnterIP)
+	{
+		wstring ip;
+		ip.assign(m_inputIP.begin(), m_inputIP.end());
+
+		m_pFontIP->UpdateText(ip, L"Enter IP : ");
+		m_textDirty = false;
+	}
 }
 
 void CStartScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
+	if (m_networkInitialized) return;
+
 	switch (nMessageID)
 	{
 	case WM_KEYDOWN:
-		switch (wParam)
-		{
-		case VK_RETURN:
+		if (m_inputStep == InputStep::EnterID) {
+			if (wParam == VK_RETURN) {
+				m_inputStep = InputStep::EnterIP;
+				::user_name = m_inputID;
+			}
+			else if (wParam == VK_BACK && !m_inputID.empty()) {
+				m_inputID.pop_back();
+				m_textDirty = true;
+			}
+			else if (isprint(wParam) && m_inputID.length() < MAX_ID_LENGTH - 1) {
+				m_inputID.push_back((char)wParam);
+				m_textDirty = true;
+			}
+			
 			break;
 		}
-		break;
-	default:
+		if (m_inputStep == InputStep::EnterIP) {
+			if (isdigit(wParam) && m_inputIP.length() < 15) {
+				m_inputIP.push_back((char)wParam);
+				m_textDirty = true;
+			}
+			else if (wParam == 190) {
+				m_inputIP.push_back('.');
+				m_textDirty = true;
+			}
+
+			else if (wParam == VK_RETURN) {
+				m_inputStep = InputStep::Done;
+				m_networkInitialized = true;
+
+				char serverIP[16];
+				strcpy(serverIP, m_inputIP.c_str());
+				std::cout << "Connecting to: " << serverIP << std::endl;
+				InitializeNetwork(serverIP); // server IP 전달
+				gGameFramework.MoveToNextScene();
+			}
+			else if (wParam == VK_BACK && !m_inputIP.empty()) {
+				m_inputIP.pop_back();
+			}
+		}
 		break;
 	}
 }
@@ -934,3 +1352,18 @@ void CStartScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM
 //	LeaveCriticalSection(&m_csRemotePlayers);
 //}
 
+void CEndScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+}
+
+void CEndScene::ReleaseObjects()
+{
+}
+
+void CEndScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+}
+
+void CEndScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+{
+}

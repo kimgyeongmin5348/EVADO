@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Object.h"
+#include "Common.h"
 
 class OtherPlayer : public CGameObject
 {
@@ -12,7 +13,8 @@ public:
 
     bool isJump = false;
 
-    int animation = 0;
+    int currentAnim = 0; // 현재 재생 애니메이션
+    int targetAnim = 0; // 서버에서 받은 애니메이션
 
     XMFLOAT3					m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
     XMFLOAT3					m_xmf3Right = XMFLOAT3(1.0f, 0.0f, 0.0f);
@@ -54,4 +56,12 @@ public:
 
         m_xmf4x4ToParent = Matrix4x4::Multiply(XMMatrixScaling(m_xmf3Scale.x, m_xmf3Scale.y, m_xmf3Scale.z), m_xmf4x4ToParent);
     }
+
+    void PlayAnimationTrack(int trackIndex, float speed = 1.0f);
+    bool IsAnimationFinished(int trackIndex);
+
+    AnimationBlend m_animBlend;
+
+    void StartAnimationBlend(int fromTrack, int toTrack, float blendTime);
+
 };

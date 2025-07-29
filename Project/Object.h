@@ -19,6 +19,15 @@ class CShader;
 class CStandardShader;
 struct QuadTreeNode;
 
+struct GameObjectInfo
+{
+	XMFLOAT4X4 mtxWorld;           // gmtxGameObject
+	XMFLOAT4   albedo;             // gMaterial.x
+	XMFLOAT4   specular;           // gMaterial.y
+	UINT       texturesMask;       // gnTexturesMask
+	float      hpRatio;            // g_hpRatio
+	XMFLOAT2   padding;            // ì •ë ¬ ë§ì¶¤ (float2 = 8ë°”ì´íŠ¸)
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -126,7 +135,7 @@ public:
 	void SetShader(CShader* pShader);
 	void SetMaterialType(UINT nType) { m_nType |= nType; }
 	void SetTexture(CTexture* pTexture, UINT nTexture = 0);
-
+	int GetTexture() const { return (1 << m_nTextures) - 1; }
 	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList);
 
 	virtual void ReleaseUploadBuffers();
@@ -259,6 +268,7 @@ public:
 	void SetEnable(bool bEnable) { m_bEnable = bEnable; }
 	void SetSpeed(float fSpeed) { m_fSpeed = fSpeed; }
 	void SetWeight(float fWeight) { m_fWeight = fWeight; }
+	void SetType(int nType) { m_nType = nType; }
 
 	void SetPosition(float fPosition) { m_fPosition = fPosition; }
 	float UpdatePosition(float fTrackPosition, float fTrackElapsedTime, float fAnimationLength);
@@ -316,6 +326,7 @@ public:
 	void SetTrackPosition(int nAnimationTrack, float fPosition);
 	void SetTrackSpeed(int nAnimationTrack, float fSpeed);
 	void SetTrackWeight(int nAnimationTrack, float fWeight);
+	void SetTrackType(int nAnimationTrack, int nType);
 
 	void SetCallbackKeys(int nAnimationTrack, int nCallbackKeys);
 	void SetCallbackKey(int nAnimationTrack, int nKeyIndex, float fTime, void* pData);
@@ -354,6 +365,10 @@ public:
 
 public:
 	char							m_pstrFrameName[64];
+
+	bool visible = true;
+	bool isFalling = false;
+	int price = 0;
 
 	CMesh* m_pMesh = NULL;
 
@@ -405,7 +420,7 @@ public:
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void ReleaseShaderVariables();
 
-	// CPU¿¡¼­ °è»êµÈ ¿ùµå º¯È¯ Çà·ÄÀ» GPUÀÇ ¼ÎÀÌ´õ¿¡¼­ »ç¿ëÇÒ ¼ö ÀÖµµ·Ï Àü´Ş
+	// CPUì—ì„œ ê³„ì‚°ëœ ì›”ë“œ ë³€í™˜ í–‰ë ¬ì„ GPUì˜ ì…°ì´ë”ì—ì„œ ì‚¬ìš©í•  ìˆ˜ ìˆë„ë¡ ì „ë‹¬
 	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT4X4* pxmf4x4World);
 	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, CMaterial* pMaterial);
 
@@ -429,6 +444,11 @@ public:
 	CGameObject* GetSibling() { return(m_pSibling); }
 	BoundingBox GetBoundingBox() const { return m_BoundingBox; }
 
+	bool GetVisible() { return visible; }
+	void SetVisible(bool b) { visible = b; }
+
+	bool IsHeldBy(CPlayer* pPlayer);
+
 	void Move(XMFLOAT3 xmf3Offset);
 
 	virtual void SetPosition(float x, float y, float z);
@@ -438,7 +458,6 @@ public:
 	void SetFrameName(const char* framename) {
 		strncpy_s(m_pstrFrameName, sizeof(m_pstrFrameName), framename, _TRUNCATE);
 	}
-
 	void MoveStrafe(float fDistance = 1.0f);
 	void MoveUp(float fDistance = 1.0f);
 	void MoveForward(float fDistance = 1.0f);
@@ -451,7 +470,7 @@ public:
 	void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
 	CGameObject* FindFrame(char* pstrFrameName);
 
-	// °ÔÀÓ ¿ÀºêÁ§Æ®ÀÇ °èÃş ±¸Á¶ ³»¿¡¼­ Æ¯Á¤ ÀÌ¸§À» °¡Áø ÅØ½ºÃ³¸¦ Ã£´Â´Ù.
+	// ê²Œì„ ì˜¤ë¸Œì íŠ¸ì˜ ê³„ì¸µ êµ¬ì¡° ë‚´ì—ì„œ íŠ¹ì • ì´ë¦„ì„ ê°€ì§„ í…ìŠ¤ì²˜ë¥¼ ì°¾ëŠ”ë‹¤.
 	CTexture* FindReplicatedTexture(_TCHAR* pstrTextureName);
 
 	UINT GetMeshType() { return((m_pMesh) ? m_pMesh->GetType() : 0x00); }
@@ -469,14 +488,14 @@ public:
 	static void LoadAnimationFromFile(FILE* pInFile, CLoadedModelInfo* pLoadedModel);
 	static CGameObject* LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CGameObject* pParent, FILE* pInFile, CShader* pShader, int* pnSkinnedMeshes);
 
-	// ¸ğµ¨ÀÇ ±âÇÏÇĞÀû µ¥ÀÌÅÍ(¸Ş½Ã)¿Í ¾Ö´Ï¸ŞÀÌ¼Ç µ¥ÀÌÅÍ¸¦ µ¿½Ã¿¡ ·Îµå
+	// ëª¨ë¸ì˜ ê¸°í•˜í•™ì  ë°ì´í„°(ë©”ì‹œ)ì™€ ì• ë‹ˆë©”ì´ì…˜ ë°ì´í„°ë¥¼ ë™ì‹œì— ë¡œë“œ
 	static CLoadedModelInfo* LoadGeometryAndAnimationFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, char* pstrFileName, CShader* pShader);
 	static CLoadedModelInfo* LoadGeometryAndAnimationFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, std::filesystem::path pstrFileName, CShader* pShader);
 
-	// °¢ ÇÁ·¹ÀÓ(°ÔÀÓ ¿ÀºêÁ§Æ®)ÀÇ ¸Ş¸ğ¸® ÁÖ¼Ò¿Í ºÎ¸ğ °´Ã¼ÀÇ ¸Ş¸ğ¸® ÁÖ¼Ò°¡ Ãâ·Â
+	// ê° í”„ë ˆì„(ê²Œì„ ì˜¤ë¸Œì íŠ¸)ì˜ ë©”ëª¨ë¦¬ ì£¼ì†Œì™€ ë¶€ëª¨ ê°ì²´ì˜ ë©”ëª¨ë¦¬ ì£¼ì†Œê°€ ì¶œë ¥
 	static void PrintFrameInfo(CGameObject* pGameObject, CGameObject* pParent);
 
-	// ¿ÀºêÁ§Æ®ÀÇ °èÃş ±¸Á¶ ÀüÃ¼¸¦ º¹»ç
+	// ì˜¤ë¸Œì íŠ¸ì˜ ê³„ì¸µ êµ¬ì¡° ì „ì²´ë¥¼ ë³µì‚¬
 	CGameObject* Clone();
 
 	virtual void CalculateBoundingBox();
@@ -534,6 +553,7 @@ public:
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
+class Hpbar;
 class CSpider : public CGameObject
 {
 public:
@@ -544,22 +564,20 @@ public:
 	//virtual void SetPlayer(CPlayer* p) { pPlayer = p; }
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
 
-<<<<<<< Updated upstream
+
 private:
-	CPlayer* pPlayer = NULL;
 	CGameObject* m_pHpbar = NULL;
-=======
+
 	float MonsterHP = 100.0f;
 	float hpRatio = MonsterHP / 100.0f;
-	//Hpbar* m_pHpbar = NULL;
+
 
 	virtual void SetMonsterID(int id) { monsterID = id; }
 	int GetMonsterID() const { return monsterID; }
 
 private:
-	CPlayer* pPlayer = NULL;
 	int monsterID = -1;
->>>>>>> Stashed changes
+
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
