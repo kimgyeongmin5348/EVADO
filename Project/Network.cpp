@@ -10,6 +10,7 @@ ID3D12GraphicsCommandList* g_pd3dCommandList = nullptr;
 ID3D12RootSignature* g_pd3dGraphicsRootSignature = nullptr;
 void* g_pContext = nullptr;
 
+
 extern CGameFramework gGameFramework;
 CGameObject object;
 
@@ -410,7 +411,7 @@ void ProcessPacket(char* ptr)
             << " Position(" << pkt->position.x << ", " << pkt->position.z << ")" << ", HP: " << pkt->hp
             << " State: " << static_cast<int>(pkt->state) << std::endl;
 
-        // 랜더링 예시 -> gGameFramework.OnMonsterSpawned(pkt->monsterID, pkt->position);
+        gGameFramework.OnMonsterSpawned(pkt->monsterID, pkt->position, pkt->state);
         break;
     }
 
@@ -433,8 +434,8 @@ void ProcessPacket(char* ptr)
             << " New Position(" << pkt->position.x << ", " << pkt->position.z << ")"
             << " State: " << static_cast<int>(pkt->state) << std::endl;
 
+        gGameFramework.UpdateMonsterPosition(pkt->monsterID, pkt->position, pkt->state);
 
-        // 랜더링 예시 ->  gGameFramework.UpdateMonsterPosition(pkt->monsterID, pkt->position, pkt->state);
         break;
     }
 
