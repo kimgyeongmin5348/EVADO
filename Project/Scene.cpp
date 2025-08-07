@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------------
 // File: CScene.cpp
 //-----------------------------------------------------------------------------
 #include "stdafx.h"
@@ -161,21 +161,6 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_pMap = new Map(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
 	m_pEffect = new CParticle(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-
-
-	//m_nHierarchicalGameObjects = 4; // spider, flashlight, shovel, whistle
-	//m_ppHierarchicalGameObjects = new CGameObject * [m_nHierarchicalGameObjects];
-
-	//CLoadedModelInfo* pSpiderModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Spider.bin", NULL);
-	//m_ppHierarchicalGameObjects[0] = new CSpider(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pSpiderModel, 3);
-	//m_ppHierarchicalGameObjects[0]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-	//m_ppHierarchicalGameObjects[0]->m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1);
-	//m_ppHierarchicalGameObjects[0]->m_pSkinnedAnimationController->SetTrackAnimationSet(2, 2);
-	//m_ppHierarchicalGameObjects[0]->m_pSkinnedAnimationController->SetTrackEnable(1, false);
-	//m_ppHierarchicalGameObjects[0]->m_pSkinnedAnimationController->SetTrackEnable(2, false);
-	//m_ppHierarchicalGameObjects[0]->SetPosition(3, 0, 30);
-	//m_ppHierarchicalGameObjects[0]->Rotate(0, 180, 0);
-	//m_ppHierarchicalGameObjects[0]->SetFrameName("Spider");
 
 	m_nMonster = 4; // spider
 	m_ppMonsters = new CGameObject * [m_nMonster];
@@ -782,12 +767,13 @@ void CScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam,
 
 			for (int i = 0; i < 4; ++i) {
 				if (PtInRect(&rt[i], m_ptPos)) {
-					if (m_pPlayer->m_pHeldItems[i]->price > 0) {
+					if (m_pPlayer->m_pHeldItems[i]) {
 						dynamic_cast<CTerrainPlayer*>(m_pPlayer)->debt -= m_pPlayer->m_pHeldItems[i]->price;
 						int objectIndex = -1;
 						for (int j = 0; j < m_nGameObjects; ++j)
 							if (m_ppGameObjects[j]->GetFrameName() == m_pPlayer->m_pHeldItems[i]->GetFrameName())
 								objectIndex = j;
+						m_pPlayer->m_pHeldItems[i] = nullptr;
 						auto it = m_textureMap.find("inven");
 						if (it != m_textureMap.end())
 						{
@@ -801,6 +787,7 @@ void CScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam,
 							}
 							// 오브젝트도 삭제해야함
 							if (objectIndex > -1) m_ppGameObjects[objectIndex] = nullptr;
+							
 						}
 					}
 				}
@@ -827,10 +814,13 @@ void CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 			m_pPlayer->m_nSelectedInventoryIndex = slotIndex;
 
 			// 슬롯에 따라 visible 갱신
-			for (int i = 0; i < m_pPlayer->m_pHeldItems.size(); ++i)
+			for (int i = 0; i < 4; ++i)
 			{
-				CGameObject* item = m_pPlayer->m_pHeldItems[i];
-				item->SetVisible(i == slotIndex); // 선택된 슬롯만 true
+				CGameObject* item = NULL;
+				if (m_pPlayer->m_pHeldItems[i]) {
+					item = m_pPlayer->m_pHeldItems[i];
+					item->SetVisible(i == slotIndex); // 선택된 슬롯만 true
+				}
 			}
 		}
 			break;
@@ -842,7 +832,7 @@ void CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 			for (int i = 0; i < m_nGameObjects; ++i)
 			{
 				CGameObject* pItem = m_ppGameObjects[i];
-				if (!pItem) continue;
+				if (!pItem) break;
 
 				XMFLOAT3 playerPos = m_pPlayer->GetPosition();
 				XMFLOAT3 itemPos = pItem->GetPosition();
@@ -855,8 +845,14 @@ void CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 					auto it = m_textureMap.find(frameName);
 					if (it != m_textureMap.end())
 					{
-						int newIndex = static_cast<int>(m_pPlayer->m_pHeldItems.size()) - 1;
-						if (newIndex < 4)
+						int newIndex = -1;
+						for (int i = 0; i < 4; ++i)
+							if (!m_pPlayer->m_pHeldItems[i]) {
+								newIndex = i - 1;
+								break;
+							}
+							else continue;
+						if (newIndex < 4 && newIndex > -1)
 						{
 							auto* pShader = dynamic_cast<CTextureToScreenShader*>(m_ppShaders[newIndex]);
 							auto* pShader1 = dynamic_cast<CTextureToScreenShader*>(m_ppShaders[newIndex + 6]);
@@ -886,7 +882,7 @@ void CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 						if (pShader) pShader->SetTexture(it->second);
 						if (pShader1)
 						{
-							//pShader1->SetTexture(it->second); 얘 때문에 이상한 텍스처가 나옴 ㅠㅠㅠ
+							pShader1->SetTexture(it->second);
 							dynamic_cast<CShopShader*>(m_ppShaders[5])->price[index] = L"0";
 						}
 					}
@@ -901,7 +897,7 @@ void CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 				dynamic_cast<CTextureToScreenShader*>(m_ppShaders[i])->visible = isShop;
 			break;
 		case VK_UP:
-			dynamic_cast<CTerrainPlayer*>(m_pPlayer)->currentHP -= 10.f;
+			dynamic_cast<CTerrainPlayer*>(m_pPlayer)->debt -= 1000;
 			break;
 		}
 		break;
@@ -984,7 +980,7 @@ void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera
 	{
 		//if (m_ppOtherPlayers[i]->isConnedted)
 		//m_ppOtherPlayers[i]->Animate(m_ppOtherPlayers[i]->animation, m_fElapsedTime);
-		m_ppOtherPlayers[i]->Render(pd3dCommandList, pCamera);
+		if (m_ppOtherPlayers[i]->visible)m_ppOtherPlayers[i]->Render(pd3dCommandList, pCamera);
 	}
 
 	for (int i = 0; i < m_nShaders; i++) if (dynamic_cast<CTextureToScreenShader*>(m_ppShaders[i])->visible) { 
@@ -1244,7 +1240,7 @@ void CStartScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM
 				strcpy(serverIP, m_inputIP.c_str());
 				std::cout << "Connecting to: " << serverIP << std::endl;
 				InitializeNetwork(serverIP); // server IP 전달
-				gGameFramework.MoveToNextScene();
+				gGameFramework.MoveToNextScene(1);
 			}
 			else if (wParam == VK_BACK && !m_inputIP.empty()) {
 				m_inputIP.pop_back();
@@ -1288,16 +1284,58 @@ void CStartScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM
 
 void CEndScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
+	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
+
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 100);
+
+	m_nShaders = 1;
+	m_ppShaders = new CShader * [m_nShaders];
+
+	CTextureToScreenShader* pTextureToScreenShader = new CTextureToScreenShader(1);
+	pTextureToScreenShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+
+	CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/EndScene.dds", RESOURCE_TEXTURE2D, 0);
+	//pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Font.dds", RESOURCE_TEXTURE2D, 1);
+
+	CreateShaderResourceViews(pd3dDevice, pTexture, 0, 15);
+
+	CScreenRectMeshTextured* pMesh = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, -1.0f, 2.0f, 1.0f, 2.0f);
+	pTextureToScreenShader->SetMesh(0, pMesh);
+	//pMesh = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, -1.f, 0.12f * 36, -0.5f, 0.20f, 1);
+	//pTextureToScreenShader->SetMesh(1, pMesh);
+	pTextureToScreenShader->SetTexture(pTexture);
+
+	m_ppShaders[0] = pTextureToScreenShader;
+
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
 void CEndScene::ReleaseObjects()
 {
+	if (m_pd3dGraphicsRootSignature) m_pd3dGraphicsRootSignature->Release();
+
+	if (m_ppShaders)
+	{
+		for (int i = 0; i < m_nShaders; i++)
+		{
+			m_ppShaders[i]->ReleaseShaderVariables();
+			m_ppShaders[i]->ReleaseObjects();
+			m_ppShaders[i]->Release();
+		}
+		delete[] m_ppShaders;
+	}
 }
 
 void CEndScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
-}
+	if (m_pd3dGraphicsRootSignature) pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
+	if (m_pd3dCbvSrvDescriptorHeap) pd3dCommandList->SetDescriptorHeaps(1, &m_pd3dCbvSrvDescriptorHeap);
 
-void CEndScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
-{
+	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
+	pCamera->UpdateShaderVariables(pd3dCommandList);
+
+	UpdateShaderVariables(pd3dCommandList);
+
+	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
 }

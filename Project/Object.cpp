@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------------
+ï»¿//-----------------------------------------------------------------------------
 // File: CGameObject.cpp
 //-----------------------------------------------------------------------------
 
@@ -286,7 +286,7 @@ void CMaterial::LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		_stprintf_s(pstrDebug, 256, _T("Texture Name: %d %c %s\n"), (pstrTextureName[0] == '@') ? nRepeatedTextures++ : nTextures++, (pstrTextureName[0] == '@') ? '@' : ' ', pwstrTextureName);
 		OutputDebugString(pstrDebug);
 #endif
-		// »õ·Î¿î ÅØ½ºÃ³ÀÎ °æ¿ì DDS ÆÄÀÏ¿¡¼­ ÅØ½ºÃ³ ·Îµå
+		// ìƒˆë¡œìš´ í…ìŠ¤ì²˜ì¸ ê²½ìš° DDS íŒŒì¼ì—ì„œ í…ìŠ¤ì²˜ ë¡œë“œ
 		if (!bDuplicated)
 		{
 			*ppTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
@@ -295,7 +295,7 @@ void CMaterial::LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 			CScene::CreateShaderResourceViews(pd3dDevice, *ppTexture, 0, nRootParameter);
 		}
-		// Áßº¹µÈ ÅØ½ºÃ³ÀÎ °æ¿ì ·çÆ® ¿ÀºêÁ§Æ®±îÁö °Å½½·¯ ¿Ã¶ó°¡ ÀÌ¹Ì ·ÎµåµÈ ÅØ½ºÃ³¸¦ Ã£¾Æ¼­ Àç»ç¿ë
+		// ì¤‘ë³µëœ í…ìŠ¤ì²˜ì¸ ê²½ìš° ë£¨íŠ¸ ì˜¤ë¸Œì íŠ¸ê¹Œì§€ ê±°ìŠ¬ëŸ¬ ì˜¬ë¼ê°€ ì´ë¯¸ ë¡œë“œëœ í…ìŠ¤ì²˜ë¥¼ ì°¾ì•„ì„œ ì¬ì‚¬ìš©
 		else
 		{
 			if (pParent)
@@ -524,7 +524,7 @@ CAnimationController::CAnimationController(ID3D12Device *pd3dDevice, ID3D12Graph
 	m_ppd3dcbSkinningBoneTransforms = new ID3D12Resource*[m_nSkinnedMeshes];
 	m_ppcbxmf4x4MappedSkinningBoneTransforms = new XMFLOAT4X4*[m_nSkinnedMeshes];
 
-	UINT ncbElementBytes = (((sizeof(XMFLOAT4X4) * SKINNED_ANIMATION_BONES) + 255) & ~255); //256ÀÇ ¹è¼ö
+	UINT ncbElementBytes = (((sizeof(XMFLOAT4X4) * SKINNED_ANIMATION_BONES) + 255) & ~255); //256ì˜ ë°°ìˆ˜
 	for (int i = 0; i < m_nSkinnedMeshes; i++)
 	{
 		m_ppd3dcbSkinningBoneTransforms[i] = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
@@ -1440,14 +1440,14 @@ CGameObject* CGameObject::Clone()
 {
 	CGameObject* pNewObject = new CGameObject(*this);
 
-	// ÀÚ½Ä °´Ã¼ º¹»ç
+	// ìì‹ ê°ì²´ ë³µì‚¬
 	if (m_pChild)
 	{
 		pNewObject->m_pChild = m_pChild->Clone();
 		pNewObject->m_pChild->m_pParent = pNewObject;
 	}
 
-	// ÇüÁ¦ °´Ã¼ º¹»ç
+	// í˜•ì œ ê°ì²´ ë³µì‚¬
 	if (m_pSibling)
 	{
 		pNewObject->m_pSibling = m_pSibling->Clone();

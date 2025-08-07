@@ -598,7 +598,7 @@ void CGameFramework::BuildObjects()
 
 	m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 
-	m_nScenes = 2; // 총 Scene 개수
+	m_nScenes = 3; // 총 Scene 개수
 	m_ppScenes = new CScene * [m_nScenes];
 
 	bool b = false;
@@ -619,6 +619,12 @@ void CGameFramework::BuildObjects()
 
 		m_ppScenes[1]->GenerateGameObjectsBoundingBox();
 		m_ppScenes[1]->InitializeCollisionSystem();
+	}
+	else if (m_nCurrentScene == 2) {
+		m_ppScenes[2] = new CEndScene();
+		m_ppScenes[2]->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
+		CPlayer* pPlayer = new CPlayer();
+		m_ppScenes[2]->SetPlayer(pPlayer);
 	}
 
 //#ifdef _WITH_TERRAIN_PLAYER
@@ -803,10 +809,10 @@ void CGameFramework::MoveToNextFrame()
 	}
 }
 
-void CGameFramework::MoveToNextScene()
+void CGameFramework::MoveToNextScene(int i)
 {
 	m_ppScenes[m_nScene]->ReleaseObjects();
-	m_nCurrentScene = 1;
+	m_nCurrentScene = i;
 	BuildObjects();
 	LoadingDoneToServer();
 	isStartScene = false;
@@ -886,7 +892,7 @@ void CGameFramework::FrameAdvance()
 	m_GameTimer.GetFrameRate(m_pszFrameRate + 7, 37);
 	size_t nLength = _tcslen(m_pszFrameRate);
 	std::wstring w_user_name(user_name.begin(), user_name.end());
-	_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("ID : %s"), w_user_name.c_str());
+	_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T(" - ID : %s"), w_user_name.c_str());
 	::SetWindowText(m_hWnd, m_pszFrameRate);
 }
 

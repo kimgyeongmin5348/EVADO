@@ -9,15 +9,6 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CPlayer
 
-void CPlayer::RemoveHeldItem(CGameObject* pItem)
-{
-	auto it = std::find(m_pHeldItems.begin(), m_pHeldItems.end(), pItem);
-	if (it != m_pHeldItems.end())
-	{
-		m_pHeldItems.erase(it);
-	}
-}
-
 CPlayer::CPlayer()
 {
 	
@@ -318,51 +309,49 @@ void CPlayer::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamer
 bool CPlayer::TryPickUpItem(CGameObject* pItem)
 {
 	if (!pItem || !pItem->GetFrameName()) return false;
-
 	CGameObject* pRightHand = FindFrame("hand_r");
 	if (!pRightHand) return false;
-
-	// 이미 손에 든 경우
 	if (pItem->GetParent() == pRightHand) return false;
 
-	// 손에 붙이기
-	if (!pRightHand->GetChild()) pRightHand->SetChild(pItem);
-	else
+	for (int i = 0; i < 4; ++i)
 	{
-		CGameObject* last = pRightHand->GetChild();
-		while (last->GetSibling()) last = last->GetSibling();
-		last->m_pSibling = pItem;
+		if (!m_pHeldItems[i])
+		{
+			// 연결
+			CGameObject* last = pRightHand->GetChild();
+			if (!last) pRightHand->SetChild(pItem);
+			else {
+				while (last->GetSibling()) last = last->GetSibling();
+				last->m_pSibling = pItem;
+			}
+
+			pItem->m_pParent = pRightHand;
+			pItem->m_pSibling = nullptr;
+
+			// 위치 보정
+			if (strcmp(pItem->GetFrameName(), "Shovel") == 0)
+				pItem->SetPosition(0.05f, -0.05f, 1.0f);
+			else
+				pItem->SetPosition(0.05f, -0.05f, 0.1f);
+
+			m_pHeldItems[i] = pItem;
+			pItem->SetVisible(i == m_nSelectedInventoryIndex);
+			UpdateTransform(nullptr);
+			return true;
+		}
 	}
-
-	pItem->m_pParent = pRightHand;
-	pItem->m_pSibling = nullptr;
-
-	// 위치 보정
-	if (strcmp(pItem->GetFrameName(), "Shovel") == 0)
-		pItem->SetPosition(0.05f, -0.05f, 1.0f);
-	else
-		pItem->SetPosition(0.05f, -0.05f, 0.1f);
-
-	UpdateTransform(nullptr);
-
-	int newIndex = static_cast<int>(m_pHeldItems.size());
-	m_pHeldItems.push_back(pItem);
-	pItem->SetVisible(newIndex == m_nSelectedInventoryIndex);
-
-	return true;
+	return false; // 가득 참
 }
 
 bool CPlayer::DropItem(int index)
 {
-	if (index < 0 || index >= m_pHeldItems.size()) return false;
-
+	if (index < 0 || index >= 4) return false;
 	CGameObject* pItem = m_pHeldItems[index];
 	if (!pItem) return false;
 
 	CGameObject* pRightHand = FindFrame("hand_r");
 	if (!pRightHand) return false;
 
-	// 연결 끊기
 	CGameObject* pCurr = pRightHand->GetChild();
 	CGameObject* pPrev = nullptr;
 
@@ -383,10 +372,9 @@ bool CPlayer::DropItem(int index)
 		pItem->isFalling = true;
 		pItem->SetVisible(true);
 
-		RemoveHeldItem(pItem);
+		m_pHeldItems[index] = nullptr;
 		return true;
 	}
-
 	return false;
 }
 
