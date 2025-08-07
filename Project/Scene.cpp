@@ -138,11 +138,6 @@ void CScene::GenerateGameObjectsBoundingBox()
 	}
 }
 
-void CScene::ItemToHand(CGameObject* pItem)
-{
-
-}
-
 void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
@@ -207,7 +202,6 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_ppGameObjects[0] = new FlashLight(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFlashlightModel);
 	m_ppGameObjects[0]->SetScale(3, 3, 3);
 	m_ppGameObjects[0]->Rotate(90, 0, 0);
-	//m_ppHierarchicalGameObjects[1]->SetPosition(3, 2, 10);
 	m_ppGameObjects[0]->SetFrameName("FlashLight");
 	m_ppGameObjects[0]->price = 80;
 	if (pFlashlightModel) delete pFlashlightModel;
@@ -216,7 +210,6 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_ppGameObjects[1] = new Shovel(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShovelModel);
 	m_ppGameObjects[1]->SetScale(1, 1, 1);
 	m_ppGameObjects[1]->Rotate(0, 0, 90);
-	//m_ppHierarchicalGameObjects[2]->SetPosition(3, 2, 12);
 	m_ppGameObjects[1]->SetFrameName("Shovel");
 	m_ppGameObjects[1]->price = 80;
 	if (pShovelModel) delete pShovelModel;
@@ -224,7 +217,6 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	CLoadedModelInfo* pWhistleModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Whistle.bin", NULL);
 	m_ppGameObjects[2] = new Whistle(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pWhistleModel);
 	m_ppGameObjects[2]->SetScale(1, 1, 1);
-	//m_ppHierarchicalGameObjects[3]->SetPosition(3, 2, 13);
 	m_ppGameObjects[2]->SetFrameName("Whistle");
 	m_ppGameObjects[2]->price = 30;
 	if (pWhistleModel) delete pWhistleModel;
@@ -738,19 +730,10 @@ void CScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam,
 			else if (!strcmp(frameName, "Shovel"))
 			{
 				dynamic_cast<CTerrainPlayer*>(m_pPlayer)->m_currentAnim = AnimationState::SWING;
-				uint8_t currentAnimState = static_cast<uint8_t>(dynamic_cast<CTerrainPlayer*>(m_pPlayer)->m_currentAnim);
 
-				cout << "CScene - anim" << currentAnimState << endl;
-
+				m_pEffect->Activate(m_pPlayer->m_pHeldItems[m_pPlayer->m_nSelectedInventoryIndex]->GetPosition());
 				if (m_pPlayer->m_isMonsterHit)
 				{
-					m_pEffect->Activate(m_ppGameObjects[1]->GetPosition());
-
-					CSpider* pSpider = dynamic_cast<CSpider*>(m_ppMonsters[0]);
-					if (pSpider)
-					{
-						//pSpider->MonsterHP -= 25.0f;
-					}
 				}
 				break;
 			}

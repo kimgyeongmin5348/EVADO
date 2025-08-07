@@ -72,8 +72,6 @@ public:
 	void InitializeCollisionSystem();
 	void GenerateGameObjectsBoundingBox();
 
-	void ItemToHand(CGameObject* pItem);
-
 	CPlayer								*m_pPlayer = NULL;
 	std::unordered_map<std::string, CTexture*> m_textureMap;
 
