@@ -136,6 +136,7 @@ public:
 	void SetMaterialType(UINT nType) { m_nType |= nType; }
 	void SetTexture(CTexture* pTexture, UINT nTexture = 0);
 	int GetTexture() const { return (1 << m_nTextures) - 1; }
+	void SetEmissive(const XMFLOAT4& e) { m_xmf4EmissiveColor = e; }
 	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList);
 
 	virtual void ReleaseUploadBuffers();
@@ -391,6 +392,7 @@ public:
 	void SetShader(CShader* pShader);
 	void SetShader(int nMaterial, CShader* pShader);
 	void SetMaterial(int nMaterial, CMaterial* pMaterial);
+	CMaterial* GetMaterial(int nMaterial) { return m_ppMaterials[nMaterial]; }
 
 	void SetChild(CGameObject* pChild, bool bReferenceUpdate = false);
 
