@@ -113,6 +113,10 @@ void CCollisionManager::HandleCollision(CPlayer* player, CGameObject* obj)
     //if (frameCounter % 60 == 0)
     //    cout << "ObjectFrameName: " << ObjectFrameName << endl;
 
+    bool isMonster = ObjectFrameName.find("Spider") != std::string::npos;
+    bool isAttacking = (dynamic_cast<CTerrainPlayer*>(player)->m_currentAnim == AnimationState::SWING);
+    bool isShovelHit = player->GetShovelAttackBoundingBox().Intersects(obj->GetBoundingBox());
+
     if (std::string::npos != ObjectFrameName.find("Map_wall_window")
         || std::string::npos != ObjectFrameName.find("Map_wall_plain")
         || std::string::npos != ObjectFrameName.find("Map_wall_baydoor")
@@ -272,15 +276,33 @@ void CCollisionManager::HandleCollision(CPlayer* player, CGameObject* obj)
         playerBox = player->GetBoundingBox();
     }
 
-    if (std::string::npos != ObjectFrameName.starts_with("Spider")) // Find -> starts_with 로 수정
+    //if (std::string::npos != ObjectFrameName.starts_with("Spider")) // Find -> starts_with 로 수정
+    //{
+    //    // 몬스터와 충돌 시 처리
+    //}
+
+    //if (dynamic_cast<CTerrainPlayer*>(player)->m_currentAnim == AnimationState::SWING
+    //    && std::string::npos != ObjectFrameName.starts_with("Spider"))
+    //{
+    //    // 몬스터와 플레이어의 공격 충돌 시 처리
+    //    player->m_isMonsterHit = true;
+    //}
+    if (isMonster && isAttacking && isShovelHit)
     {
-        // 몬스터와 충돌 시 처리
+        player->m_isMonsterHit = true;
+
+        CSpider* pSpider = dynamic_cast<CSpider*>(obj);
+        if (pSpider) {
+            pSpider->MonsterHP -= 25.0f;
+            std::cout << "[Hit] Monster HP: " << pSpider->MonsterHP << std::endl;
+        }
+
+        return;
     }
 
-    if (dynamic_cast<CTerrainPlayer*>(player)->m_currentAnim == AnimationState::SWING
-        && std::string::npos != ObjectFrameName.starts_with("Spider"))
+    // 몬스터와 그냥 부딪힌 경우
+    if (isMonster && !isAttacking)
     {
-        // 몬스터와 플레이어의 공격 충돌 시 처리
-        player->m_isMonsterHit = true;
-    }
-}
+        player->currentHP -= 10.f;
+        return;
+    }}

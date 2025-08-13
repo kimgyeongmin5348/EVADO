@@ -72,8 +72,6 @@ public:
 	void InitializeCollisionSystem();
 	void GenerateGameObjectsBoundingBox();
 
-	void ItemToHand(CGameObject* pItem);
-
 	CPlayer								*m_pPlayer = NULL;
 	std::unordered_map<std::string, CTexture*> m_textureMap;
 
@@ -129,7 +127,7 @@ public:
 	float								m_fElapsedTime = 0.0f;
 
 	int									m_nGameObjects = 0;
-	CGameObject							**m_ppGameObjects = NULL;
+	CGameObject**m_ppGameObjects = NULL;
 
 	int									m_nMonster = 0;
 	CGameObject							**m_ppMonsters = NULL;
@@ -207,6 +205,10 @@ public:
 	virtual void OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 
 private:
+	int									m_nGameObjects = 0;
+	CGameObject** m_ppGameObjects = NULL;
+
+
 	InputStep m_inputStep = InputStep::EnterID;
 	std::string m_inputID;
 	std::string m_inputIP;
@@ -227,6 +229,4 @@ public:
 	virtual void ReleaseObjects();
 
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
-
-	virtual void OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 };

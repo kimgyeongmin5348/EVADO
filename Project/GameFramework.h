@@ -36,7 +36,7 @@ public:
 
 	void WaitForGpuComplete();
 	void MoveToNextFrame();
-	void MoveToNextScene();
+	void MoveToNextScene(int i);
 
 	void OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	void OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
