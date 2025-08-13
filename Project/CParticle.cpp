@@ -8,7 +8,7 @@ CParticle::CParticle(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 {
     m_bActive = false;
 
-    CCubeMesh *pMesh = new CCubeMesh(pd3dDevice, pd3dCommandList, 0.2f, 0.2f, 0.2f);
+    CCubeMesh *pMesh = new CCubeMesh(pd3dDevice, pd3dCommandList, 0.1f, 0.2f, 0.1f);
     SetMesh(pMesh);
 
     CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -36,7 +36,7 @@ void CParticle::Activate(XMFLOAT3 pos)
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<float> dist(-1.0f, 1.0f);
-
+    std::uniform_real_distribution<float> alphaDist(0.3f, 1.0f);
     m_activeCount = MAX_PARTICLES;
     for (int i = 0; i < MAX_PARTICLES; ++i) {
         XMFLOAT3 dir = { dist(gen), dist(gen), dist(gen) };
@@ -47,6 +47,7 @@ void CParticle::Activate(XMFLOAT3 pos)
         m_velocities[i] = { dir.x * 2.0f, dir.y * 2.0f, dir.z * 2.0f };
         m_lifetimes[i] = 0.0f;
         m_bActives[i] = true;
+        m_alphas[i] = alphaDist(gen);
     }
 
     m_bActive = true;
@@ -71,10 +72,13 @@ void CParticle::Animate(float fTimeElapsed, XMFLOAT3 position)
 
 void CParticle::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* camera)
 {
+    auto* mat = m_ppMaterials[0];
     for (int i = 0; i < MAX_PARTICLES; ++i) {
         if (!m_bActives[i]) continue;
 
         SetPosition(m_positions[i]); // 위치 적용
+        //pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &m_alphas[i], 33);
+        mat->m_xmf4AlbedoColor.w = m_alphas[i];
         CGameObject::Render(pd3dCommandList, camera);
     }
 }

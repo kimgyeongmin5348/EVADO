@@ -5,7 +5,7 @@
 class Item : public CGameObject
 {
 private:
-	long long	item_id = -1;  // 고유 ID저장
+	long long	item_id = -1;  // ���� ID����
 	int			item_type = 0;
 	int		  price = 0;
   
@@ -29,11 +29,11 @@ public:
 	void SetType(int t) { item_type = t; }
 	int GetType() const { return item_type; }
 
-	void SetPrice(float p) { price = p; }
-	float GetPrice() const { return price; }
+	void SetPrice(int p) { price = p; }
+	int GetPrice() const { return price; }
 
 protected:
-	float m_fFallingSpeed; // 낙하 속도
+	float m_fFallingSpeed; // ���� �ӵ�
 };
 
 
@@ -51,9 +51,9 @@ public:
 	BoundingBox GetattackBoundingBox() { return m_attackBoundingBox; };
 
 	void ProccessSwing();
-	void GenerateSwingBoundingBox(XMFLOAT3 playerPos, XMFLOAT3 playerLook);  // 휘두를 시 바운딩 박스 생성
-	void UpdateSwingBoundingBox(); // 바운딩 박스 업데이트
-	void DeleteSwingBoundingBox(); // 바운딩 박스 삭제
+	void GenerateSwingBoundingBox(XMFLOAT3 playerPos, XMFLOAT3 playerLook);  // �ֵθ� �� �ٿ�� �ڽ� ����
+	void UpdateSwingBoundingBox(); // �ٿ�� �ڽ� ������Ʈ
+	void DeleteSwingBoundingBox(); // �ٿ�� �ڽ� ����
 };
 
 class Handmap : public Item

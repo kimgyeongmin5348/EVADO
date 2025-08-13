@@ -16,6 +16,7 @@ public:
     float m_lifetimes[MAX_PARTICLES] = {};
     float m_maxLifetime = 0.5f;
     bool m_bActives[MAX_PARTICLES] = {};
+    float m_alphas[MAX_PARTICLES] = {};
 
     int m_activeCount = 0;
 
