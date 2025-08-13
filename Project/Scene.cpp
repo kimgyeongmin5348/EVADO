@@ -218,10 +218,13 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_nGameObjects = 3;
 	m_ppGameObjects = new CGameObject * [m_nGameObjects];
 	long long itemIDs[3] = { 20000,20001,20002 };
+
+	float itemPrices[3] = { 80.0f, 150.0f, 80.0f };
+
 	XMFLOAT3 positions[3] = {
-	XMFLOAT3(-2.0f, 0.0f, 19.0f),
-	XMFLOAT3(-2.0f, 0.0f, 22.0f),
-	XMFLOAT3(-2.0f, 0.0f, 25.0f)
+		{-2.0f, 0.0f, 19.0f},
+		{-2.0f, 0.0f, 22.0f},
+		{-2.0f, 0.0f, 25.0f}
 	};
 
 	CLoadedModelInfo* pFlashlightModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Flashlightgold.bin", NULL);
@@ -234,6 +237,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_ppGameObjects[0]->SetPosition(positions[0]);
 
 	static_cast<Item*>(m_ppGameObjects[0])->SetUniqueID(itemIDs[0]);
+	static_cast<Item*>(m_ppGameObjects[0])->SetPrice(itemPrices[0]);
 	g_items[monsterIDs[0]] = static_cast<Item*>(m_ppGameObjects[0]);
 
 	if (pFlashlightModel) delete pFlashlightModel;
@@ -247,9 +251,10 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	//m_ppHierarchicalGameObjects[2]->SetPosition(3, 2, 12);
 	m_ppGameObjects[1]->SetFrameName("Shovel");
 	//m_ppGameObjects[1]->price = 80;
-	m_ppGameObjects[0]->SetPosition(positions[1]);
+	m_ppGameObjects[1]->SetPosition(positions[1]);
 
 	static_cast<Item*>(m_ppGameObjects[1])->SetUniqueID(itemIDs[1]);
+	static_cast<Item*>(m_ppGameObjects[1])->SetPrice(itemPrices[1]);
 	g_items[monsterIDs[1]] = static_cast<Item*>(m_ppGameObjects[1]);
 
 	if (pShovelModel) delete pShovelModel;
@@ -263,9 +268,10 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	//m_ppHierarchicalGameObjects[3]->SetPosition(3, 2, 13);
 	m_ppGameObjects[2]->SetFrameName("Whistle");
 	//m_ppGameObjects[2]->price = 30;
-	m_ppGameObjects[0]->SetPosition(positions[2]);
+	m_ppGameObjects[2]->SetPosition(positions[2]);
 
 	static_cast<Item*>(m_ppGameObjects[2])->SetUniqueID(itemIDs[2]);
+	static_cast<Item*>(m_ppGameObjects[2])->SetPrice(itemPrices[2]);
 	g_items[monsterIDs[2]] = static_cast<Item*>(m_ppGameObjects[2]);
 
 	if (pWhistleModel) delete pWhistleModel;

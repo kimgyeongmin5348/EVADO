@@ -5,10 +5,10 @@
 class Item : public CGameObject
 {
 private:
-	long long	item_id = -1;  // °íÀ¯ IDÀúÀå
+	long long	item_id = -1;  // ê³ ìœ  IDì €ì¥
 	int			item_type = 0;
-	float		price = 0.f;
-
+	int		  price = 0;
+  
 	bool is_exist = false;
 
 public:
@@ -33,7 +33,7 @@ public:
 	float GetPrice() const { return price; }
 
 protected:
-	float m_fFallingSpeed; // ³«ÇÏ ¼Óµµ
+	float m_fFallingSpeed; // ë‚™í•˜ ì†ë„
 };
 
 
@@ -51,9 +51,9 @@ public:
 	BoundingBox GetattackBoundingBox() { return m_attackBoundingBox; };
 
 	void ProccessSwing();
-	void GenerateSwingBoundingBox(XMFLOAT3 playerPos, XMFLOAT3 playerLook);  // ÈÖµÎ¸¦ ½Ã ¹Ù¿îµù ¹Ú½º »ı¼º
-	void UpdateSwingBoundingBox(); // ¹Ù¿îµù ¹Ú½º ¾÷µ¥ÀÌÆ®
-	void DeleteSwingBoundingBox(); // ¹Ù¿îµù ¹Ú½º »èÁ¦
+	void GenerateSwingBoundingBox(XMFLOAT3 playerPos, XMFLOAT3 playerLook);  // íœ˜ë‘ë¥¼ ì‹œ ë°”ìš´ë”© ë°•ìŠ¤ ìƒì„±
+	void UpdateSwingBoundingBox(); // ë°”ìš´ë”© ë°•ìŠ¤ ì—…ë°ì´íŠ¸
+	void DeleteSwingBoundingBox(); // ë°”ìš´ë”© ë°•ìŠ¤ ì‚­ì œ
 };
 
 class Handmap : public Item

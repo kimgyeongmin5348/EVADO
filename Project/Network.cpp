@@ -341,19 +341,6 @@ void ProcessPacket(char* ptr)
     {
         sc_packet_item_spawn* pkt = reinterpret_cast<sc_packet_item_spawn*>(ptr);
 
-        // 아래 주석한 식으로 정보를 저장하고 하면 랜더링 할때 지금보단 조금더 수월해 지지 않을까?
-        
-        // 아이템 생성 및 정보 세팅
-        //auto newItem = std::make_unique<Item>();
-        //newItem->SetUniqueID(pkt->item_id);
-        //newItem->SetItemType(static_cast<ITEM_TYPE>(pkt->item_type));
-        //newItem->SetPosition(pkt->position);
-        //newItem->SetCash(pkt->cash);
-        //// 컨테이너에 등록 (예: ID가 키인 맵)
-        //{
-        //    std::lock_guard<std::mutex> lock(g_item_mutex);
-        //    g_items[pkt->item_id] = newItem.get();  // raw 포인터 저장 가능 (단, 소유권은 unique_ptr가 가짐)
-        //}
 
         std::cout << "[Client] Item Create - ID: " << pkt->item_id
             << " Postion(" << pkt->position.x << ", "
