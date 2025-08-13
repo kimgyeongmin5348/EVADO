@@ -848,15 +848,19 @@ void CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 
 			for (int i = 0; i < m_nGameObjects; ++i)
 			{
-				CGameObject* pItem = m_ppGameObjects[i];
-				if (!pItem) break;
+				CGameObject* pObj = m_ppGameObjects[i];
+				if (!pObj) continue;
+
+				Item* pItem = dynamic_cast<Item*>(pObj);
+				if (!pItem) continue;
+				
 
 				XMFLOAT3 playerPos = m_pPlayer->GetPosition();
 				XMFLOAT3 itemPos = pItem->GetPosition();
 				float distance = Vector3::Length(Vector3::Subtract(playerPos, itemPos));
 				if (distance > 0.5f) continue;
-
 				if (m_pPlayer->TryPickUpItem(pItem))
+
 				{
 					std::string frameName = pItem->m_pstrFrameName;
 					auto it = m_textureMap.find(frameName);
@@ -877,7 +881,7 @@ void CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 							if (pShader1)
 							{
 								pShader1->SetTexture(it->second);
-								dynamic_cast<CShopShader*>(m_ppShaders[5])->price[newIndex] = std::to_wstring(pItem->price);
+								dynamic_cast<CShopShader*>(m_ppShaders[5])->price[newIndex] = std::to_wstring(pItem->GetPrice());
 							}
 						}
 					}
