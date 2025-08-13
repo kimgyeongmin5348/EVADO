@@ -881,8 +881,12 @@ void CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 			// 1단계: 먼저 주울 수 있는 아이템 탐색
 			for (int i = 0; i < m_nGameObjects; ++i)
 			{
-				CGameObject* pItem = m_ppGameObjects[i];
+				CGameObject* pObj = m_ppGameObjects[i];
+				if (!pObj) continue;
+
+				Item* pItem = dynamic_cast<Item*>(pObj);
 				if (!pItem) continue;
+				
 
 				// 플레이어와 아이템 간 거리 계산
 				XMFLOAT3 playerPos = m_pPlayer->GetPosition();
@@ -900,9 +904,33 @@ void CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 				if (!pRightHand->GetChild()) pRightHand->SetChild(pItem);
 				else
 				{
+<<<<<<< Updated upstream
 					CGameObject* last = pRightHand->GetChild();
 					while (last->GetSibling()) last = last->GetSibling();
 					last->m_pSibling = pItem;
+=======
+					long long itemID = pItem->GetUniqueID();
+
+					std::string frameName = pItem->m_pstrFrameName;
+					auto it = m_textureMap.find(frameName);
+					if (it != m_textureMap.end())
+					{
+						int newIndex = static_cast<int>(m_pPlayer->m_pHeldItems.size()) - 1;
+						if (newIndex < 4)
+						{
+							auto* pShader = dynamic_cast<CTextureToScreenShader*>(m_ppShaders[newIndex]);
+							auto* pShader1 = dynamic_cast<CTextureToScreenShader*>(m_ppShaders[newIndex + 6]);
+							if (pShader) pShader->SetTexture(it->second);
+							if (pShader1)
+							{
+								pShader1->SetTexture(it->second);
+								dynamic_cast<CShopShader*>(m_ppShaders[5])->price[newIndex] = std::to_wstring(pItem->GetPrice());
+							}
+						}
+					}
+					bPickedUp = true;
+					break;
+>>>>>>> Stashed changes
 				}
 				pItem->m_pParent = pRightHand;
 				pItem->m_pSibling = nullptr;
