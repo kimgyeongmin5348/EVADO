@@ -52,6 +52,8 @@ public:
 	void CGameFramework::UpdateMonsterState(CSpider* pMonster, int state);
 	void CGameFramework::UpdateMonsterPosition(int monsterID, const XMFLOAT3& pos, int state);
 
+	void ItemSpawned(long long itemID, const XMFLOAT3& pos, int type, int price);
+	void UpdateItemPosition(long long itemID, const XMFLOAT3& pos);
 
 	void ItemToHand(int objectIndex);
 
@@ -71,9 +73,6 @@ public:
 	{
 		m_ppScenes[m_nCurrentScene]->UpdateOtherPlayerAnimation(clinetnum, animNum);
 	}
-
-
-	void AddItemToScene(long long id, ITEM_TYPE type, const XMFLOAT3& position);
 
 	const float Recognized_Range = 2.0f;
 

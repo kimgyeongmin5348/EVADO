@@ -4,9 +4,12 @@
 
 class Item : public CGameObject
 {
-//private:
-//	long long m_id = -1;  // 고유 ID저장
-//	bool m_bIsHeld = false;
+private:
+	long long	item_id = -1;  // 고유 ID저장
+	int			item_type = 0;
+	float		price = 0.0f;
+
+	bool is_exist = false;
 
 public:
 	//Item(int nMaterials = 0) : CGameObject(nMaterials), m_id(-1) {}
@@ -17,14 +20,17 @@ public:
 	virtual void Animate(float fTimeElapsed);
 	void ChangeExistState(bool isExist);
 
-	bool is_exist = false;
+	
+	bool IsExist() const { return is_exist; }
 
-	//// 고유 ID 설정
-	//void SetUniqueID(long long id) { m_id = id; }
-	//// 고유 ID 반환
-	//long long GetUniqueID() const { return m_id; }
-	//void SetHeld(bool held) { m_bIsHeld = held; }
-	//bool IsHeld() const { return m_bIsHeld; }
+	void SetUniqueID(long long id) { item_id = id; }
+	long long GetUniqueID() const { return item_id; }
+
+	void SetType(int t) { item_type = t; }
+	int GetType() const { return item_type; }
+
+	void SetPrice(float p) { price = p; }
+	float GetPrice() const { return price; }
 
 protected:
 	float m_fFallingSpeed; // 낙하 속도

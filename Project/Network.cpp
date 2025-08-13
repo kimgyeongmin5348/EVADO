@@ -358,7 +358,7 @@ void ProcessPacket(char* ptr)
             << pkt->position.y << ", " << pkt->position.z << ")"
             << " Type: " << pkt->item_type << " Cash: " << pkt->cash << std::endl;
 
-        gGameFramework.InitItemToScene(pkt->item_id, static_cast<ITEM_TYPE>(pkt->item_type), pkt->position);
+        gGameFramework.ItemSpawned(pkt->item_id, pkt->position, pkt->item_type, pkt->cash);
 
         break;
     }
@@ -398,7 +398,7 @@ void ProcessPacket(char* ptr)
             << pkt->position.y << ", " << pkt->position.z << ")"
             << std::endl;
 
-        //gGameFramework.UpdateItemPosition(pkt->item_id, pkt->position);
+        gGameFramework.UpdateItemPosition(pkt->item_id, pkt->position);
 
         break;
     }
@@ -520,6 +520,16 @@ void send_position_to_server(const XMFLOAT3& position, const XMFLOAT3& look, con
     p.animState = animState;
     send_packet(&p);
 
+}
+
+void send_item_position_to_server(const XMFLOAT3& position, long long id)
+{
+    cs_packet_item_move ipk;
+    ipk.size = sizeof(ipk);
+    ipk.type = CS_P_ITEM_MOVE;
+    ipk.position = position;
+    ipk.item_id = id;
+    send_packet(&ipk);
 }
 
 void CleanupNetwork() {
