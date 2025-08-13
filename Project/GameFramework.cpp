@@ -331,6 +331,10 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			case VK_F9:
 				ChangeSwapChainState();
 				break;
+			case VK_DOWN:
+				cout << "player pos - " << m_pPlayer->GetPosition().x << ", " << m_pPlayer->GetPosition().y << ", " << m_pPlayer->GetPosition().z << endl;
+				cout << "flashlight pos - " << m_pScene->m_ppGameObjects[0]->GetPosition().x << ", " << m_pScene->m_ppGameObjects[0]->GetPosition().y << ", " << m_pScene->m_ppGameObjects[0]->GetPosition().z << endl;
+				break;
 			}
 			break;
 		default:
@@ -634,7 +638,7 @@ void CGameFramework::AnimateObjects()
 			for (int i = 0; i < m_pScene->m_nGameObjects; ++i) {
 				if (m_pPlayer->m_pHeldItems[m_pPlayer->m_nSelectedInventoryIndex] == m_pScene->m_ppGameObjects[i]) {
 					Item* pItem = dynamic_cast<Item*>(m_pScene->m_ppGameObjects[i]);
-					XMFLOAT3 pos = m_pPlayer->m_pHand->GetToParentPosition();
+					XMFLOAT3 pos = m_pPlayer->m_pHand->m_pSibling->GetPosition();
 					SendItemMove(pItem->GetUniqueID(), pos);
 				}
 			}

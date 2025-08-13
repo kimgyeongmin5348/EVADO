@@ -256,7 +256,7 @@ void ProcessPacket(char* ptr)
 
     const unsigned char packet_type = ptr[1];
 
-    std::cout << "[Client] Packet - Type : " << (int)packet_type << std::endl;
+    //std::cout << "[Client] Packet - Type : " << (int)packet_type << std::endl;
 
     switch (packet_type)
     {
@@ -365,10 +365,10 @@ void ProcessPacket(char* ptr)
     {
         sc_packet_item_move* pkt = reinterpret_cast<sc_packet_item_move*>(ptr);
 
-        std::cout << "[Client] Item Move - ID: " << pkt->item_id
-            << " Position(" << pkt->position.x << ", "
-            << pkt->position.y << ", " << pkt->position.z << ")"
-            << std::endl;
+        //std::cout << "[Client] Item Move - ID: " << pkt->item_id
+        //    << " Position(" << pkt->position.x << ", "
+        //    << pkt->position.y << ", " << pkt->position.z << ")"
+        //    << std::endl;
 
         gGameFramework.UpdateItemPosition(pkt->item_id, pkt->position);
 

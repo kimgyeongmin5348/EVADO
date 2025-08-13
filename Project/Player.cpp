@@ -309,24 +309,24 @@ void CPlayer::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamer
 bool CPlayer::TryPickUpItem(CGameObject* pItem)
 {
 	if (!pItem || !pItem->GetFrameName()) return false;
-	CGameObject* pRightHand = FindFrame("hand_r");
-	if (!pRightHand) return false;
+	/*CGameObject* pRightHand = FindFrame("hand_r");
+	if (!pRightHand) return false;*/
 
-	if (pItem->GetParent() == pRightHand) return false;
+	if (pItem->GetParent() == m_pHand) return false;
 
 	for (int i = 0; i < 4; ++i)
 	{
 		if (!m_pHeldItems[i])
 		{
 			// 연결
-			CGameObject* last = pRightHand->GetChild();
-			if (!last) pRightHand->SetChild(pItem);
+			CGameObject* last = m_pHand->GetChild();
+			if (!last) m_pHand->SetChild(pItem);
 			else {
 				while (last->GetSibling()) last = last->GetSibling();
 				last->m_pSibling = pItem;
 			}
 
-			pItem->m_pParent = pRightHand;
+			pItem->m_pParent = m_pHand;
 			pItem->m_pSibling = nullptr;
 
 			// 위치 보정
@@ -357,10 +357,10 @@ bool CPlayer::DropItem(int index)
 	CGameObject* pItem = m_pHeldItems[index];
 	if (!pItem) return false;
 
-	CGameObject* pRightHand = FindFrame("hand_r");
-	if (!pRightHand) return false;
+	//CGameObject* pRightHand = FindFrame("hand_r");
+	//if (!pRightHand) return false;
 
-	CGameObject* pCurr = pRightHand->GetChild();
+	CGameObject* pCurr = m_pHand->GetChild();
 	CGameObject* pPrev = nullptr;
 
 	while (pCurr)
@@ -373,7 +373,7 @@ bool CPlayer::DropItem(int index)
 	if (pCurr == pItem)
 	{
 		if (pPrev) pPrev->m_pSibling = pItem->GetSibling();
-		else pRightHand->SetChild(pItem->GetSibling());
+		else m_pHand->SetChild(pItem->GetSibling());
 
 		pItem->m_pParent = nullptr;
 		pItem->m_pSibling = nullptr;
