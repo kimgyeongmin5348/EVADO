@@ -904,7 +904,7 @@ void CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 							if (pShader1)
 							{
 								pShader1->SetTexture(it->second);
-								dynamic_cast<CShopShader*>(m_ppShaders[5])->price[newIndex] = std::to_wstring(pItem->Getprice());
+								dynamic_cast<CShopShader*>(m_ppShaders[5])->price[newIndex] = std::to_wstring(pItem->GetPrice());
 							}
 						}
 					}
