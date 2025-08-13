@@ -217,6 +217,12 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	m_nGameObjects = 3;
 	m_ppGameObjects = new CGameObject * [m_nGameObjects];
+	long long itemIDs[3] = { 20000,20001,20002 };
+	XMFLOAT3 positions[3] = {
+	XMFLOAT3(-2.0f, 0.0f, 19.0f),
+	XMFLOAT3(-2.0f, 0.0f, 22.0f),
+	XMFLOAT3(-2.0f, 0.0f, 25.0f)
+	};
 
 	CLoadedModelInfo* pFlashlightModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Flashlightgold.bin", NULL);
 	m_ppGameObjects[0] = new FlashLight(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFlashlightModel);
@@ -224,8 +230,15 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_ppGameObjects[0]->Rotate(90, 0, 0);
 	//m_ppHierarchicalGameObjects[1]->SetPosition(3, 2, 10);
 	m_ppGameObjects[0]->SetFrameName("FlashLight");
-	m_ppGameObjects[0]->price = 80;
+	//m_ppGameObjects[0]->price = 80;
+	m_ppGameObjects[0]->SetPosition(positions[0]);
+
+	static_cast<Item*>(m_ppGameObjects[0])->SetUniqueID(itemIDs[0]);
+	g_items[monsterIDs[0]] = static_cast<Item*>(m_ppGameObjects[0]);
+
 	if (pFlashlightModel) delete pFlashlightModel;
+
+	// ============================================================================================================
 
 	CLoadedModelInfo* pShovelModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Shovel.bin", NULL);
 	m_ppGameObjects[1] = new Shovel(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShovelModel);
@@ -233,15 +246,28 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_ppGameObjects[1]->Rotate(0, 0, 90);
 	//m_ppHierarchicalGameObjects[2]->SetPosition(3, 2, 12);
 	m_ppGameObjects[1]->SetFrameName("Shovel");
-	m_ppGameObjects[1]->price = 80;
+	//m_ppGameObjects[1]->price = 80;
+	m_ppGameObjects[0]->SetPosition(positions[1]);
+
+	static_cast<Item*>(m_ppGameObjects[1])->SetUniqueID(itemIDs[1]);
+	g_items[monsterIDs[1]] = static_cast<Item*>(m_ppGameObjects[1]);
+
 	if (pShovelModel) delete pShovelModel;
+
+	// ============================================================================================================
+
 
 	CLoadedModelInfo* pWhistleModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Whistle.bin", NULL);
 	m_ppGameObjects[2] = new Whistle(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pWhistleModel);
 	m_ppGameObjects[2]->SetScale(1, 1, 1);
 	//m_ppHierarchicalGameObjects[3]->SetPosition(3, 2, 13);
 	m_ppGameObjects[2]->SetFrameName("Whistle");
-	m_ppGameObjects[2]->price = 30;
+	//m_ppGameObjects[2]->price = 30;
+	m_ppGameObjects[0]->SetPosition(positions[2]);
+
+	static_cast<Item*>(m_ppGameObjects[2])->SetUniqueID(itemIDs[2]);
+	g_items[monsterIDs[2]] = static_cast<Item*>(m_ppGameObjects[2]);
+
 	if (pWhistleModel) delete pWhistleModel;
 
 	m_nOtherPlayers = 1;
@@ -782,25 +808,35 @@ void CScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam,
 
 			for (int i = 0; i < 4; ++i) {
 				if (PtInRect(&rt[i], m_ptPos)) {
-					if (m_pPlayer->m_pHeldItems[i]->price > 0) {
-						dynamic_cast<CTerrainPlayer*>(m_pPlayer)->debt -= m_pPlayer->m_pHeldItems[i]->price;
-						int objectIndex = -1;
-						for (int j = 0; j < m_nGameObjects; ++j)
-							if (m_ppGameObjects[j]->GetFrameName() == m_pPlayer->m_pHeldItems[i]->GetFrameName())
-								objectIndex = j;
-						auto it = m_textureMap.find("inven");
-						if (it != m_textureMap.end())
-						{
+					Item* pItem = dynamic_cast<Item*>(m_pPlayer->m_pHeldItems[i]);
+					if (pItem && pItem->IsExist() && pItem->GetPrice() > 0) {
+						dynamic_cast<CTerrainPlayer*>(m_pPlayer)->debt -= pItem->GetPrice();
+						long long itemID = pItem->GetUniqueID();
+
+						auto it = g_items.find(itemID);
+						if (it != g_items.end()) {					
+							it->second->ChangeExistState(false);						
+							m_pPlayer->m_pHeldItems[i] = nullptr;
+						
+							for (int j = 0; j < m_nGameObjects; ++j) {
+								Item* pGameObjectItem = dynamic_cast<Item*>(m_ppGameObjects[j]);
+								if (pGameObjectItem && pGameObjectItem->GetUniqueID() == itemID) {
+									m_ppGameObjects[j] = nullptr;
+									break;
+								}
+							}
+						}
+						auto texIt = m_textureMap.find("inven");
+						if (texIt != m_textureMap.end()) {
 							auto* pShader = dynamic_cast<CTextureToScreenShader*>(m_ppShaders[i]);
 							auto* pShader1 = dynamic_cast<CTextureToScreenShader*>(m_ppShaders[i + 6]);
 							if (pShader) {
-								pShader->SetTexture(it->second);
-							}if (pShader1) {
-								pShader1->SetTexture(it->second);
+								pShader->SetTexture(texIt->second);
+							}
+							if (pShader1) {
+								pShader1->SetTexture(texIt->second);
 								dynamic_cast<CShopShader*>(m_ppShaders[5])->price[i] = L"0";
 							}
-							// 오브젝트도 삭제해야함
-							if (objectIndex > -1) m_ppGameObjects[objectIndex] = nullptr;
 						}
 					}
 				}
@@ -1029,84 +1065,6 @@ void CScene::AddItem(long long id, ITEM_TYPE type, const XMFLOAT3& position) {
 	}
 }
 
-//void CScene::AddItem(long long id, ITEM_TYPE type, const XMFLOAT3& position) {
-//    Item* pNewItem = nullptr;
-//
-//    switch (type) {
-//    case ITEM_TYPE_SHOVEL:
-//        pNewItem = dynamic_cast<Shovel*>(m_ppHierarchicalGameObjects[2]);
-//        break;
-//    case ITEM_TYPE_HANDMAP:
-//        break;
-//    case ITEM_TYPE_FLASHLIGHT:
-//        pNewItem = dynamic_cast<FlashLight*>(m_ppHierarchicalGameObjects[1]);
-//        break;
-//    case ITEM_TYPE_WHISTLE:
-//        pNewItem = dynamic_cast<Whistle*>(m_ppHierarchicalGameObjects[3]);
-//        break;
-//    default:
-//        std::cerr << "[Error] Unknown item type: " << static_cast<int>(type) << std::endl;
-//        return;
-//    }
-//
-//    if (pNewItem) {
-//        // 고유아이디 세팅 (Item 클래스에 SetUniqueID 추가되어 있어야 함)
-//        //pNewItem->SetUniqueID(id);
-//
-//        pNewItem->ChangeExistState(true);
-//        pNewItem->SetPosition(position);
-//        pNewItem->SetScale(1.0f, 1.0f, 1.0f);
-//
-//        std::lock_guard<std::mutex> lock(g_item_mutex);
-//        g_items[id] = pNewItem;
-//    }
-//}
-
-// server 추가해봄 UpdateItemPosition
-
-//void CScene::UpdateItemPosition(long long id, const XMFLOAT3& worldPosition)
-//{
-//	std::lock_guard<std::mutex> lock(g_item_mutex);
-//
-//	auto it = g_items.find(id);
-//	if (it != g_items.end()) {
-//		Item* item = it->second;
-//
-//		// 아이템이 손에 들려 있다면 일단 부모를 뗄 수도 있음 (필요 시)
-//		if (item->GetParent()) {
-//			// 손에서 떨어뜨리기
-//			// 부모->자식 연결 해제, item->부모 null 설정
-//			CGameObject* parent = item->GetParent();
-//			// 부모 자식 연결 리스트에서 item 제거하는 로직 필요
-//			// 예: 부모의 첫 자식이 item일 경우 처리를 다르게 해야 함.
-//			// 간단히 아래처럼 가능 (주의: 정확한 연결 해제로 게임 로직 맞춰야 함)
-//			if (parent->GetChild() == item)
-//				parent->SetChild(item->GetSibling());
-//			else {
-//				CGameObject* sibling = parent->GetChild();
-//				while (sibling && sibling->GetSibling() != item) {
-//					sibling = sibling->GetSibling();
-//				}
-//				if (sibling)
-//					sibling->m_pSibling = item->GetSibling();
-//			}
-//			item->m_pParent = nullptr;
-//			item->m_pSibling = nullptr;
-//		}
-//
-//		// 일단 부모 없는 상태로 월드좌표를 로컬좌표로 변환없이 직접 세팅하는 경우 가능
-//		item->SetPosition(worldPosition);
-//
-//		// 월드 변환 갱신
-//		item->UpdateTransform();
-//
-//	}
-//	else {
-//		std::cerr << "[Warning] UpdateItemPosition: Item ID " << id << " not found." << std::endl;
-//	}
-//}
-
-
 
 void CStartScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
@@ -1254,37 +1212,6 @@ void CStartScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM
 	}
 }
 
-//server
-//void CScene::AddRemotePlayer(long long id, const XMFLOAT3& pos, ID3D12Device* device, ID3D12GraphicsCommandList* cmd, ID3D12RootSignature* root, void* context) {
-//	EnterCriticalSection(&m_csRemotePlayers);
-//	if (m_remotePlayers.find(id) == m_remotePlayers.end()) {
-//		CRemotePlayer* pNew = new CRemotePlayer();
-//		//pNew->BuildObjects(device, cmd, root, context);
-//		pNew->SetPosition(pos);
-//		m_remotePlayers[id] = pNew;
-//	}
-//	LeaveCriticalSection(&m_csRemotePlayers);
-//}
-//
-//void CScene::RemoveRemotePlayer(long long id) {
-//	EnterCriticalSection(&m_csRemotePlayers);
-//	auto it = m_remotePlayers.find(id);
-//	if (it != m_remotePlayers.end()) {
-//		it->second->ReleaseShaderVariables();
-//		delete it->second;
-//		m_remotePlayers.erase(it);
-//	}
-//	LeaveCriticalSection(&m_csRemotePlayers);
-//}
-//
-//void CScene::UpdateRemotePlayer(long long id, const XMFLOAT3& pos) {
-//	EnterCriticalSection(&m_csRemotePlayers);
-//	auto it = m_remotePlayers.find(id);
-//	if (it != m_remotePlayers.end()) {
-//		it->second->SetPosition(pos);
-//	}
-//	LeaveCriticalSection(&m_csRemotePlayers);
-//}
 
 void CEndScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
