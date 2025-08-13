@@ -315,6 +315,80 @@ void CPlayer::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamer
 	if (nCameraMode == THIRD_PERSON_CAMERA) CGameObject::Render(pd3dCommandList, pCamera);
 }
 
+bool CPlayer::TryPickUpItem(CGameObject* pItem)
+{
+	if (!pItem || !pItem->GetFrameName()) return false;
+
+	CGameObject* pRightHand = FindFrame("hand_r");
+	if (!pRightHand) return false;
+
+	// 이미 손에 든 경우
+	if (pItem->GetParent() == pRightHand) return false;
+
+	// 손에 붙이기
+	if (!pRightHand->GetChild()) pRightHand->SetChild(pItem);
+	else
+	{
+		CGameObject* last = pRightHand->GetChild();
+		while (last->GetSibling()) last = last->GetSibling();
+		last->m_pSibling = pItem;
+	}
+
+	pItem->m_pParent = pRightHand;
+	pItem->m_pSibling = nullptr;
+
+	// 위치 보정
+	if (strcmp(pItem->GetFrameName(), "Shovel") == 0)
+		pItem->SetPosition(0.05f, -0.05f, 1.0f);
+	else
+		pItem->SetPosition(0.05f, -0.05f, 0.1f);
+
+	UpdateTransform(nullptr);
+
+	int newIndex = static_cast<int>(m_pHeldItems.size());
+	m_pHeldItems.push_back(pItem);
+	pItem->SetVisible(newIndex == m_nSelectedInventoryIndex);
+
+	return true;
+}
+
+bool CPlayer::DropItem(int index)
+{
+	if (index < 0 || index >= m_pHeldItems.size()) return false;
+
+	CGameObject* pItem = m_pHeldItems[index];
+	if (!pItem) return false;
+
+	CGameObject* pRightHand = FindFrame("hand_r");
+	if (!pRightHand) return false;
+
+	// 연결 끊기
+	CGameObject* pCurr = pRightHand->GetChild();
+	CGameObject* pPrev = nullptr;
+
+	while (pCurr)
+	{
+		if (pCurr == pItem) break;
+		pPrev = pCurr;
+		pCurr = pCurr->GetSibling();
+	}
+
+	if (pCurr == pItem)
+	{
+		if (pPrev) pPrev->m_pSibling = pItem->GetSibling();
+		else pRightHand->SetChild(pItem->GetSibling());
+
+		pItem->m_pParent = nullptr;
+		pItem->m_pSibling = nullptr;
+		pItem->isFalling = true;
+		pItem->SetVisible(true);
+
+		RemoveHeldItem(pItem);
+		return true;
+	}
+
+	return false;
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 
@@ -591,6 +665,8 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 	}
 
 	if (m_pText) { m_pText->UpdateText(std::to_wstring(debt), L"debt : "); }
+
+	//currentHP = g_myid.hp;
 
 	float hpRatio = currentHP / 100.f;
 	float newWidth = hpRatio * 0.5f;

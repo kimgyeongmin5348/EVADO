@@ -339,9 +339,6 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	CTextureToScreenShader* pTextureItem4Shader = new CTextureToScreenShader(1);
 	pTextureItem4Shader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-	CTexture* pTextureItem4 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	pTextureItem4->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/inven.dds", RESOURCE_TEXTURE2D, 0);
-	CreateShaderResourceViews(pd3dDevice, pTextureItem4, 0, 15);
 	CScreenRectMeshTextured* pMesh3 = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, 0.02f + 0.375f, 0.225f * 0.5f, -0.65f, 0.4f * 0.5f);
 	pTextureItem4Shader->SetMesh(0, pMesh3);
 	pTextureItem4Shader->SetTexture(pTextureinven);
@@ -878,7 +875,6 @@ void CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 		{
 			bool bPickedUp = false;
 
-			// 1단계: 먼저 주울 수 있는 아이템 탐색
 			for (int i = 0; i < m_nGameObjects; ++i)
 			{
 				CGameObject* pObj = m_ppGameObjects[i];
@@ -888,29 +884,13 @@ void CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 				if (!pItem) continue;
 				
 
-				// 플레이어와 아이템 간 거리 계산
 				XMFLOAT3 playerPos = m_pPlayer->GetPosition();
 				XMFLOAT3 itemPos = pItem->GetPosition();
 				float distance = Vector3::Length(Vector3::Subtract(playerPos, itemPos));
 				if (distance > 0.5f) continue;
+				if (m_pPlayer->TryPickUpItem(pItem))
 
-				// 이미 손에 들고 있는 경우는 스킵
-				if (pItem->GetParent() == m_pPlayer->FindFrame("hand_r")) continue;
-
-				// 들기
-				CGameObject* pRightHand = m_pPlayer->FindFrame("hand_r");
-				if (!pRightHand) return;
-
-				if (!pRightHand->GetChild()) pRightHand->SetChild(pItem);
-				else
 				{
-<<<<<<< Updated upstream
-					CGameObject* last = pRightHand->GetChild();
-					while (last->GetSibling()) last = last->GetSibling();
-					last->m_pSibling = pItem;
-=======
-					long long itemID = pItem->GetUniqueID();
-
 					std::string frameName = pItem->m_pstrFrameName;
 					auto it = m_textureMap.find(frameName);
 					if (it != m_textureMap.end())
@@ -924,103 +904,37 @@ void CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 							if (pShader1)
 							{
 								pShader1->SetTexture(it->second);
-								dynamic_cast<CShopShader*>(m_ppShaders[5])->price[newIndex] = std::to_wstring(pItem->GetPrice());
+								dynamic_cast<CShopShader*>(m_ppShaders[5])->price[newIndex] = std::to_wstring(pItem->Getprice());
 							}
 						}
 					}
 					bPickedUp = true;
 					break;
->>>>>>> Stashed changes
 				}
-				pItem->m_pParent = pRightHand;
-				pItem->m_pSibling = nullptr;
-
-				// 손 위치에 맞게 조정
-				if (pItem == pItem->FindFrame("Shovel")) pItem->SetPosition(0.05f, -0.05f, 1.f);
-				else pItem->SetPosition(0.05f, -0.05f, 0.1f);
-				//dynamic_cast<CTerrainPlayer*>(m_pPlayer)->debt += pItem->price; 빚 변동
-				m_pPlayer->UpdateTransform(nullptr);
-
-				int newIndex = static_cast<int>(m_pPlayer->m_pHeldItems.size());
-				m_pPlayer->m_pHeldItems.push_back(pItem);
-				pItem->SetVisible(newIndex == m_pPlayer->m_nSelectedInventoryIndex);
-
-				// 아이콘 표시
-				std::string frameName = pItem->m_pstrFrameName;
-				auto it = m_textureMap.find(frameName);
-				if (it != m_textureMap.end())
-				{
-					auto* pShader = dynamic_cast<CTextureToScreenShader*>(m_ppShaders[newIndex]);
-					auto* pShader1 = dynamic_cast<CTextureToScreenShader*>(m_ppShaders[newIndex+6]);
-					if (pShader) {
-						pShader->SetTexture(it->second);
-					}if (pShader1) {
-						pShader1->SetTexture(it->second);
-						std::wstring priceStr = std::to_wstring(pItem->price);
-						dynamic_cast<CShopShader*>(m_ppShaders[5])->price[newIndex] = priceStr;
-					}
-				}
-
-				bPickedUp = true;
-				break; // 한 개만 주우면 종료
 			}
 
-			// 2단계: 못 주웠으면 → 선택된 인덱스의 아이템만 내려놓기
-			if (!bPickedUp) {
+			if (!bPickedUp)
+			{
 				int index = m_pPlayer->m_nSelectedInventoryIndex;
-				if (index >= 0 && index < m_pPlayer->m_pHeldItems.size())
+				if (m_pPlayer->DropItem(index))
 				{
-					CGameObject* pItem = m_pPlayer->m_pHeldItems[index];
-					if (!pItem) return;
-
-					CGameObject* pRightHand = m_pPlayer->FindFrame("hand_r");
-					if (!pRightHand) return;
-
-					// 형제 연결 재조정
-					CGameObject* pCurr = pRightHand->GetChild();
-					CGameObject* pPrev = nullptr;
-
-					while (pCurr)
+					auto it = m_textureMap.find("inven");
+					if (it != m_textureMap.end())
 					{
-						if (pCurr == pItem) break;
-						pPrev = pCurr;
-						pCurr = pCurr->GetSibling();
-					}
-
-					if (pCurr == pItem)
-					{
-						if (pPrev) pPrev->m_pSibling = pItem->GetSibling();
-						else pRightHand->SetChild(pItem->GetSibling());
-
-						pItem->m_pParent = nullptr;
-						pItem->m_pSibling = nullptr;
-						pItem->isFalling = true;
-						pItem->SetVisible(true);
-
-						m_pPlayer->RemoveHeldItem(pItem);
-
-						// 아이콘 숨기기
-						auto it = m_textureMap.find("inven");
-						if (it != m_textureMap.end())
+						auto* pShader = dynamic_cast<CTextureToScreenShader*>(m_ppShaders[index]);
+						auto* pShader1 = dynamic_cast<CTextureToScreenShader*>(m_ppShaders[index + 6]);
+						if (pShader) pShader->SetTexture(it->second);
+						if (pShader1)
 						{
-							auto* pShader = dynamic_cast<CTextureToScreenShader*>(m_ppShaders[index]);
-							auto* pShader1 = dynamic_cast<CTextureToScreenShader*>(m_ppShaders[index+6]);
-							if (pShader) {
-								pShader->SetTexture(it->second);
-							}if (pShader1) {
-								pShader1->SetTexture(it->second);
-								dynamic_cast<CShopShader*>(m_ppShaders[5])->price[index] = L"0";
-							}
+							//pShader1->SetTexture(it->second); 얘 때문에 이상한 텍스처가 나옴 ㅠㅠㅠ
+							dynamic_cast<CShopShader*>(m_ppShaders[5])->price[index] = L"0";
 						}
-
-						break;
 					}
 				}
 			}
 
 			break;
 		}
-			break;
 		case VK_TAB:		
 			isShop = !isShop;
 			for (int i = 5; i < 10; ++i)
@@ -1028,10 +942,6 @@ void CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 			break;
 		case VK_UP:
 			dynamic_cast<CTerrainPlayer*>(m_pPlayer)->currentHP -= 10.f;
-			//for (int i = 0; i < 4; ++i) {
-			//	XMFLOAT3 pos = m_ppMonsters[i]->GetPosition();
-			//	cout << i << "번 몬스터 x - " << pos.x << ", y - " << pos.y << ", z - " << pos.z << endl;
-			//}
 			break;
 		}
 		break;

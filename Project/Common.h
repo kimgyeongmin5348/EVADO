@@ -227,7 +227,9 @@ enum class MonsterAnimationState : uint8_t
 {
 	IDLE,
 	WALK,
-	ATTACK
+	RUN,
+	ATTACK,
+	DEATH
 };
 
 struct sc_packet_monster_spawn
