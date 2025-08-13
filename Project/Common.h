@@ -148,10 +148,10 @@ struct cs_packet_move {
 // æ∆¿Ã≈€
 
 enum ITEM_TYPE : int {
-	ITEM_TYPE_SHOVEL = 2,
-	ITEM_TYPE_HANDMAP = 4,
-	ITEM_TYPE_FLASHLIGHT = 1,
-	ITEM_TYPE_WHISTLE = 3
+	ITEM_TYPE_SHOVEL = 1,
+	ITEM_TYPE_HANDMAP = 2,
+	ITEM_TYPE_FLASHLIGHT = 3,
+	ITEM_TYPE_WHISTLE = 4
 };
 
 struct sc_packet_item_spawn {

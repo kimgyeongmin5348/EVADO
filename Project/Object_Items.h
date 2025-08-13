@@ -5,9 +5,9 @@
 class Item : public CGameObject
 {
 private:
-	long long	item_id = -1;  // ���� ID����
+	long long	item_id = -1; 
 	int			item_type = 0;
-	int		  price = 0;
+	int			price = 0;
   
 	bool is_exist = false;
 
@@ -32,8 +32,9 @@ public:
 	void SetPrice(int p) { price = p; }
 	int GetPrice() const { return price; }
 
+
 protected:
-	float m_fFallingSpeed; // ���� �ӵ�
+	float m_fFallingSpeed; 
 };
 
 
@@ -51,9 +52,9 @@ public:
 	BoundingBox GetattackBoundingBox() { return m_attackBoundingBox; };
 
 	void ProccessSwing();
-	void GenerateSwingBoundingBox(XMFLOAT3 playerPos, XMFLOAT3 playerLook);  // �ֵθ� �� �ٿ�� �ڽ� ����
-	void UpdateSwingBoundingBox(); // �ٿ�� �ڽ� ������Ʈ
-	void DeleteSwingBoundingBox(); // �ٿ�� �ڽ� ����
+	void GenerateSwingBoundingBox(XMFLOAT3 playerPos, XMFLOAT3 playerLook); 
+	void UpdateSwingBoundingBox(); 
+	void DeleteSwingBoundingBox(); 
 };
 
 class Handmap : public Item
