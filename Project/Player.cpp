@@ -667,6 +667,14 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 	}
 	// server
 
+	// 아이템 전송
+	if (m_nSelectedInventoryIndex > -1) {
+		Item* pItem = dynamic_cast<Item*>(m_pHeldItems[m_nSelectedInventoryIndex]);
+		long long id = pItem->GetUniqueID();
+		XMFLOAT3 pos = pItem->GetPosition();
+		SendItemMove(id, pos);
+	}
+
 	// position, look, right ------------------------------------
 
 

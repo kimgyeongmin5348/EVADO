@@ -70,7 +70,6 @@ public:
 	CGameObject* m_pHeldItems[4] = { nullptr };
 
 	bool bflashlight = false;
-	void RemoveHeldItem(CGameObject* pItem);
 public:
 	CPlayer();
 	virtual ~CPlayer();

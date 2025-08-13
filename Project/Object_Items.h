@@ -7,7 +7,7 @@ class Item : public CGameObject
 private:
 	long long	item_id = -1;  // 고유 ID저장
 	int			item_type = 0;
-	float		price = 0.f;
+	int			price = 0;
 
 	bool is_exist = false;
 
@@ -29,8 +29,8 @@ public:
 	void SetType(int t) { item_type = t; }
 	int GetType() const { return item_type; }
 
-	void SetPrice(float p) { price = p; }
-	float GetPrice() const { return price; }
+	void SetPrice(int p) { price = p; }
+	int GetPrice() const { return price; }
 
 protected:
 	float m_fFallingSpeed; // 낙하 속도

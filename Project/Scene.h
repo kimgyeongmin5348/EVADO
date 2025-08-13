@@ -127,7 +127,7 @@ public:
 	float								m_fElapsedTime = 0.0f;
 
 	int									m_nGameObjects = 0;
-	Item							**m_ppGameObjects = NULL;
+	CGameObject**m_ppGameObjects = NULL;
 
 	int									m_nMonster = 0;
 	CGameObject							**m_ppMonsters = NULL;
