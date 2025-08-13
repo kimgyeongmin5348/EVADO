@@ -219,7 +219,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_ppGameObjects = new CGameObject * [m_nGameObjects];
 	long long itemIDs[3] = { 20000,20001,20002 };
 
-	float itemPrices[3] = { 80.0f, 150.0f, 80.0f };
+	float itemPrices[3] = { 80, 150, 80 };
 
 	XMFLOAT3 positions[3] = {
 		{-2.0f, 0.0f, 19.0f},
