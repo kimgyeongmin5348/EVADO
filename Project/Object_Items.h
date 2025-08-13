@@ -7,7 +7,11 @@ class Item : public CGameObject
 private:
 	long long	item_id = -1;  // 고유 ID저장
 	int			item_type = 0;
+<<<<<<< Updated upstream
 	float		price = 0.0f;
+=======
+	float		price = 0;
+>>>>>>> Stashed changes
 
 	bool is_exist = false;
 
