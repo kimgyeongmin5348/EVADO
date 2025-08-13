@@ -311,6 +311,7 @@ bool CPlayer::TryPickUpItem(CGameObject* pItem)
 	if (!pItem || !pItem->GetFrameName()) return false;
 	CGameObject* pRightHand = FindFrame("hand_r");
 	if (!pRightHand) return false;
+
 	if (pItem->GetParent() == pRightHand) return false;
 
 	for (int i = 0; i < 4; ++i)
@@ -670,24 +671,26 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 	if (fabs(prevWidth - newWidth) > 0.01f)
 	{
 		prevWidth = newWidth;
-		SetHPWidth(newWidth); 
+		SetHPWidth(newWidth);
 	}
 
-	for (int i = 0; i < 4; ++i)
-	{
-		CGameObject* pObj = m_pHeldItems[i];
-		if (!pObj) continue;
+	//for (int i = 0; i < 4; ++i)
+	//{
+	//	CGameObject* pObj = m_pHeldItems[i];
+	//	if (!pObj) continue;
 
-		Item* pItem = dynamic_cast<Item*>(pObj);
-		if (!pItem) continue;
+	//	Item* pItem = dynamic_cast<Item*>(pObj);
+	//	if (!pItem) continue;
 
-		// 현재 월드 좌표 가져오기
-		XMFLOAT3 curPos = pItem->GetPosition();
+	//	// 현재 월드 좌표 가져오기
+	//	XMFLOAT3 curPos = pItem->GetPosition();
 
-		// 서버 동기화
-		SendItemMove(pItem->GetUniqueID(), curPos);
-	}
+	//	// 서버 동기화
+	//	SendItemMove(pItem->GetUniqueID(), curPos);
+	//}
 
+	CGameObject* pRightHand = FindFrame("hand_r");
+	m_pHand = pRightHand;
 	// position, look, right ------------------------------------
 
 
