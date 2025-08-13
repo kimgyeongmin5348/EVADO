@@ -763,6 +763,8 @@ void CGameFramework::FrameAdvance()
 	::SetWindowText(m_hWnd, m_pszFrameRate);
 }
 
+
+
 void CGameFramework::ItemSpawned(long long itemID, const XMFLOAT3& pos, int type, int price)
 {
 	auto it = g_items.find(itemID);
@@ -791,6 +793,8 @@ void CGameFramework::UpdateItemPosition(long long itemID, const XMFLOAT3& pos)
 	pItem->SetPosition(pos);
 	
 }
+
+
 
 void CGameFramework::OnMonsterSpawned(int monsterID, const XMFLOAT3& pos, int state)
 {

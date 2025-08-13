@@ -446,6 +446,8 @@ public:
 	CGameObject* GetSibling() { return(m_pSibling); }
 	BoundingBox GetBoundingBox() const { return m_BoundingBox; }
 
+
+
 	bool GetVisible() { return visible; }
 	void SetVisible(bool b) { visible = b; }
 

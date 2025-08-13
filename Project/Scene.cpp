@@ -202,9 +202,9 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	float itemPrices[3] = { 80, 150, 80 };
 
 	XMFLOAT3 positions[3] = {
-		{-2.0f, 0.0f, 19.0f},
-		{-2.0f, 0.0f, 22.0f},
-		{-2.0f, 0.0f, 25.0f}
+		{-2, 0, 19},
+		{-2, 0, 22},
+		{-2, 0, 25}
 	};
 
 	CLoadedModelInfo* pFlashlightModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Flashlightgold.bin", NULL);
@@ -217,7 +217,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	static_cast<Item*>(m_ppGameObjects[0])->SetUniqueID(itemIDs[0]);
 	static_cast<Item*>(m_ppGameObjects[0])->SetPrice(itemPrices[0]);
-	g_items[monsterIDs[0]] = static_cast<Item*>(m_ppGameObjects[0]);
+	g_items[itemIDs[0]] = static_cast<Item*>(m_ppGameObjects[0]);
 
 	if (pFlashlightModel) delete pFlashlightModel;
 
@@ -233,7 +233,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	static_cast<Item*>(m_ppGameObjects[1])->SetUniqueID(itemIDs[1]);
 	static_cast<Item*>(m_ppGameObjects[1])->SetPrice(itemPrices[1]);
-	g_items[monsterIDs[1]] = static_cast<Item*>(m_ppGameObjects[1]);
+	g_items[itemIDs[1]] = static_cast<Item*>(m_ppGameObjects[1]);
 
 	if (pShovelModel) delete pShovelModel;
 
@@ -249,7 +249,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	static_cast<Item*>(m_ppGameObjects[2])->SetUniqueID(itemIDs[2]);
 	static_cast<Item*>(m_ppGameObjects[2])->SetPrice(itemPrices[2]);
-	g_items[monsterIDs[2]] = static_cast<Item*>(m_ppGameObjects[2]);
+	g_items[itemIDs[2]] = static_cast<Item*>(m_ppGameObjects[2]);
 
 	if (pWhistleModel) delete pWhistleModel;
 

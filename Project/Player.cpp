@@ -337,6 +337,13 @@ bool CPlayer::TryPickUpItem(CGameObject* pItem)
 			m_pHeldItems[i] = pItem;
 			pItem->SetVisible(i == m_nSelectedInventoryIndex);
 			UpdateTransform(nullptr);
+
+			Item* pickedItem = dynamic_cast<Item*>(pItem);
+			if (pickedItem) {
+				XMFLOAT3 curPos = pickedItem->GetPosition();
+				SendItemMove(pickedItem->GetUniqueID(), curPos);
+			}
+
 			return true;
 		}
 	}
@@ -665,14 +672,20 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 		prevWidth = newWidth;
 		SetHPWidth(newWidth); 
 	}
-	// server
 
-	// 아이템 전송
-	if (m_nSelectedInventoryIndex > -1) {
-		Item* pItem = dynamic_cast<Item*>(m_pHeldItems[m_nSelectedInventoryIndex]);
-		long long id = pItem->GetUniqueID();
-		XMFLOAT3 pos = pItem->GetPosition();
-		SendItemMove(id, pos);
+	for (int i = 0; i < 4; ++i)
+	{
+		CGameObject* pObj = m_pHeldItems[i];
+		if (!pObj) continue;
+
+		Item* pItem = dynamic_cast<Item*>(pObj);
+		if (!pItem) continue;
+
+		// 현재 월드 좌표 가져오기
+		XMFLOAT3 curPos = pItem->GetPosition();
+
+		// 서버 동기화
+		SendItemMove(pItem->GetUniqueID(), curPos);
 	}
 
 	// position, look, right ------------------------------------
