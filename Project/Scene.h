@@ -127,7 +127,7 @@ public:
 	float								m_fElapsedTime = 0.0f;
 
 	int									m_nGameObjects = 0;
-	CGameObject							**m_ppGameObjects = NULL;
+	Item							**m_ppGameObjects = NULL;
 
 	int									m_nMonster = 0;
 	CGameObject							**m_ppMonsters = NULL;
@@ -205,6 +205,10 @@ public:
 	virtual void OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 
 private:
+	int									m_nGameObjects = 0;
+	CGameObject** m_ppGameObjects = NULL;
+
+
 	InputStep m_inputStep = InputStep::EnterID;
 	std::string m_inputID;
 	std::string m_inputIP;

@@ -196,7 +196,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	if (pSpiderModel) delete pSpiderModel;
 
 	m_nGameObjects = 3;
-	m_ppGameObjects = new CGameObject * [m_nGameObjects];
+	m_ppGameObjects = new Item * [m_nGameObjects];
 
 	CLoadedModelInfo* pFlashlightModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Flashlightgold.bin", NULL);
 	m_ppGameObjects[0] = new FlashLight(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFlashlightModel);
