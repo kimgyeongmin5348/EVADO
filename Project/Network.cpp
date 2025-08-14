@@ -406,7 +406,7 @@ void ProcessPacket(char* ptr)
             << " New Position(" << pkt->position.x << ", " << pkt->position.z << ")"
             << " State: " << static_cast<int>(pkt->state) << std::endl;
 
-        gGameFramework.UpdateMonsterPosition(pkt->monsterID, pkt->position, pkt->state);
+        gGameFramework.UpdateMonsterPosition(pkt->monsterID, pkt->position, pkt->rotation, pkt->state);
 
         break;
     }
