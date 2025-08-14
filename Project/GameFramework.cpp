@@ -634,15 +634,6 @@ void CGameFramework::AnimateObjects()
 		if (m_pScene->m_ppMonsters) 
 			for(int i=0;i< m_pScene->m_nMonster; ++i)
 			m_pScene->m_ppMonsters[i]->Animate(fTimeElapsed);
-		if (m_pScene->m_ppGameObjects && m_pPlayer->m_nSelectedInventoryIndex > -1 && m_pPlayer->m_pHeldItems[m_pPlayer->m_nSelectedInventoryIndex]) {
-			for (int i = 0; i < m_pScene->m_nGameObjects; ++i) {
-				if (m_pPlayer->m_pHeldItems[m_pPlayer->m_nSelectedInventoryIndex] == m_pScene->m_ppGameObjects[i]) {
-					Item* pItem = dynamic_cast<Item*>(m_pScene->m_ppGameObjects[i]);
-					XMFLOAT3 pos = m_pPlayer->m_pHand->m_pSibling->GetPosition();
-					SendItemMove(pItem->GetUniqueID(), pos);
-				}
-			}
-		}
 	}
 
 	m_pPlayer->Animate(fTimeElapsed);

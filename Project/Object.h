@@ -430,6 +430,7 @@ public:
 
 	char* GetFrameName() { return m_pstrFrameName; }
 	XMFLOAT3 GetPosition();
+	XMFLOAT4 GetRotation() const;
 	XMFLOAT3 GetLook();
 	XMFLOAT3 GetUp();
 	XMFLOAT3 GetRight();
@@ -445,7 +446,7 @@ public:
 	CGameObject* GetChild() { return(m_pChild); }
 	CGameObject* GetSibling() { return(m_pSibling); }
 	BoundingBox GetBoundingBox() const { return m_BoundingBox; }
-
+	XMFLOAT3 GetOffset(const XMFLOAT3& Offset, bool includeScale = false) const;
 
 
 	bool GetVisible() { return visible; }

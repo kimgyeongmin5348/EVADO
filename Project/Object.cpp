@@ -936,9 +936,61 @@ XMFLOAT3 CGameObject::GetPosition()
 	return(XMFLOAT3(m_xmf4x4World._41, m_xmf4x4World._42, m_xmf4x4World._43));
 }
 
+XMFLOAT4 CGameObject::GetRotation() const
+{
+	// 월드 행렬 로드
+	XMMATRIX W = XMLoadFloat4x4(&m_xmf4x4World);
+
+	// 회전축(컬럼 벡터) 추출 + 정규화로 스케일 제거
+	XMVECTOR r0 = XMVector3Normalize(W.r[0]); // Right
+	XMVECTOR r1 = XMVector3Normalize(W.r[1]); // Up
+	XMVECTOR r2 = XMVector3Normalize(W.r[2]); // Look
+
+	// 회전 전용 행렬 구성(평행이동 제거)
+	XMMATRIX R = XMMATRIX(
+		XMVectorSet(XMVectorGetX(r0), XMVectorGetX(r1), XMVectorGetX(r2), 0.0f),
+		XMVectorSet(XMVectorGetY(r0), XMVectorGetY(r1), XMVectorGetY(r2), 0.0f),
+		XMVectorSet(XMVectorGetZ(r0), XMVectorGetZ(r1), XMVectorGetZ(r2), 0.0f),
+		XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f)
+	);
+
+	// 쿼터니언 변환
+	XMVECTOR q = XMQuaternionRotationMatrix(R);
+	q = XMQuaternionNormalize(q);
+
+	XMFLOAT4 out{};
+	XMStoreFloat4(&out, q);
+	return out;
+}
+
 XMFLOAT3 CGameObject::GetToParentPosition()
 {
 	return(XMFLOAT3(m_xmf4x4ToParent._41, m_xmf4x4ToParent._42, m_xmf4x4ToParent._43));
+}
+
+XMFLOAT3 CGameObject::GetOffset(const XMFLOAT3& Offset, bool includeScale) const
+{
+	XMVECTOR v = XMLoadFloat3(&Offset);
+
+	if (includeScale)
+	{
+		// 회전+스케일을 함께 적용 (평행이동은 제외되는 TransformNormal 사용)
+		XMMATRIX W = XMLoadFloat4x4(&m_xmf4x4World);
+		XMVECTOR vr = XMVector3TransformNormal(v, W);
+		XMFLOAT3 out{};
+		XMStoreFloat3(&out, vr);
+		return out;
+	}
+	else
+	{
+		// 스케일 제거한 회전만 적용
+		XMFLOAT4 qf = GetRotation();
+		XMVECTOR q = XMLoadFloat4(&qf);
+		XMVECTOR vr = XMVector3Rotate(v, q); // vr = q * v * q^-1
+		XMFLOAT3 out{};
+		XMStoreFloat3(&out, vr);
+		return out;
+	}
 }
 
 XMFLOAT3 CGameObject::GetLook()
