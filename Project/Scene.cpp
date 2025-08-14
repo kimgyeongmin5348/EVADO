@@ -210,7 +210,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	CLoadedModelInfo* pFlashlightModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Flashlightgold.bin", NULL);
 	m_ppGameObjects[0] = new FlashLight(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFlashlightModel);
 	m_ppGameObjects[0]->SetScale(3, 3, 3);
-	m_ppGameObjects[0]->Rotate(90, 0, 0);
+	//m_ppGameObjects[0]->Rotate(90, 0, 0);
 	m_ppGameObjects[0]->SetFrameName("FlashLight");
 	//m_ppGameObjects[0]->price = 80;
 	m_ppGameObjects[0]->SetPosition(positions[0]);
@@ -226,7 +226,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	CLoadedModelInfo* pShovelModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Shovel.bin", NULL);
 	m_ppGameObjects[1] = new Shovel(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShovelModel);
 	m_ppGameObjects[1]->SetScale(1, 1, 1);
-	m_ppGameObjects[1]->Rotate(0, 0, 90);
+	//m_ppGameObjects[1]->Rotate(0, 0, 90);
 	m_ppGameObjects[1]->SetFrameName("Shovel");
 	//m_ppGameObjects[1]->price = 80;
 	m_ppGameObjects[1]->SetPosition(positions[1]);

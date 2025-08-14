@@ -367,14 +367,20 @@ void CPlayer::UpdateItem()
 
 	for (int i = 0; i < 4; ++i)
 	{
-		CGameObject* pItem = m_pHeldItems[i];
-		if (!pItem) continue;
+		CGameObject* it = m_pHeldItems[i];
+		if (!it) continue;
 
 		if (i == m_nSelectedInventoryIndex)
 		{
-			pItem->SetVisible(true);
+			//if (auto* item = dynamic_cast<Item*>(it)) {
+			//	if (!item->rot) {
+			//		if (std::strcmp(it->GetFrameName(), "Shovel") == 0)      it->Rotate(0, 90, 90);
+			//		else if (std::strcmp(it->GetFrameName(), "FlashLight") == 0) it->Rotate(90, 0, 180);
+			//		item->rot = true;
+			//	}
+			//}
 
-			XMFLOAT3 off = (std::strcmp(pItem->GetFrameName(), "Shovel") == 0)
+			XMFLOAT3 off = (std::strcmp(it->GetFrameName(), "Shovel") == 0)
 				? XMFLOAT3(0.05f, -0.05f, 1.0f)
 				: XMFLOAT3(0.05f, -0.05f, 0.1f);
 
@@ -390,13 +396,13 @@ void CPlayer::UpdateItem()
 			handPos.z + worldOff.z
 			};
 
-			Item* obj = dynamic_cast<Item*>(pItem);
+			Item* obj = dynamic_cast<Item*>(it);
 			SendItemMove(obj->GetUniqueID(), targetPos);
 			//SendItemMove(obj->GetUniqueID(), handPos, handL, handR);
 		}
 		else
 		{
-			pItem->SetVisible(false);
+			it->SetVisible(false);
 		}
 	}
 }
