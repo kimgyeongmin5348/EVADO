@@ -331,6 +331,10 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			case VK_F9:
 				ChangeSwapChainState();
 				break;
+			case VK_DOWN:
+				cout << "player pos - " << m_pPlayer->GetPosition().x << ", " << m_pPlayer->GetPosition().y << ", " << m_pPlayer->GetPosition().z << endl;
+				cout << "flashlight pos - " << m_pScene->m_ppGameObjects[0]->GetPosition().x << ", " << m_pScene->m_ppGameObjects[0]->GetPosition().y << ", " << m_pScene->m_ppGameObjects[0]->GetPosition().z << endl;
+				break;
 			}
 			break;
 		default:
@@ -630,8 +634,7 @@ void CGameFramework::AnimateObjects()
 		if (m_pScene->m_ppMonsters) 
 			for(int i=0;i< m_pScene->m_nMonster; ++i)
 			m_pScene->m_ppMonsters[i]->Animate(fTimeElapsed);
-<<<<<<< Updated upstream
-=======
+
 		if (m_pScene->m_ppGameObjects && m_pPlayer->m_nSelectedInventoryIndex > -1 && m_pPlayer->m_pHeldItems[m_pPlayer->m_nSelectedInventoryIndex]) {
 			for (int i = 0; i < m_pScene->m_nGameObjects; ++i) {
 				if (m_pPlayer->m_pHeldItems[m_pPlayer->m_nSelectedInventoryIndex] == m_pScene->m_ppGameObjects[i]) {
@@ -643,7 +646,7 @@ void CGameFramework::AnimateObjects()
 				}
 			}
 		}
->>>>>>> Stashed changes
+
 	}
 
 	m_pPlayer->Animate(fTimeElapsed);
@@ -796,20 +799,11 @@ void CGameFramework::ItemSpawned(long long itemID, const XMFLOAT3& pos, int type
 
 void CGameFramework::UpdateItemPosition(long long itemID, const XMFLOAT3& pos)
 {
-<<<<<<< Updated upstream
-=======
-	//cout << "update item pos - " << pos.x << ", " << pos.y << ", " << pos.z << endl;
->>>>>>> Stashed changes
 	auto it = g_items.find(itemID);
-	if (it == g_items.end())
+	if (it != g_items.end())
 	{
-		std::cout << "[Error] Item ID not found: " << itemID << std::endl;
-		return;
+		it->second->SetPosition(pos);
 	}
-
-	Item* pItem = it->second;
-	pItem->SetPosition(pos);
-	
 }
 
 void CGameFramework::UpdateItemRotation(long long itemID, const XMFLOAT3& look, const XMFLOAT3& right)
