@@ -365,6 +365,11 @@ public:
 	virtual ~CGameObject();
 
 public:
+
+	XMFLOAT3		m_xmf3Look;
+	XMFLOAT3		m_xmf3Right;
+
+
 	char							m_pstrFrameName[64];
 
 	bool visible = true;
@@ -447,6 +452,8 @@ public:
 	BoundingBox GetBoundingBox() const { return m_BoundingBox; }
 
 
+	void SetLookVector(const XMFLOAT3& look) { m_xmf3Look = look; }
+	void SetRightVector(const XMFLOAT3& right) { m_xmf3Right = right; }
 
 	bool GetVisible() { return visible; }
 	void SetVisible(bool b) { visible = b; }

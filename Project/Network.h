@@ -66,7 +66,7 @@ void SendShopBuyRequest(int item_type);
 void SendShopSellRequest(int item_type);
 
 // Item
-void SendItemMove(long long item_id, XMFLOAT3& position);
+void SendItemMove(long long item_id, const XMFLOAT3& position, const XMFLOAT3& look, const XMFLOAT3& right);
 
 
 void ProcessPacket(char* ptr);

@@ -58,6 +58,7 @@ public:
 
 	void ItemSpawned(long long itemID, const XMFLOAT3& pos, int type, int price);
 	void UpdateItemPosition(long long itemID, const XMFLOAT3& pos);
+	void UpdateItemRotation(long long itemID, const XMFLOAT3& look, const XMFLOAT3& right);
 
 	void ItemToHand(int objectIndex);
 
