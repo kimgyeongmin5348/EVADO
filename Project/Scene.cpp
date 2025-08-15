@@ -953,6 +953,10 @@ void CScene::AnimateObjects(float fTimeElapsed)
 			{
 				pos.y -= 0.1f;
 				m_ppGameObjects[i]->SetPosition(pos);
+				Item* itemObj = dynamic_cast<Item*>(m_ppGameObjects[i]);
+				if (itemObj) {
+					SendItemMove(itemObj->GetUniqueID(), pos, m_ppGameObjects[i]->GetLook(), m_ppGameObjects[i]->GetRight());
+				}
 			}
 			else m_ppGameObjects[i]->isFalling = false;		
 		}
