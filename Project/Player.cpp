@@ -322,9 +322,9 @@ bool CPlayer::TryPickUpItem(CGameObject* pItem)
 			pItem->SetVisible(i == m_nSelectedInventoryIndex);
 
 			// 위치 보정
-			if (strcmp(pItem->GetFrameName(), "Shovel") == 0)
-				pItem->SetPosition(0.05f, -0.05f, 1.0f);
-			else
+			//if (strcmp(pItem->GetFrameName(), "Shovel") == 0)
+			//	pItem->SetPosition(0.05f, -0.05f, 1.0f);
+			//else
 				pItem->SetPosition(0.05f, -0.05f, 0.1f);
 
 			m_pHeldItems[i] = pItem;
@@ -380,9 +380,10 @@ void CPlayer::UpdateItem()
 			//	}
 			//}
 
-			XMFLOAT3 off = (std::strcmp(it->GetFrameName(), "Shovel") == 0)
+/*			XMFLOAT3 off = (std::strcmp(it->GetFrameName(), "Shovel") == 0)
 				? XMFLOAT3(0.05f, -0.05f, 1.0f)
-				: XMFLOAT3(0.05f, -0.05f, 0.1f);
+				: XMFLOAT3(0.05f, -0.05f, 0.1f);	*/		
+			XMFLOAT3 off = XMFLOAT3(0.05f, -0.05f, 0.1f);
 
 			XMFLOAT3 worldOff{
 			handR.x * off.x + handU.x * off.y + handL.x * off.z,

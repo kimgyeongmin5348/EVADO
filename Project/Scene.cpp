@@ -211,7 +211,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	CLoadedModelInfo* pFlashlightModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Flashlightgold.bin", NULL);
 	m_ppGameObjects[0] = new FlashLight(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pFlashlightModel);
 	m_ppGameObjects[0]->SetScale(3, 3, 3);
-	//m_ppGameObjects[0]->Rotate(90, 0, 0);
+	m_ppGameObjects[0]->Rotate(-90, 0, 0);
 	m_ppGameObjects[0]->SetFrameName("FlashLight");
 	//m_ppGameObjects[0]->price = 80;
 	m_ppGameObjects[0]->SetPosition(positions[0]);
@@ -227,7 +227,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	CLoadedModelInfo* pShovelModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Shovel.bin", NULL);
 	m_ppGameObjects[1] = new Shovel(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShovelModel);
 	m_ppGameObjects[1]->SetScale(1, 1, 1);
-	//m_ppGameObjects[1]->Rotate(0, 0, 90);
+	m_ppGameObjects[1]->Rotate(0, 0, 90);
 	m_ppGameObjects[1]->SetFrameName("Shovel");
 	//m_ppGameObjects[1]->price = 80;
 	m_ppGameObjects[1]->SetPosition(positions[1]);
@@ -759,6 +759,7 @@ void CScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam,
 			{
 				m_pPlayer->bflashlight = !m_pPlayer->bflashlight;
 				BuildDefaultLightsAndMaterials(m_pPlayer->bflashlight);
+				// server 로 켯다는거 보내주기
 			}
 			else if (!strcmp(frameName, "Shovel"))
 			{
@@ -767,6 +768,7 @@ void CScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam,
 				m_pEffect->Activate(m_pPlayer->m_pHeldItems[m_pPlayer->m_nSelectedInventoryIndex]->GetPosition());
 				if (m_pPlayer->m_isMonsterHit)
 				{
+					// server 로 공격 데미지 값 보내주기 - 몬스터 hp 깎여야함
 				}
 				break;
 			}
@@ -957,10 +959,10 @@ void CScene::AnimateObjects(float fTimeElapsed)
 	}
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);
 
-	if (m_pLights)
+	if (m_pLights && m_ppGameObjects[0])
 	{	
-		m_pLights[0].m_xmf3Position = m_pPlayer->m_pHand->GetPosition();
-		m_pLights[0].m_xmf3Direction = m_pPlayer->GetLookVector();
+		m_pLights[0].m_xmf3Position = m_ppGameObjects[0]->GetPosition();
+		m_pLights[0].m_xmf3Direction = m_ppGameObjects[0]->GetLook();
 	}
 
 	if (m_pEffect&& m_ppGameObjects[1]) m_pEffect->Animate(fTimeElapsed, m_ppGameObjects[1]->GetPosition());
