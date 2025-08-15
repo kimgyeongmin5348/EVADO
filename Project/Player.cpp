@@ -400,8 +400,7 @@ void CPlayer::UpdateItem()
 			};
 
 			Item* obj = dynamic_cast<Item*>(it);
-			SendItemMove(obj->GetUniqueID(), targetPos);
-			//SendItemMove(obj->GetUniqueID(), handPos, handL, handR);
+			SendItemMove(obj->GetUniqueID(), targetPos, handL, handR);
 		}
 		else
 		{
