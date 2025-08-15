@@ -350,6 +350,7 @@ bool CPlayer::DropItem(int index)
 	if (index < 0 || index >= 4) return false;
 	CGameObject* pItem = m_pHeldItems[index];
 	if (!pItem) return false;
+}
 
 void CPlayer::UpdateItem()
 {
