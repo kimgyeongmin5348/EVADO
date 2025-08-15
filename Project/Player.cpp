@@ -318,21 +318,13 @@ bool CPlayer::TryPickUpItem(CGameObject* pItem)
 	{
 		if (!m_pHeldItems[i])
 		{
-			// 연결
-			CGameObject* last = m_pHand->GetChild();
-			if (!last) m_pHand->SetChild(pItem);
-			else {
-				while (last->GetSibling()) last = last->GetSibling();
-				last->m_pSibling = pItem;
-			}
-
-			pItem->m_pParent = m_pHand;
-			pItem->m_pSibling = nullptr;
+			m_pHeldItems[i] = pItem;
+			pItem->SetVisible(i == m_nSelectedInventoryIndex);
 
 			// 위치 보정
-			if (strcmp(pItem->GetFrameName(), "Shovel") == 0)
-				pItem->SetPosition(0.05f, -0.05f, 1.0f);
-			else
+			//if (strcmp(pItem->GetFrameName(), "Shovel") == 0)
+			//	pItem->SetPosition(0.05f, -0.05f, 1.0f);
+			//else
 				pItem->SetPosition(0.05f, -0.05f, 0.1f);
 
 			m_pHeldItems[i] = pItem;
@@ -359,33 +351,63 @@ bool CPlayer::DropItem(int index)
 	CGameObject* pItem = m_pHeldItems[index];
 	if (!pItem) return false;
 
-	//CGameObject* pRightHand = FindFrame("hand_r");
-	//if (!pRightHand) return false;
+	m_pHeldItems[index] = nullptr;
+	pItem->isFalling = true;
+	pItem->SetVisible(true);
+	return true;
+}
 
-	CGameObject* pCurr = m_pHand->GetChild();
-	CGameObject* pPrev = nullptr;
+void CPlayer::UpdateItem()
+{
+	CGameObject* pRightHand = FindFrame("hand_r");
+	if (!pRightHand) return;
 
-	while (pCurr)
+	XMFLOAT3 handPos = pRightHand->GetPosition();
+	XMFLOAT3 handR = pRightHand->GetRight(); 
+	XMFLOAT3 handL = pRightHand->GetLook();
+	XMFLOAT3 handU = pRightHand->GetUp();
+
+	for (int i = 0; i < 4; ++i)
 	{
-		if (pCurr == pItem) break;
-		pPrev = pCurr;
-		pCurr = pCurr->GetSibling();
+		CGameObject* it = m_pHeldItems[i];
+		if (!it) continue;
+
+		if (i == m_nSelectedInventoryIndex)
+		{
+			//if (auto* item = dynamic_cast<Item*>(it)) {
+			//	if (!item->rot) {
+			//		if (std::strcmp(it->GetFrameName(), "Shovel") == 0)      it->Rotate(0, 90, 90);
+			//		else if (std::strcmp(it->GetFrameName(), "FlashLight") == 0) it->Rotate(90, 0, 180);
+			//		item->rot = true;
+			//	}
+			//}
+
+/*			XMFLOAT3 off = (std::strcmp(it->GetFrameName(), "Shovel") == 0)
+				? XMFLOAT3(0.05f, -0.05f, 1.0f)
+				: XMFLOAT3(0.05f, -0.05f, 0.1f);	*/		
+			XMFLOAT3 off = XMFLOAT3(0.05f, -0.05f, 0.1f);
+
+			XMFLOAT3 worldOff{
+			handR.x * off.x + handU.x * off.y + handL.x * off.z,
+			handR.y * off.x + handU.y * off.y + handL.y * off.z,
+			handR.z * off.x + handU.z * off.y + handL.z * off.z
+			};
+
+			XMFLOAT3 targetPos{
+			handPos.x + worldOff.x,
+			handPos.y + worldOff.y,
+			handPos.z + worldOff.z
+			};
+
+			Item* obj = dynamic_cast<Item*>(it);
+			SendItemMove(obj->GetUniqueID(), targetPos);
+			//SendItemMove(obj->GetUniqueID(), handPos, handL, handR);
+		}
+		else
+		{
+			it->SetVisible(false);
+		}
 	}
-
-	if (pCurr == pItem)
-	{
-		if (pPrev) pPrev->m_pSibling = pItem->GetSibling();
-		else m_pHand->SetChild(pItem->GetSibling());
-
-		pItem->m_pParent = nullptr;
-		pItem->m_pSibling = nullptr;
-		pItem->isFalling = true;
-		pItem->SetVisible(true);
-
-		m_pHeldItems[index] = nullptr;
-		return true;
-	}
-	return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -603,7 +625,6 @@ void CTerrainPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera*
 void CTerrainPlayer::Update(float fTimeElapsed)
 {
 	CPlayer::Update(fTimeElapsed);
-
 	if (m_pSkinnedAnimationController)
 	{
 		if (m_animBlend.active)
@@ -691,8 +712,10 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 	//	SendItemMove(pItem->GetUniqueID(), curPos);
 	//}
 
-	CGameObject* pRightHand = FindFrame("hand_r");
-	m_pHand = pRightHand;
+	UpdateItem();
+
+	m_pHand = FindFrame("hand_r");
+
 	// position, look, right ------------------------------------
 
 
