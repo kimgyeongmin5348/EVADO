@@ -367,24 +367,29 @@ void CPlayer::UpdateItem()
 	XMFLOAT3 handL = pRightHand->GetLook();
 	XMFLOAT3 handU = pRightHand->GetUp();
 
+	XMFLOAT3 pR = GetRight();
+	XMFLOAT3 pU = GetUp();
+	XMFLOAT3 pL = GetLook();
+
+	// 초기 로컬 회전 캐시
+	struct Basis { XMFLOAT3 r, u, l; };
+	static std::unordered_map<Item*, Basis> sInitBasis;
+
+	auto mul = [&](const XMFLOAT3& v)->XMFLOAT3 {
+		return {
+			pR.x * v.x + pU.x * v.y + pL.x * v.z,
+			pR.y * v.x + pU.y * v.y + pL.y * v.z,
+			pR.z * v.x + pU.z * v.y + pL.z * v.z
+		};
+	};
+
 	for (int i = 0; i < 4; ++i)
 	{
 		CGameObject* it = m_pHeldItems[i];
 		if (!it) continue;
 
 		if (i == m_nSelectedInventoryIndex)
-		{
-			//if (auto* item = dynamic_cast<Item*>(it)) {
-			//	if (!item->rot) {
-			//		if (std::strcmp(it->GetFrameName(), "Shovel") == 0)      it->Rotate(0, 90, 90);
-			//		else if (std::strcmp(it->GetFrameName(), "FlashLight") == 0) it->Rotate(90, 0, 180);
-			//		item->rot = true;
-			//	}
-			//}
-
-/*			XMFLOAT3 off = (std::strcmp(it->GetFrameName(), "Shovel") == 0)
-				? XMFLOAT3(0.05f, -0.05f, 1.0f)
-				: XMFLOAT3(0.05f, -0.05f, 0.1f);	*/		
+		{	
 			XMFLOAT3 off = XMFLOAT3(0.05f, -0.05f, 0.1f);
 
 			XMFLOAT3 worldOff{
@@ -400,7 +405,38 @@ void CPlayer::UpdateItem()
 			};
 
 			Item* obj = dynamic_cast<Item*>(it);
-			SendItemMove(obj->GetUniqueID(), targetPos, handL, handR);
+			if (!obj) continue;
+
+			// 아이템 초기 회전(생성 시 각도) 1회 캐싱: ToParent의 3x3 회전부
+			Basis init{};
+			auto fnd = sInitBasis.find(obj);
+			if (fnd == sInitBasis.end()) {
+				XMFLOAT4X4& t = obj->m_xmf4x4ToParent; // 생성 시 넣어둔 회전 값 보관돼 있음
+				XMFLOAT3 vec1{ t._11, t._12, t._13 };
+				XMFLOAT3 vec2{ t._21, t._22, t._23 };
+				XMFLOAT3 vec3{ t._31, t._32, t._33 };
+				init.r = Vector3::Normalize(vec1);
+				init.u = Vector3::Normalize(vec2);
+				init.l = Vector3::Normalize(vec3);
+				sInitBasis.emplace(obj, init);
+			}
+			else {
+				init = fnd->second;
+			}
+
+			// 최종 회전 = 플레이어 회전 * 초기 회전
+			XMFLOAT3 fR = mul(init.r);
+			XMFLOAT3 fU = mul(init.u);
+			XMFLOAT3 fL = mul(init.l);
+
+			// ToParent에 직접 적용 + 변환 갱신
+			obj->m_xmf4x4ToParent._11 = fR.x; obj->m_xmf4x4ToParent._12 = fR.y; obj->m_xmf4x4ToParent._13 = fR.z;
+			obj->m_xmf4x4ToParent._21 = fU.x; obj->m_xmf4x4ToParent._22 = fU.y; obj->m_xmf4x4ToParent._23 = fU.z;
+			obj->m_xmf4x4ToParent._31 = fL.x; obj->m_xmf4x4ToParent._32 = fL.y; obj->m_xmf4x4ToParent._33 = fL.z;
+			obj->m_xmf4x4ToParent._41 = targetPos.x; obj->m_xmf4x4ToParent._42 = targetPos.y; obj->m_xmf4x4ToParent._43 = targetPos.z;
+			obj->UpdateTransform(nullptr);
+
+			SendItemMove(dynamic_cast<Item*>(it)->GetUniqueID(), targetPos, fL, fR);
 		}
 		else
 		{
