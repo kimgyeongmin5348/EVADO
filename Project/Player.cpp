@@ -196,17 +196,17 @@ void CPlayer::CalculateBoundingBox()
 	m_BoundingCylinder.Height = mergedBox.Extents.y * 2.0f;
 	m_BoundingCylinder.Center = mergedBox.Center;
 
-	// 3. ø¯≈Î¿ª ∞®ΩŒ¥¬ AABB∑Œ ∫Ø»Ø
+	// 3. ÏõêÌÜµÏùÑ Í∞êÏã∏Îäî AABBÎ°ú Î≥ÄÌôò
 	ConvertCylinderToAABB(m_BoundingCylinder, m_BoundingBox);
 }
 
 void CPlayer::GenerateShovelAttackBoundingBox()
 {
-	// πŸøÓµ˘ π⁄Ω∫¿« ¡ﬂΩ…: «√∑π¿ÃæÓ ¿ßƒ°ø°º≠ ¿¸πÊ(Look) πÊ«‚¿∏∑Œ 0.5f ¿Ãµø
+	// Î∞îÏö¥Îî© Î∞ïÏä§Ïùò Ï§ëÏã¨: ÌîåÎ†àÏù¥Ïñ¥ ÏúÑÏπòÏóêÏÑú Ï†ÑÎ∞©(Look) Î∞©Ìñ•ÏúºÎ°ú 0.5f Ïù¥Îèô
 	XMFLOAT3 forwardOffset = Vector3::ScalarProduct(Vector3::Normalize(m_xmf3Look), 0.5f);
 	m_shovelAttackBoundingBox.Center = Vector3::Add(m_xmf3Position, forwardOffset);
 
-	// πŸøÓµ˘ π⁄Ω∫¿« ≈©±‚
+	// Î∞îÏö¥Îî© Î∞ïÏä§Ïùò ÌÅ¨Í∏∞
 	m_shovelAttackBoundingBox.Extents = XMFLOAT3(0.5f, 0.5f, 1.0f);
 }
 
@@ -321,7 +321,7 @@ bool CPlayer::TryPickUpItem(CGameObject* pItem)
 			m_pHeldItems[i] = pItem;
 			pItem->SetVisible(i == m_nSelectedInventoryIndex);
 
-			// ¿ßƒ° ∫∏¡§
+			// ÏúÑÏπò Î≥¥Ï†ï
 			//if (strcmp(pItem->GetFrameName(), "Shovel") == 0)
 			//	pItem->SetPosition(0.05f, -0.05f, 1.0f);
 			//else
@@ -342,7 +342,7 @@ bool CPlayer::TryPickUpItem(CGameObject* pItem)
 			return true;
 		}
 	}
-	return false; // ∞°µÊ ¬¸
+	return false; // Í∞ÄÎìù Ï∞∏
 }
 
 bool CPlayer::DropItem(int index)
@@ -350,28 +350,32 @@ bool CPlayer::DropItem(int index)
 	if (index < 0 || index >= 4) return false;
 	CGameObject* pItem = m_pHeldItems[index];
 	if (!pItem) return false;
+	
+	XMFLOAT3 currentPos = pItem->GetPosition();
 
 	m_pHeldItems[index] = nullptr;
+
 	pItem->isFalling = true;
 	pItem->SetVisible(true);
+
 	return true;
 }
 
 void CPlayer::UpdateItem()
 {
-	CGameObject* pRightHand = FindFrame("hand_r");
-	if (!pRightHand) return;
+    CGameObject* pRightHand = FindFrame("hand_r");
+    if (!pRightHand) return;
 
-	XMFLOAT3 handPos = pRightHand->GetPosition();
-	XMFLOAT3 handR = pRightHand->GetRight(); 
-	XMFLOAT3 handL = pRightHand->GetLook();
-	XMFLOAT3 handU = pRightHand->GetUp();
+    XMFLOAT3 handPos = pRightHand->GetPosition();
+    XMFLOAT3 handR = pRightHand->GetRight(); 
+    XMFLOAT3 handL = pRightHand->GetLook();
+    XMFLOAT3 handU = pRightHand->GetUp();
 
 	XMFLOAT3 pR = GetRight();
 	XMFLOAT3 pU = GetUp();
 	XMFLOAT3 pL = GetLook();
 
-	// √ ±‚ ∑Œƒ√ »∏¿¸ ƒ≥Ω√
+	// Ï¥àÍ∏∞ Î°úÏª¨ ÌöåÏ†Ñ Ï∫êÏãú
 	struct Basis { XMFLOAT3 r, u, l; };
 	static std::unordered_map<Item*, Basis> sInitBasis;
 
@@ -392,26 +396,26 @@ void CPlayer::UpdateItem()
 		{	
 			XMFLOAT3 off = XMFLOAT3(0.05f, -0.05f, 0.1f);
 
-			XMFLOAT3 worldOff{
-			handR.x * off.x + handU.x * off.y + handL.x * off.z,
-			handR.y * off.x + handU.y * off.y + handL.y * off.z,
-			handR.z * off.x + handU.z * off.y + handL.z * off.z
-			};
+            XMFLOAT3 worldOff{
+                handR.x * off.x + handU.x * off.y + handL.x * off.z,
+                handR.y * off.x + handU.y * off.y + handL.y * off.z,
+                handR.z * off.x + handU.z * off.y + handL.z * off.z
+            };
 
-			XMFLOAT3 targetPos{
-			handPos.x + worldOff.x,
-			handPos.y + worldOff.y,
-			handPos.z + worldOff.z
-			};
+            XMFLOAT3 targetPos{
+                handPos.x + worldOff.x,
+                handPos.y + worldOff.y,
+                handPos.z + worldOff.z
+            };
 
 			Item* obj = dynamic_cast<Item*>(it);
 			if (!obj) continue;
 
-			// æ∆¿Ã≈€ √ ±‚ »∏¿¸(ª˝º∫ Ω√ ∞¢µµ) 1»∏ ƒ≥ΩÃ: ToParent¿« 3x3 »∏¿¸∫Œ
+			// ÏïÑÏù¥ÌÖú Ï¥àÍ∏∞ ÌöåÏ†Ñ(ÏÉùÏÑ± Ïãú Í∞ÅÎèÑ) 1Ìöå Ï∫êÏã±: ToParentÏùò 3x3 ÌöåÏ†ÑÎ∂Ä
 			Basis init{};
 			auto fnd = sInitBasis.find(obj);
 			if (fnd == sInitBasis.end()) {
-				XMFLOAT4X4& t = obj->m_xmf4x4ToParent; // ª˝º∫ Ω√ ≥÷æÓµ– »∏¿¸ ∞™ ∫∏∞¸µ≈ ¿÷¿Ω
+				XMFLOAT4X4& t = obj->m_xmf4x4ToParent; // ÏÉùÏÑ± Ïãú ÎÑ£Ïñ¥Îëî ÌöåÏ†Ñ Í∞í Î≥¥Í¥ÄÎèº ÏûàÏùå
 				XMFLOAT3 vec1{ t._11, t._12, t._13 };
 				XMFLOAT3 vec2{ t._21, t._22, t._23 };
 				XMFLOAT3 vec3{ t._31, t._32, t._33 };
@@ -424,12 +428,12 @@ void CPlayer::UpdateItem()
 				init = fnd->second;
 			}
 
-			// √÷¡æ »∏¿¸ = «√∑π¿ÃæÓ »∏¿¸ * √ ±‚ »∏¿¸
+			// ÏµúÏ¢Ö ÌöåÏ†Ñ = ÌîåÎ†àÏù¥Ïñ¥ ÌöåÏ†Ñ * Ï¥àÍ∏∞ ÌöåÏ†Ñ
 			XMFLOAT3 fR = mul(init.r);
 			XMFLOAT3 fU = mul(init.u);
 			XMFLOAT3 fL = mul(init.l);
 
-			// ToParentø° ¡˜¡¢ ¿˚øÎ + ∫Ø»Ø ∞ªΩ≈
+			// ToParentÏóê ÏßÅÏ†ë Ï†ÅÏö© + Î≥ÄÌôò Í∞±Ïã†
 			obj->m_xmf4x4ToParent._11 = fR.x; obj->m_xmf4x4ToParent._12 = fR.y; obj->m_xmf4x4ToParent._13 = fR.z;
 			obj->m_xmf4x4ToParent._21 = fU.x; obj->m_xmf4x4ToParent._22 = fU.y; obj->m_xmf4x4ToParent._23 = fU.z;
 			obj->m_xmf4x4ToParent._31 = fL.x; obj->m_xmf4x4ToParent._32 = fL.y; obj->m_xmf4x4ToParent._33 = fL.z;
@@ -444,6 +448,7 @@ void CPlayer::UpdateItem()
 		}
 	}
 }
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 
@@ -472,13 +477,13 @@ CTerrainPlayer::CTerrainPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandLi
 	SetChild(pPlayerModel->m_pModelRootObject, true);
 
 	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 7, pPlayerModel);
-	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0); // ±‚∫ª
-	m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1); // ∞»±‚
-	m_pSkinnedAnimationController->SetTrackAnimationSet(2, 2); // ∂Ÿ±‚
-	m_pSkinnedAnimationController->SetTrackAnimationSet(3, 3); // ¡°«¡
-	m_pSkinnedAnimationController->SetTrackAnimationSet(4, 4); // »÷µŒ∏£±‚
-	m_pSkinnedAnimationController->SetTrackAnimationSet(5, 5); // øı≈©∏Æ±‚
-	m_pSkinnedAnimationController->SetTrackAnimationSet(6, 6); // øı≈©∏Æ∞Ì ∞»±‚
+	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0); // Í∏∞Î≥∏
+	m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1); // Í±∑Í∏∞
+	m_pSkinnedAnimationController->SetTrackAnimationSet(2, 2); // Îõ∞Í∏∞
+	m_pSkinnedAnimationController->SetTrackAnimationSet(3, 3); // Ï†êÌîÑ
+	m_pSkinnedAnimationController->SetTrackAnimationSet(4, 4); // ÌúòÎëêÎ•¥Í∏∞
+	m_pSkinnedAnimationController->SetTrackAnimationSet(5, 5); // ÏõÖÌÅ¨Î¶¨Í∏∞
+	m_pSkinnedAnimationController->SetTrackAnimationSet(6, 6); // ÏõÖÌÅ¨Î¶¨Í≥† Í±∑Í∏∞
 	m_pSkinnedAnimationController->SetTrackEnable(1, false); 
 	m_pSkinnedAnimationController->SetTrackEnable(2, false); 
 	m_pSkinnedAnimationController->SetTrackEnable(3, false); 
@@ -740,10 +745,10 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 	//	Item* pItem = dynamic_cast<Item*>(pObj);
 	//	if (!pItem) continue;
 
-	//	// «ˆ¿Á ø˘µÂ ¡¬«• ∞°¡Æø¿±‚
+	//	// ÌòÑÏû¨ ÏõîÎìú Ï¢åÌëú Í∞ÄÏ†∏Ïò§Í∏∞
 	//	XMFLOAT3 curPos = pItem->GetPosition();
 
-	//	// º≠πˆ µø±‚»≠
+	//	// ÏÑúÎ≤Ñ ÎèôÍ∏∞Ìôî
 	//	SendItemMove(pItem->GetUniqueID(), curPos);
 	//}
 
@@ -794,10 +799,10 @@ void CTerrainPlayer::SetHPWidth(float newWidth)
 {
 	if (m_playerHP)
 	{
-		// ªı mesh ª˝º∫
+		// ÏÉà mesh ÏÉùÏÑ±
 		CScreenRectMeshTextured* newMesh = new CScreenRectMeshTextured(device, cmdList, 0.25f, newWidth, 0.9f, 0.1f);
 
-		// ±‚¡∏ ∏ﬁΩ√ ±≥√º
+		// Í∏∞Ï°¥ Î©îÏãú ÍµêÏ≤¥
 		m_playerHP->SetMesh(0, newMesh);
 	}
 }
