@@ -350,6 +350,15 @@ bool CPlayer::DropItem(int index)
 	if (index < 0 || index >= 4) return false;
 	CGameObject* pItem = m_pHeldItems[index];
 	if (!pItem) return false;
+	
+	XMFLOAT3 currentPos = pItem->GetPosition();
+
+	m_pHeldItems[index] = nullptr;
+
+	pItem->isFalling = true;
+	pItem->SetVisible(true);
+
+	return true;
 }
 
 void CPlayer::UpdateItem()
