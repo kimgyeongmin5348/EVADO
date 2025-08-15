@@ -760,12 +760,16 @@ void CScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam,
 				m_pPlayer->bflashlight = !m_pPlayer->bflashlight;
 				BuildDefaultLightsAndMaterials(m_pPlayer->bflashlight);
 				// server 로 켯다는거 보내주기
+				SendFlashlightChange(m_pPlayer->bflashlight);
 			}
 			else if (!strcmp(frameName, "Shovel"))
 			{
 				dynamic_cast<CTerrainPlayer*>(m_pPlayer)->m_currentAnim = AnimationState::SWING;
 
 				m_pEffect->Activate(m_pPlayer->m_pHeldItems[m_pPlayer->m_nSelectedInventoryIndex]->GetPosition());
+
+				SendParticleImpact(m_pPlayer->GetPosition());
+
 				if (m_pPlayer->m_isMonsterHit)
 				{
 					// server 로 공격 데미지 값 보내주기 - 몬스터 hp 깎여야함
