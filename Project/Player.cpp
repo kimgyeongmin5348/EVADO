@@ -359,17 +359,69 @@ bool CPlayer::DropItem(int index)
 	CGameObject* pItem = m_pHeldItems[index];
 	if (!pItem) return false;
 
+<<<<<<< Updated upstream
 	//CGameObject* pRightHand = FindFrame("hand_r");
 	//if (!pRightHand) return false;
+=======
+	XMFLOAT3 currentPos = pItem->GetPosition();
+
+	m_pHeldItems[index] = nullptr;
+	pItem->isFalling = true;
+	pItem->SetVisible(true);
+
+	return true;
+}
+>>>>>>> Stashed changes
 
 	CGameObject* pCurr = m_pHand->GetChild();
 	CGameObject* pPrev = nullptr;
 
 	while (pCurr)
 	{
+<<<<<<< Updated upstream
 		if (pCurr == pItem) break;
 		pPrev = pCurr;
 		pCurr = pCurr->GetSibling();
+=======
+		CGameObject* it = m_pHeldItems[i];
+		if (!it) continue;
+
+		if (i == m_nSelectedInventoryIndex)
+		{
+			//if (auto* item = dynamic_cast<Item*>(it)) {
+			//	if (!item->rot) {
+			//		if (std::strcmp(it->GetFrameName(), "Shovel") == 0)      it->Rotate(0, 90, 90);
+			//		else if (std::strcmp(it->GetFrameName(), "FlashLight") == 0) it->Rotate(90, 0, 180);
+			//		item->rot = true;
+			//	}
+			//}
+
+/*			XMFLOAT3 off = (std::strcmp(it->GetFrameName(), "Shovel") == 0)
+				? XMFLOAT3(0.05f, -0.05f, 1.0f)
+				: XMFLOAT3(0.05f, -0.05f, 0.1f);	*/		
+			XMFLOAT3 off = XMFLOAT3(0.05f, -0.05f, 0.1f);
+
+			XMFLOAT3 worldOff{
+			handR.x * off.x + handU.x * off.y + handL.x * off.z,
+			handR.y * off.x + handU.y * off.y + handL.y * off.z,
+			handR.z * off.x + handU.z * off.y + handL.z * off.z
+			};
+
+			XMFLOAT3 targetPos{
+			handPos.x + worldOff.x,
+			handPos.y + worldOff.y,
+			handPos.z + worldOff.z
+			};
+
+			Item* obj = dynamic_cast<Item*>(it);
+			SendItemMove(obj->GetUniqueID(), targetPos, handL, handR);
+			//SendItemMove(obj->GetUniqueID(), handPos, handL, handR);
+		}
+		else
+		{
+			it->SetVisible(false);
+		}
+>>>>>>> Stashed changes
 	}
 
 	if (pCurr == pItem)
