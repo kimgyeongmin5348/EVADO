@@ -812,6 +812,7 @@ void CGameFramework::OnMonsterSpawned(int monsterID, const XMFLOAT3& pos, int st
 	{
 		// 기존 몬스터 위치/상태/HP 갱신
 		it->second->SetPosition(pos);
+
 		UpdateMonsterState(it->second, state);
 	}
 	else
@@ -845,7 +846,7 @@ void CGameFramework::UpdateMonsterState(CSpider* pMonster, int state)
 	}
 }
 
-void CGameFramework::UpdateMonsterPosition(int monsterID, const XMFLOAT3& pos, int state)
+void CGameFramework::UpdateMonsterPosition(int monsterID, const XMFLOAT3& pos, const XMFLOAT3& rot, int state)
 {
 	auto it = g_monsters.find(monsterID);
 	if (it == g_monsters.end())
@@ -856,5 +857,6 @@ void CGameFramework::UpdateMonsterPosition(int monsterID, const XMFLOAT3& pos, i
 
 	CSpider* pMonster = it->second;
 	pMonster->SetPosition(pos);
+	pMonster->Rotate(rot);
 	UpdateMonsterState(pMonster, state);
 }

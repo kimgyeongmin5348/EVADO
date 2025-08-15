@@ -246,9 +246,10 @@ struct sc_packet_monster_move
 {
 	unsigned char		size;
 	char				type;
-	int64_t				monsterID;
+	long long			monsterID;
 	XMFLOAT3			position;
-	uint8_t				state;
+	XMFLOAT3			rotation;
+	int					state;
 };
 
 struct cs_packet_shovel_damage

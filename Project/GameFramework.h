@@ -54,7 +54,7 @@ public:
 
 	void OnMonsterSpawned(int monsterID, const XMFLOAT3& pos, int state);
 	void UpdateMonsterState(CSpider* pMonster, int state);
-	void UpdateMonsterPosition(int monsterID, const XMFLOAT3& pos, int state);
+	void UpdateMonsterPosition(int monsterID, const XMFLOAT3& pos, const XMFLOAT3& rot, int state);
 
 	void ItemSpawned(long long itemID, const XMFLOAT3& pos, int type, int price);
 	void UpdateItemPosition(long long itemID, const XMFLOAT3& pos);
