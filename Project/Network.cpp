@@ -93,6 +93,28 @@ void SendItemMove(long long item_id, const XMFLOAT3& position, const XMFLOAT3& l
 }
 
 // =================================================================
+//                          파티클 관리
+// =================================================================
+
+void SendFlashlightChange(bool flashlight_on) {
+    cs_packet_flashlight pkt{};
+    pkt.size = sizeof(pkt);
+    pkt.type = CS_P_FLASHLIGHT;
+    pkt.player_id = g_myid;
+    pkt.flashlight_on = flashlight_on;
+    send_packet(&pkt);
+}
+
+void SendParticleImpact(const XMFLOAT3& impact_pos) {
+    cs_packet_particle_impact pkt{};
+    pkt.size = sizeof(pkt);
+    pkt.type = CS_P_PARTICLE_IMPACT;
+    pkt.player_id = g_myid;
+    pkt.impact_pos = impact_pos;
+    send_packet(&pkt);
+}
+
+// =================================================================
 //                      네트워크 코어 로직
 // =================================================================
 
@@ -338,7 +360,6 @@ void ProcessPacket(char* ptr)
         break;
     }
 
-    // 랜더링 해야함
     case SC_P_ITEM_SPAWN:
     {
         sc_packet_item_spawn* pkt = reinterpret_cast<sc_packet_item_spawn*>(ptr);
@@ -362,7 +383,6 @@ void ProcessPacket(char* ptr)
         break;
     }
 
-    // 랜더링 해야함
     case SC_P_ITEM_MOVE:
     {
         sc_packet_item_move* pkt = reinterpret_cast<sc_packet_item_move*>(ptr);
@@ -378,7 +398,6 @@ void ProcessPacket(char* ptr)
         break;
     }
 
-    // 랜더링 해야함
     case SC_P_MONSTER_SPAWN:
     {
         sc_packet_monster_spawn* pkt = reinterpret_cast<sc_packet_monster_spawn*>(ptr);
@@ -400,7 +419,6 @@ void ProcessPacket(char* ptr)
         // 여긴 체력바 렌더링 하는곳에 보내는 역할의 코드를 작성? 해야하지 않을까?
     }
     
-    // 랜더링 해야함
     case SC_P_MONSTER_MOVE:
     {
         sc_packet_monster_move* pkt = reinterpret_cast<sc_packet_monster_move*>(ptr);
@@ -410,6 +428,22 @@ void ProcessPacket(char* ptr)
             << " State: " << static_cast<int>(pkt->state) << std::endl;
 
         gGameFramework.UpdateMonsterPosition(pkt->monsterID, pkt->position, pkt->rotation, pkt->state);
+
+        break;
+    }
+
+    case SC_P_FLASHLIGHT:
+    {
+        sc_packet_flashlight* pkt = reinterpret_cast<sc_packet_flashlight*>(ptr);
+
+
+        break;
+    }
+
+    case SC_P_PARTICLE_IMPACT:
+    {
+        sc_packet_particle_impact* pkt = reinterpret_cast<sc_packet_particle_impact*>(ptr);
+
 
         break;
     }

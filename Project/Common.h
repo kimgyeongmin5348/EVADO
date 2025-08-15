@@ -56,6 +56,12 @@ constexpr char SC_P_SHOP_SELL_ACK = 24;
 
 constexpr char CS_P_LOADING_DONE = 25;
 
+constexpr char CS_P_FLASHLIGHT = 28;
+constexpr char SC_P_FLASHLIGHT = 29;
+constexpr char CS_P_PARTICLE_IMPACT = 30;
+constexpr char SC_P_PARTICLE_IMPACT = 31;
+
+
 #pragma pack (push, 1)
 
 struct cs_packet_loading_done
@@ -271,6 +277,35 @@ struct sc_packet_update_monster_hp
 	int					hp;
 };
 
+
+//particle
+struct cs_packet_flashlight {
+	unsigned char		size;
+	char				type;
+	long long			player_id;
+	bool				flashlight_on;
+};
+
+struct sc_packet_flashlight {
+	unsigned char		size;
+	char				type; 
+	long long			player_id;
+	bool				flashlight_on;
+};
+
+struct cs_packet_particle_impact {
+	unsigned char		size;
+	char				type;
+	long long			player_id;
+	XMFLOAT3			impact_pos;
+};
+
+struct sc_packet_particle_impact {
+	unsigned char		size;
+	char				type;
+	long long			player_id;
+	XMFLOAT3			impact_pos;
+};
 
 #pragma pack (pop)
 
