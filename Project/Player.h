@@ -134,6 +134,7 @@ public:
 	// 물건 줍기
 	bool TryPickUpItem(CGameObject* pItem);
 	bool DropItem(int index);
+	void UpdateItem();
 };
 
 //class CSoundCallbackHandler : public CAnimationCallbackHandler
