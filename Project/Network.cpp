@@ -436,6 +436,14 @@ void ProcessPacket(char* ptr)
     {
         sc_packet_flashlight* pkt = reinterpret_cast<sc_packet_flashlight*>(ptr);
 
+        long long player_id = pkt->player_id;
+        bool flashlight_on = pkt->flashlight_on;
+
+        auto it = g_other_players.find(player_id);
+        if (it != g_other_players.end())
+        {
+            // it->second->SetFlashlight(flashlight_on); <- 이런식으로 상대 플레이어가 손전등 껐다 켰다 한다는걸 받아야 할듯?
+        }
 
         break;
     }
@@ -444,6 +452,10 @@ void ProcessPacket(char* ptr)
     {
         sc_packet_particle_impact* pkt = reinterpret_cast<sc_packet_particle_impact*>(ptr);
 
+        long long player_id = pkt->player_id;
+        XMFLOAT3 impact_pos = pkt->impact_pos;
+
+        //이부분에 파티클 Active 관련 코드? 작성 해야할듯?
 
         break;
     }
