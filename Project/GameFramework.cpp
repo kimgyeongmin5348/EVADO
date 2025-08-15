@@ -634,15 +634,19 @@ void CGameFramework::AnimateObjects()
 		if (m_pScene->m_ppMonsters) 
 			for(int i=0;i< m_pScene->m_nMonster; ++i)
 			m_pScene->m_ppMonsters[i]->Animate(fTimeElapsed);
+
 		if (m_pScene->m_ppGameObjects && m_pPlayer->m_nSelectedInventoryIndex > -1 && m_pPlayer->m_pHeldItems[m_pPlayer->m_nSelectedInventoryIndex]) {
 			for (int i = 0; i < m_pScene->m_nGameObjects; ++i) {
 				if (m_pPlayer->m_pHeldItems[m_pPlayer->m_nSelectedInventoryIndex] == m_pScene->m_ppGameObjects[i]) {
 					Item* pItem = dynamic_cast<Item*>(m_pScene->m_ppGameObjects[i]);
 					XMFLOAT3 pos = m_pPlayer->m_pHand->m_pSibling->GetPosition();
-					SendItemMove(pItem->GetUniqueID(), pos);
+					XMFLOAT3 look = m_pPlayer->GetLook();
+					XMFLOAT3 right = m_pPlayer->GetRight();
+					SendItemMove(pItem->GetUniqueID(), pos, look, right);
 				}
 			}
 		}
+
 	}
 
 	m_pPlayer->Animate(fTimeElapsed);
@@ -795,16 +799,6 @@ void CGameFramework::ItemSpawned(long long itemID, const XMFLOAT3& pos, int type
 
 void CGameFramework::UpdateItemPosition(long long itemID, const XMFLOAT3& pos)
 {
-	//auto it = g_items.find(itemID);
-	//if (it == g_items.end())
-	//{
-	//	std::cout << "[Error] Item ID not found: " << itemID << std::endl;
-	//	return;
-	//}
-
-	//Item* pItem = it->second;
-	//pItem->SetPosition(pos);
-	//cout << "update item pos - " << pos.x << ", " << pos.y << ", " << pos.z << endl;
 	auto it = g_items.find(itemID);
 	if (it != g_items.end())
 	{
@@ -812,6 +806,15 @@ void CGameFramework::UpdateItemPosition(long long itemID, const XMFLOAT3& pos)
 	}
 }
 
+void CGameFramework::UpdateItemRotation(long long itemID, const XMFLOAT3& look, const XMFLOAT3& right)
+{
+	auto it = g_items.find(itemID);
+	if (it != g_items.end())
+	{
+		it->second->SetLookVector(look);
+		it->second->SetRightVector(right);
+	}
+}
 
 
 void CGameFramework::OnMonsterSpawned(int monsterID, const XMFLOAT3& pos, int state)

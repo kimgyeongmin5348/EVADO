@@ -80,13 +80,15 @@ void SendShopSellRequest(int item_type)
 //                          아이템 관리
 // =================================================================
 
-void SendItemMove(long long item_id, XMFLOAT3& position)
+void SendItemMove(long long item_id, const XMFLOAT3& position, const XMFLOAT3& look, const XMFLOAT3& right)
 {
     cs_packet_item_move itm;
     itm.size = sizeof(itm);
     itm.type = CS_P_ITEM_MOVE;
     itm.item_id = item_id;
     itm.position = position;
+    itm.look = look;
+    itm.right = right;
     send_packet(&itm);
 }
 
@@ -371,6 +373,7 @@ void ProcessPacket(char* ptr)
         //    << std::endl;
 
         gGameFramework.UpdateItemPosition(pkt->item_id, pkt->position);
+        gGameFramework.UpdateItemRotation(pkt->item_id, pkt->look, pkt->right);
 
         break;
     }

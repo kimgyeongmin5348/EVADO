@@ -342,7 +342,9 @@ bool CPlayer::TryPickUpItem(CGameObject* pItem)
 			Item* pickedItem = dynamic_cast<Item*>(pItem);
 			if (pickedItem) {
 				XMFLOAT3 curPos = pickedItem->GetPosition();
-				SendItemMove(pickedItem->GetUniqueID(), curPos);
+				XMFLOAT3 look = GetLook();
+				XMFLOAT3 right = GetRight();
+				SendItemMove(pickedItem->GetUniqueID(), curPos, look, right);
 			}
 
 			return true;
