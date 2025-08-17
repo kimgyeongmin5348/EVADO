@@ -196,16 +196,22 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	if (pSpiderModel) delete pSpiderModel;
 
-	m_nGameObjects = 3;
+	m_nGameObjects = 8;
 	m_ppGameObjects = new CGameObject * [m_nGameObjects];
-	long long itemIDs[3] = { 20000,20001,20002 };
+	long long itemIDs[8] = { 20000, 20001, 20002,
+							 30000, 30001, 30002, 30003, 30004};
 
-	float itemPrices[3] = { 80, 150, 80 };
+	float itemPrices[8] = { 80, 150, 80, 10, 20, 30, 40, 50 };
 
-	XMFLOAT3 positions[3] = {
+	XMFLOAT3 positions[8] = {
 		{-2, 0, 19},
 		{-2, 0, 22},
-		{-2, 0, 25}
+		{-2, 0, 25},
+		{-2, 0, 28},
+		{-2, 0, 31},
+		{-2, 0, 34},
+		{-2, 0, 37},
+		{-2, 0, 13}
 	};
 
 	CLoadedModelInfo* pFlashlightModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Flashlightgold.bin", NULL);
@@ -254,6 +260,87 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	if (pWhistleModel) delete pWhistleModel;
 
+	// ============================================================================================================
+	// ============================================================================================================
+
+
+	CLoadedModelInfo* pGoldbarModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Goldbar.bin", NULL);
+	m_ppGameObjects[3] = new Whistle(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pGoldbarModel);
+	m_ppGameObjects[3]->SetScale(1, 1, 1);
+	m_ppGameObjects[3]->SetFrameName("Goldbar");
+	//m_ppGameObjects[3]->price = 30;
+	m_ppGameObjects[3]->SetPosition(positions[3]);
+
+	static_cast<Item*>(m_ppGameObjects[3])->SetUniqueID(itemIDs[3]);
+	static_cast<Item*>(m_ppGameObjects[3])->SetPrice(itemPrices[3]);
+	g_items[itemIDs[3]] = static_cast<Item*>(m_ppGameObjects[3]);
+
+	if (pGoldbarModel) delete pGoldbarModel;
+
+	// ============================================================================================================
+
+
+	CLoadedModelInfo* pCoinModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Coin.bin", NULL);
+	m_ppGameObjects[4] = new Whistle(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pCoinModel);
+	m_ppGameObjects[4]->SetScale(2, 2, 2);
+	m_ppGameObjects[4]->SetFrameName("Coin");
+	//m_ppGameObjects[2]->price = 30;
+	m_ppGameObjects[4]->SetPosition(positions[4]);
+
+	static_cast<Item*>(m_ppGameObjects[4])->SetUniqueID(itemIDs[4]);
+	static_cast<Item*>(m_ppGameObjects[4])->SetPrice(itemPrices[4]);
+	g_items[itemIDs[4]] = static_cast<Item*>(m_ppGameObjects[4]);
+
+	if (pCoinModel) delete pCoinModel;
+
+	// ============================================================================================================
+
+
+	CLoadedModelInfo* pCanister1Model = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Canisters_01.bin", NULL);
+	m_ppGameObjects[5] = new Whistle(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pCanister1Model);
+	m_ppGameObjects[5]->SetScale(1, 1, 1);
+	m_ppGameObjects[5]->SetFrameName("Canisters_01");
+	//m_ppGameObjects[2]->price = 30;
+	m_ppGameObjects[5]->SetPosition(positions[5]);
+
+	static_cast<Item*>(m_ppGameObjects[5])->SetUniqueID(itemIDs[5]);
+	static_cast<Item*>(m_ppGameObjects[5])->SetPrice(itemPrices[5]);
+	g_items[itemIDs[5]] = static_cast<Item*>(m_ppGameObjects[5]);
+
+	if (pCanister1Model) delete pCanister1Model;
+
+	// ============================================================================================================
+
+
+	CLoadedModelInfo* pCanister2Model = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Canisters_02.bin", NULL);
+	m_ppGameObjects[6] = new Whistle(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pCanister2Model);
+	m_ppGameObjects[6]->SetScale(1, 1, 1);
+	m_ppGameObjects[6]->SetFrameName("Canisters_02");
+	//m_ppGameObjects[2]->price = 30;
+	m_ppGameObjects[6]->SetPosition(positions[6]);
+
+	static_cast<Item*>(m_ppGameObjects[6])->SetUniqueID(itemIDs[6]);
+	static_cast<Item*>(m_ppGameObjects[6])->SetPrice(itemPrices[6]);
+	g_items[itemIDs[6]] = static_cast<Item*>(m_ppGameObjects[6]);
+
+	if (pCanister2Model) delete pCanister2Model;
+
+	// ============================================================================================================
+
+
+	CLoadedModelInfo* pCanister3Model = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Canisters_03.bin", NULL);
+	m_ppGameObjects[7] = new Whistle(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pCanister3Model);
+	m_ppGameObjects[7]->SetScale(1, 1, 1);
+	m_ppGameObjects[7]->SetFrameName("Canisters_03");
+	//m_ppGameObjects[2]->price = 30;
+	m_ppGameObjects[7]->SetPosition(positions[7]);
+
+	static_cast<Item*>(m_ppGameObjects[7])->SetUniqueID(itemIDs[7]);
+	static_cast<Item*>(m_ppGameObjects[7])->SetPrice(itemPrices[7]);
+	g_items[itemIDs[7]] = static_cast<Item*>(m_ppGameObjects[7]);
+
+	if (pCanister3Model) delete pCanister3Model;
+
 	m_nOtherPlayers = 1;
 	m_ppOtherPlayers = new OtherPlayer * [m_nOtherPlayers];
 	CLoadedModelInfo* pOtherPlayerModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Player.bin", NULL);
@@ -299,6 +386,31 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	pTextureItem3->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Whistle.dds", RESOURCE_TEXTURE2D, 0);
 	CreateShaderResourceViews(pd3dDevice, pTextureItem3, 0, 15);
 	m_textureMap["Whistle"] = pTextureItem3;
+
+	CTexture* pTextureItem4 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pTextureItem4->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Goldbar.dds", RESOURCE_TEXTURE2D, 0);
+	CreateShaderResourceViews(pd3dDevice, pTextureItem4, 0, 15);
+	m_textureMap["Goldbar"] = pTextureItem4;
+
+	CTexture* pTextureItem5 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pTextureItem5->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Coin.dds", RESOURCE_TEXTURE2D, 0);
+	CreateShaderResourceViews(pd3dDevice, pTextureItem5, 0, 15);
+	m_textureMap["Coin"] = pTextureItem5;
+
+	CTexture* pTextureItem6 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pTextureItem6->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Canisters_01.dds", RESOURCE_TEXTURE2D, 0);
+	CreateShaderResourceViews(pd3dDevice, pTextureItem6, 0, 15);
+	m_textureMap["Canisters_01"] = pTextureItem6;
+
+	CTexture* pTextureItem7 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pTextureItem7->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Canisters_02.dds", RESOURCE_TEXTURE2D, 0);
+	CreateShaderResourceViews(pd3dDevice, pTextureItem7, 0, 15);
+	m_textureMap["Canisters_02"] = pTextureItem7;
+
+	CTexture* pTextureItem8 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pTextureItem8->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Canisters_03.dds", RESOURCE_TEXTURE2D, 0);
+	CreateShaderResourceViews(pd3dDevice, pTextureItem8, 0, 15);
+	m_textureMap["Canisters_03"] = pTextureItem8;
 
 	CTextureToScreenShader* pTextureItem1Shader = new CTextureToScreenShader(1);
 	pTextureItem1Shader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
