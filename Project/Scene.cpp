@@ -387,6 +387,31 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	CreateShaderResourceViews(pd3dDevice, pTextureItem3, 0, 15);
 	m_textureMap["Whistle"] = pTextureItem3;
 
+	CTexture* pTextureItem4 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pTextureItem4->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Goldbar.dds", RESOURCE_TEXTURE2D, 0);
+	CreateShaderResourceViews(pd3dDevice, pTextureItem4, 0, 15);
+	m_textureMap["Goldbar"] = pTextureItem4;
+
+	CTexture* pTextureItem5 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pTextureItem5->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Coin.dds", RESOURCE_TEXTURE2D, 0);
+	CreateShaderResourceViews(pd3dDevice, pTextureItem5, 0, 15);
+	m_textureMap["Coin"] = pTextureItem5;
+
+	CTexture* pTextureItem6 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pTextureItem6->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Canisters_01.dds", RESOURCE_TEXTURE2D, 0);
+	CreateShaderResourceViews(pd3dDevice, pTextureItem6, 0, 15);
+	m_textureMap["Canisters_01"] = pTextureItem6;
+
+	CTexture* pTextureItem7 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pTextureItem7->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Canisters_02.dds", RESOURCE_TEXTURE2D, 0);
+	CreateShaderResourceViews(pd3dDevice, pTextureItem7, 0, 15);
+	m_textureMap["Canisters_02"] = pTextureItem7;
+
+	CTexture* pTextureItem8 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pTextureItem8->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Canisters_03.dds", RESOURCE_TEXTURE2D, 0);
+	CreateShaderResourceViews(pd3dDevice, pTextureItem8, 0, 15);
+	m_textureMap["Canisters_03"] = pTextureItem8;
+
 	CTextureToScreenShader* pTextureItem1Shader = new CTextureToScreenShader(1);
 	pTextureItem1Shader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	CScreenRectMeshTextured* pMesh = new CScreenRectMeshTextured(pd3dDevice, pd3dCommandList, 0.02f, 0.225f * 0.5f, -0.65f, 0.4f * 0.5f);
