@@ -294,13 +294,13 @@ void ProcessPacket(char* ptr)
         
         //player.SetPosition(packet->position);
 
-        std::cout << "[Client] My Player : " << packet->id << std::endl;
-        std::cout << "[Client] My Player Information ID:" << packet->id
-            << " Positino(" << packet->position.x << "," << packet->position.y << "," << packet->position.z << ")"
-            << " Look(" << packet->look.x << "," << packet->look.y << "," << packet->look.z << ")"
-            << " Right(" << packet->right.x << "," << packet->right.y << "," << packet->right.z << ")"
-            << "Animation : " << static_cast<int>(packet->animState) << ", HP : " << packet->hp
-            << std::endl;
+        //std::cout << "[Client] My Player : " << packet->id << std::endl;
+        //std::cout << "[Client] My Player Information ID:" << packet->id
+        //    << " Positino(" << packet->position.x << "," << packet->position.y << "," << packet->position.z << ")"
+        //    << " Look(" << packet->look.x << "," << packet->look.y << "," << packet->look.z << ")"
+        //    << " Right(" << packet->right.x << "," << packet->right.y << "," << packet->right.z << ")"
+        //    << "Animation : " << static_cast<int>(packet->animState) << ", HP : " << packet->hp
+        //    << std::endl;
         break;
     }
     
@@ -311,13 +311,13 @@ void ProcessPacket(char* ptr)
 
         if (id == g_myid) break;
 
-        std::cout << "[Client] New Player " << id << "Connect " << "\n";
+      /*  std::cout << "[Client] New Player " << id << "Connect " << "\n";
         std::cout << "[Client] New Player Information Recv "
             << " Position(" << packet->position.x << "," << packet->position.y << "," << packet->position.z << ")"
             << " Look(" << packet->look.x << "," << packet->look.y << "," << packet->look.z << ")"
             << " Right(" << packet->right.x << "," << packet->right.y << "," << packet->right.z << ")"
             << "Animation : " << static_cast<int>(packet->animState) << "HP : " << packet->hp
-            << std::endl;
+            << std::endl;*/
 
         // 씬에 OtherPlayer가 딱 나타난다
         gGameFramework.OnOtherClientConnected();
@@ -340,12 +340,12 @@ void ProcessPacket(char* ptr)
             gGameFramework.UpdateOtherPlayerRotate(0, packet->right, packet->look);
         }
 
-        std::cout << "[Client] New Player Information Recv "
+  /*      std::cout << "[Client] New Player Information Recv "
             << " Position(" << packet->position.x << "," << packet->position.y << "," << packet->position.z << ")"
             << " Look(" << packet->look.x << "," << packet->look.y << "," << packet->look.z << ")"
             << " Right(" << packet->right.x << "," << packet->right.y << "," << packet->right.z << ")"
             << "Animation : " << static_cast<int>(packet->animState)
-            << std::endl;
+            << std::endl;*/
 
         break;
     }
@@ -365,10 +365,10 @@ void ProcessPacket(char* ptr)
         sc_packet_item_spawn* pkt = reinterpret_cast<sc_packet_item_spawn*>(ptr);
 
 
-        std::cout << "[Client] Item Create - ID: " << pkt->item_id
-            << " Postion(" << pkt->position.x << ", "
-            << pkt->position.y << ", " << pkt->position.z << ")"
-            << " Type: " << pkt->item_type << " Cash: " << pkt->cash << std::endl;
+        //std::cout << "[Client] Item Create - ID: " << pkt->item_id
+        //    << " Postion(" << pkt->position.x << ", "
+        //    << pkt->position.y << ", " << pkt->position.z << ")"
+        //    << " Type: " << pkt->item_type << " Cash: " << pkt->cash << std::endl;
 
         gGameFramework.ItemSpawned(pkt->item_id, pkt->position, pkt->item_type, pkt->cash);
 
@@ -401,9 +401,9 @@ void ProcessPacket(char* ptr)
     case SC_P_MONSTER_SPAWN:
     {
         sc_packet_monster_spawn* pkt = reinterpret_cast<sc_packet_monster_spawn*>(ptr);
-        std::cout << "[Client] Monster Spawn - ID: " << pkt->monsterID
-            << " Position(" << pkt->position.x << ", " << pkt->position.z << ")" << ", HP: " << pkt->hp
-            << " State: " << static_cast<int>(pkt->state) << std::endl;
+        //std::cout << "[Client] Monster Spawn - ID: " << pkt->monsterID
+        //    << " Position(" << pkt->position.x << ", " << pkt->position.z << ")" << ", HP: " << pkt->hp
+        //    << " State: " << static_cast<int>(pkt->state) << std::endl;
 
         gGameFramework.OnMonsterSpawned(pkt->monsterID, pkt->position, pkt->state);
         break;
@@ -423,9 +423,9 @@ void ProcessPacket(char* ptr)
     {
         sc_packet_monster_move* pkt = reinterpret_cast<sc_packet_monster_move*>(ptr);
 
-        std::cout << "[Client] Monster Move - ID: " << pkt->monsterID
+       /* std::cout << "[Client] Monster Move - ID: " << pkt->monsterID
             << " New Position(" << pkt->position.x << ", " << pkt->position.z << ")"
-            << " State: " << static_cast<int>(pkt->state) << std::endl;
+            << " State: " << static_cast<int>(pkt->state) << std::endl;*/
 
         gGameFramework.UpdateMonsterPosition(pkt->monsterID, pkt->position, pkt->rotation, pkt->state);
 

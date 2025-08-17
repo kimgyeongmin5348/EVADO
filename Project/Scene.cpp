@@ -199,19 +199,19 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_nGameObjects = 8;
 	m_ppGameObjects = new CGameObject * [m_nGameObjects];
 	long long itemIDs[8] = { 20000, 20001, 20002,
-							 30000, 30001, 30002, 30003, 30004};
+							 20003, 30004, 20005, 20006, 20007};
 
-	float itemPrices[8] = { 80, 150, 80, 10, 20, 30, 40, 50 };
+	float itemPrices[8] = { 80, 150, 80, 200, 120, 130, 140, 190 };
 
 	XMFLOAT3 positions[8] = {
 		{-2, 0, 19},
 		{-2, 0, 22},
-		{-2, 0, 25},
-		{-2, 0, 28},
-		{-2, 0, 31},
-		{-2, 0, 34},
-		{-2, 0, 37},
-		{-2, 0, 13}
+		{2, 0, -7},
+		{4, 0, -56},
+		{-20, 0, 1},
+		{-54, 0, -92},
+		{-46, 0, -45},
+		{27, 0, -5}
 	};
 
 	CLoadedModelInfo* pFlashlightModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Flashlightgold.bin", NULL);
@@ -282,7 +282,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	CLoadedModelInfo* pCoinModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Coin.bin", NULL);
 	m_ppGameObjects[4] = new Whistle(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pCoinModel);
-	m_ppGameObjects[4]->SetScale(2, 2, 2);
+	m_ppGameObjects[4]->SetScale(4, 4, 4);
 	m_ppGameObjects[4]->SetFrameName("Coin");
 	//m_ppGameObjects[2]->price = 30;
 	m_ppGameObjects[4]->SetPosition(positions[4]);
