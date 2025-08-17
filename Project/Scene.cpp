@@ -201,7 +201,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	long long itemIDs[8] = { 20000, 20001, 20002,
 							 30000, 30001, 30002, 30003, 30004};
 
-	float itemPrices[3] = { 80, 150, 80 };
+	float itemPrices[8] = { 80, 150, 80, 10, 20, 30, 40, 50 };
 
 	XMFLOAT3 positions[8] = {
 		{-2, 0, 19},
@@ -209,9 +209,9 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 		{-2, 0, 25},
 		{-2, 0, 28},
 		{-2, 0, 31},
-		{-2, 0, 34},
-		{-2, 0, 37},
-		{-2, 0, 40}
+		{-2, 0, 17},
+		{-2, 0, 15},
+		{-2, 0, 13}
 	};
 
 	CLoadedModelInfo* pFlashlightModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Flashlightgold.bin", NULL);
@@ -264,8 +264,8 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	// ============================================================================================================
 
 
-	CLoadedModelInfo* pWhistleModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Goldbar.bin", NULL);
-	m_ppGameObjects[3] = new Whistle(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pWhistleModel);
+	CLoadedModelInfo* pGoldbarModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Goldbar.bin", NULL);
+	m_ppGameObjects[3] = new Whistle(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pGoldbarModel);
 	m_ppGameObjects[3]->SetScale(1, 1, 1);
 	m_ppGameObjects[3]->SetFrameName("Goldbar");
 	//m_ppGameObjects[3]->price = 30;
@@ -275,13 +275,13 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	static_cast<Item*>(m_ppGameObjects[3])->SetPrice(itemPrices[3]);
 	g_items[itemIDs[3]] = static_cast<Item*>(m_ppGameObjects[3]);
 
-	if (pWhistleModel) delete pWhistleModel;
+	if (pGoldbarModel) delete pGoldbarModel;
 
 	// ============================================================================================================
 
 
-	CLoadedModelInfo* pWhistleModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Coin.bin", NULL);
-	m_ppGameObjects[4] = new Whistle(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pWhistleModel);
+	CLoadedModelInfo* pCoinModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Coin.bin", NULL);
+	m_ppGameObjects[4] = new Whistle(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pCoinModel);
 	m_ppGameObjects[4]->SetScale(1, 1, 1);
 	m_ppGameObjects[4]->SetFrameName("Coin");
 	//m_ppGameObjects[2]->price = 30;
@@ -291,13 +291,13 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	static_cast<Item*>(m_ppGameObjects[4])->SetPrice(itemPrices[4]);
 	g_items[itemIDs[4]] = static_cast<Item*>(m_ppGameObjects[4]);
 
-	if (pWhistleModel) delete pWhistleModel;
+	if (pCoinModel) delete pCoinModel;
 
 	// ============================================================================================================
 
 
-	CLoadedModelInfo* pWhistleModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Canister_1.bin", NULL);
-	m_ppGameObjects[5] = new Whistle(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pWhistleModel);
+	CLoadedModelInfo* pCanister1Model = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Canisters_01.bin", NULL);
+	m_ppGameObjects[5] = new Whistle(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pCanister1Model);
 	m_ppGameObjects[5]->SetScale(1, 1, 1);
 	m_ppGameObjects[5]->SetFrameName("Canister_1");
 	//m_ppGameObjects[2]->price = 30;
@@ -307,13 +307,13 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	static_cast<Item*>(m_ppGameObjects[5])->SetPrice(itemPrices[5]);
 	g_items[itemIDs[5]] = static_cast<Item*>(m_ppGameObjects[5]);
 
-	if (pWhistleModel) delete pWhistleModel;
+	if (pCanister1Model) delete pCanister1Model;
 
 	// ============================================================================================================
 
 
-	CLoadedModelInfo* pWhistleModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Canister_2.bin", NULL);
-	m_ppGameObjects[6] = new Whistle(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pWhistleModel);
+	CLoadedModelInfo* pCanister2Model = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Canisters_02.bin", NULL);
+	m_ppGameObjects[6] = new Whistle(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pCanister2Model);
 	m_ppGameObjects[6]->SetScale(1, 1, 1);
 	m_ppGameObjects[6]->SetFrameName("Canister_2");
 	//m_ppGameObjects[2]->price = 30;
@@ -323,13 +323,13 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	static_cast<Item*>(m_ppGameObjects[6])->SetPrice(itemPrices[6]);
 	g_items[itemIDs[6]] = static_cast<Item*>(m_ppGameObjects[6]);
 
-	if (pWhistleModel) delete pWhistleModel;
+	if (pCanister2Model) delete pCanister2Model;
 
 	// ============================================================================================================
 
 
-	CLoadedModelInfo* pWhistleModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Canister_3.bin", NULL);
-	m_ppGameObjects[7] = new Whistle(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pWhistleModel);
+	CLoadedModelInfo* pCanister3Model = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Canisters_03.bin", NULL);
+	m_ppGameObjects[7] = new Whistle(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pCanister3Model);
 	m_ppGameObjects[7]->SetScale(1, 1, 1);
 	m_ppGameObjects[7]->SetFrameName("Canister_3");
 	//m_ppGameObjects[2]->price = 30;
@@ -339,7 +339,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	static_cast<Item*>(m_ppGameObjects[7])->SetPrice(itemPrices[7]);
 	g_items[itemIDs[7]] = static_cast<Item*>(m_ppGameObjects[7]);
 
-	if (pWhistleModel) delete pWhistleModel;
+	if (pCanister3Model) delete pCanister3Model;
 
 	m_nOtherPlayers = 1;
 	m_ppOtherPlayers = new OtherPlayer * [m_nOtherPlayers];
