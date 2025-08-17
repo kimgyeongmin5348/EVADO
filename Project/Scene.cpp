@@ -209,8 +209,8 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 		{-2, 0, 25},
 		{-2, 0, 28},
 		{-2, 0, 31},
-		{-2, 0, 17},
-		{-2, 0, 15},
+		{-2, 0, 34},
+		{-2, 0, 37},
 		{-2, 0, 13}
 	};
 
@@ -282,7 +282,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	CLoadedModelInfo* pCoinModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Coin.bin", NULL);
 	m_ppGameObjects[4] = new Whistle(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pCoinModel);
-	m_ppGameObjects[4]->SetScale(1, 1, 1);
+	m_ppGameObjects[4]->SetScale(2, 2, 2);
 	m_ppGameObjects[4]->SetFrameName("Coin");
 	//m_ppGameObjects[2]->price = 30;
 	m_ppGameObjects[4]->SetPosition(positions[4]);
@@ -299,7 +299,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	CLoadedModelInfo* pCanister1Model = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Canisters_01.bin", NULL);
 	m_ppGameObjects[5] = new Whistle(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pCanister1Model);
 	m_ppGameObjects[5]->SetScale(1, 1, 1);
-	m_ppGameObjects[5]->SetFrameName("Canister_1");
+	m_ppGameObjects[5]->SetFrameName("Canisters_01");
 	//m_ppGameObjects[2]->price = 30;
 	m_ppGameObjects[5]->SetPosition(positions[5]);
 
@@ -315,7 +315,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	CLoadedModelInfo* pCanister2Model = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Canisters_02.bin", NULL);
 	m_ppGameObjects[6] = new Whistle(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pCanister2Model);
 	m_ppGameObjects[6]->SetScale(1, 1, 1);
-	m_ppGameObjects[6]->SetFrameName("Canister_2");
+	m_ppGameObjects[6]->SetFrameName("Canisters_02");
 	//m_ppGameObjects[2]->price = 30;
 	m_ppGameObjects[6]->SetPosition(positions[6]);
 
@@ -331,7 +331,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	CLoadedModelInfo* pCanister3Model = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Item/Canisters_03.bin", NULL);
 	m_ppGameObjects[7] = new Whistle(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pCanister3Model);
 	m_ppGameObjects[7]->SetScale(1, 1, 1);
-	m_ppGameObjects[7]->SetFrameName("Canister_3");
+	m_ppGameObjects[7]->SetFrameName("Canisters_03");
 	//m_ppGameObjects[2]->price = 30;
 	m_ppGameObjects[7]->SetPosition(positions[7]);
 
