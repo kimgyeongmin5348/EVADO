@@ -1082,7 +1082,7 @@ void CScene::AnimateObjects(float fTimeElapsed)
 	if (m_pLights && m_ppGameObjects[0])
 	{	
 		m_pLights[0].m_xmf3Position = m_ppGameObjects[0]->GetPosition();
-		m_pLights[0].m_xmf3Direction = m_ppGameObjects[0]->GetLook();
+		m_pLights[0].m_xmf3Direction = m_pPlayer->GetLook();
 	}
 
 	if (m_pEffect&& m_ppGameObjects[1]) m_pEffect->Animate(fTimeElapsed, m_ppGameObjects[1]->GetPosition());
