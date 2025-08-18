@@ -1043,7 +1043,7 @@ void CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 				dynamic_cast<CTextureToScreenShader*>(m_ppShaders[i])->visible = isShop;
 			break;
 		case VK_UP:
-			dynamic_cast<CTerrainPlayer*>(m_pPlayer)->debt -= 1000;
+			dynamic_cast<CTerrainPlayer*>(m_pPlayer)->debt = 0;
 			break;
 		}
 		break;
@@ -1336,7 +1336,7 @@ void CEndScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	pTextureToScreenShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
 	CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/EndScene.dds", RESOURCE_TEXTURE2D, 0);
+	pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/end.dds", RESOURCE_TEXTURE2D, 0);
 	//pTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Font.dds", RESOURCE_TEXTURE2D, 1);
 
 	CreateShaderResourceViews(pd3dDevice, pTexture, 0, 15);

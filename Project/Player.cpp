@@ -737,6 +737,10 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 		SetHPWidth(newWidth);
 	}
 
+	if (currentHP <= 0.1f) {
+		SetPosition(XMFLOAT3(-2, 0, 20)); 
+		currentHP = 100.f;
+	}
 	//for (int i = 0; i < 4; ++i)
 	//{
 	//	CGameObject* pObj = m_pHeldItems[i];

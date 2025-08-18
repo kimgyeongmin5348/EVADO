@@ -332,8 +332,9 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 				ChangeSwapChainState();
 				break;
 			case VK_DOWN:
-				cout << "player pos - " << m_pPlayer->GetPosition().x << ", " << m_pPlayer->GetPosition().y << ", " << m_pPlayer->GetPosition().z << endl;
-				cout << "flashlight pos - " << m_pScene->m_ppGameObjects[0]->GetPosition().x << ", " << m_pScene->m_ppGameObjects[0]->GetPosition().y << ", " << m_pScene->m_ppGameObjects[0]->GetPosition().z << endl;
+				m_ppScenes[m_nCurrentScene]->ReleaseObjects();
+				m_nCurrentScene = 2;
+				BuildObjects();
 				break;
 			}
 			break;
@@ -494,8 +495,10 @@ void CGameFramework::BuildObjects()
 	else if (m_nCurrentScene == 2) {
 		m_ppScenes[2] = new CEndScene();
 		m_ppScenes[2]->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
-		CPlayer* pPlayer = new CPlayer();
+		CTerrainPlayer* pPlayer = new CTerrainPlayer(m_pd3dDevice, m_pd3dCommandList, m_ppScenes[2]->GetGraphicsRootSignature(), NULL);
 		m_ppScenes[2]->SetPlayer(pPlayer);
+		pPlayer->m_pText = NULL;
+		pPlayer->m_playerHP = NULL;
 	}
 
 //#ifdef _WITH_TERRAIN_PLAYER
